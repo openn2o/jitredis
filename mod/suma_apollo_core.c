@@ -644,10 +644,10 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
     if (runable == 0) { /*启动biz分析*/
         RedisModuleTimerID tid            = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
         RedisModuleString * codes_install = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
-                                                                                "for i, v in ipairs (result) do \n"
-                                                                                "    local code = redis.call ('get' , v) \n"
-                                                                                "    register_c(v , code) \n"
-                                                                                "end \n"
+                                                                                "for i, v in ipairs (result) do                               \n"
+                                                                                "    local code = redis.call ('get' , v)                      \n"
+                                                                                "    register_c(v , code)                                     \n"
+                                                                                "end                                                          \n"
                                                                                 "return 1");
         REDISMODULE_NOT_USED(tid);
         runable ++;
@@ -677,13 +677,13 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
     #endif
     RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx,   "redis.log(redis.LOG_WARNING, KEYS[1])  \n"
                                                                         "redis.log(redis.LOG_WARNING, KEYS[2])  \n"
-                                                                        "return biz_compile(KEYS[1] , KEYS[2])   \n");
+                                                                        "return biz_compile(KEYS[1] , KEYS[2])  \n");
     RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx,   "local result = redis.call ('lrange', 'biz_info.list', 0, -1)\n"
-                                                                        "for i, v in ipairs (result) do \n"
-                                                                        "    local code = redis.call ('get', v)  \n"
-                                                                        "    register_c(v , code)  \n"
-                                                                        "end \n"
-                                                                        "return 1" );
+                                                                        "for i, v in ipairs (result) do         \n"
+                                                                        "    local code = redis.call ('get', v) \n"
+                                                                        "    register_c(v , code)               \n"
+                                                                        "end                                    \n"
+                                                                        "return 1");
     RedisModuleCallReply *rep_i = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2" , argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(rep_i)) {
          long long status = RedisModule_CallReplyInteger(rep_i);
