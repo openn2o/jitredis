@@ -635,26 +635,23 @@ void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
     RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
 }
 
-///定时任务启动
+///定时任务启动 V1
 int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    REDISMODULE_NOT_USED(argv);
-    REDISMODULE_NOT_USED(argc);
+    RedisModule_AutoMemory(ctx);
+    REDISMODULE_NOT_USED  (argv);
+    REDISMODULE_NOT_USED  (argc);
 
-    if (runable == 0) {
-        RedisModule_CreateTimer(ctx,1000,timerDataProcessorHandler, NULL);
-        runable++;
-        /////////
-        ///////// 读取处理函数
-        /////////
-        RedisModuleString * codehook =  RedisModule_CreateStringPrintf(ctx, 
-            "local result = redis.call ('lrange', 'biz_info.list', 0, -1); \
-            for i, v in ipairs (result) do \
-                local code = redis.call ('get' , v); \
-                register_c(v , code) ; \
-            end \
-            return 1" 
-        );
-        RedisModule_Call(ctx, "EVAL", "sc", codehook, "0");
+    if (runable == 0) { /*启动biz分析*/
+        RedisModuleTimerID tid            = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
+        RedisModuleString * codes_install = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
+                                                                                "for i, v in ipairs (result) do \n"
+                                                                                "    local code = redis.call ('get' , v) \n"
+                                                                                "    register_c(v , code) \n"
+                                                                                "end \n"
+                                                                                "return 1");
+        REDISMODULE_NOT_USED(tid);
+        runable ++;
+        RedisModule_Call(ctx, "EVAL", "sc", codes_install, "0");
     }
     return RedisModule_ReplyWithSimpleString(ctx, "OK");
 }
@@ -695,7 +692,7 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
             RedisModule_ReplyWithLongLong(ctx, 1);
             return  REDISMODULE_OK;
          }
-         if (status == 0)  RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build pass1.1");
+         if (status == 0)  RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build failed.");
     }
     RedisModule_ReplyWithLongLong(ctx, 0);
     return  REDISMODULE_OK;
