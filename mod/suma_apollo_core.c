@@ -596,16 +596,15 @@ static int startup_atomic_lock = 0;
 void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
     RedisModule_AutoMemory(ctx);
     REDISMODULE_NOT_USED  (data);
-    RedisModuleString * snapshot_cmd = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info' , 0, -1); \n"
-                                                                           "redis.call('del' , 'biz_info');                           \n"
-                                                                           "local str = table.concat(result);                         \n"
-                                                                           "redis.call ('set', 'biz_info.snapshot', str);             \n"
+    RedisModuleString * snapshot_cmd = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info' , 0, -1) \n"
+                                                                           "redis.call('del', 'biz_info')                            \n"
+                                                                           "local str = table.concat(result)                         \n"
+                                                                           "redis.call('set', 'biz_info.snapshot', str)              \n"
     );
     RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
-    /////分析处理
     RedisModule_Call(ctx, "EVAL", "sc", RedisModule_CreateStringPrintf(ctx, "run_c()\n"), "0");
     #if ALLOW_TRACE == 1
-        RedisModule_Log(ctx ,  "warning", "tick.");
+        RedisModule_Log(ctx, "warning", "tick.");
     #endif
     RedisModuleTimerID tid = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
     REDISMODULE_NOT_USED(tid);
@@ -651,14 +650,14 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
     );
     RedisModule_Log(ctx ,  "warning", "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-    RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx, "redis.log(redis.LOG_WARNING, KEYS[1])  \n"
-                                                                      "redis.log(redis.LOG_WARNING, KEYS[2])  \n"
-                                                                      "return biz_compile(KEYS[1] , KEYS[2])  \n");
-    RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1)\n"
-                                                                      "for i, v in ipairs (result) do         \n"
-                                                                      "  local code = redis.call ('get', v)   \n"
-                                                                      "  register_c(v , code)                 \n"
-                                                                      "end                                    \n"
+    RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx, "redis.log(redis.LOG_WARNING, KEYS[1]) \n"
+                                                                      "redis.log(redis.LOG_WARNING, KEYS[2]) \n"
+                                                                      "return biz_compile(KEYS[1], KEYS[2])  \n");
+    RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
+                                                                      "for i, v in ipairs (result) do        \n"
+                                                                      "  local code = redis.call ('get', v)  \n"
+                                                                      "  register_c(v , code)                \n"
+                                                                      "end                                   \n"
                                                                       "return 1");
     RedisModuleCallReply *rep_i = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2", argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(rep_i)) {
