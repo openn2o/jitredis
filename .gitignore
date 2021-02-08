@@ -21,7 +21,6 @@ src/configs
 redis.ds
 src/redis.conf
 src/nodes.conf
-mod/*
 deps/lua/src/lua
 deps/lua/src/luac
 deps/lua/src/liblua.a
