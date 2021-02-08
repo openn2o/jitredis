@@ -621,8 +621,8 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
         RedisModuleTimerID tid            = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
         RedisModuleString * codes_install = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
                                                                                 "for i, v in ipairs (result) do                               \n"
-                                                                                "    local code = redis.call ('get' , v)                      \n"
-                                                                                "    register_c(v , code)                                     \n"
+                                                                                "  local code = redis.call ('get' , v)                        \n"
+                                                                                "  register_c(v , code)                                       \n"
                                                                                 "end                                                          \n"
                                                                                 "return 1");
         REDISMODULE_NOT_USED(tid);
@@ -656,8 +656,8 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
                                                                       "return biz_compile(KEYS[1] , KEYS[2])  \n");
     RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1)\n"
                                                                       "for i, v in ipairs (result) do         \n"
-                                                                      "    local code = redis.call ('get', v) \n"
-                                                                      "    register_c(v , code)               \n"
+                                                                      "  local code = redis.call ('get', v)   \n"
+                                                                      "  register_c(v , code)                 \n"
                                                                       "end                                    \n"
                                                                       "return 1");
     RedisModuleCallReply *rep_i = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2", argv[1], argv[2]);
