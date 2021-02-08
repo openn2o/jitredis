@@ -10,16 +10,18 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "redismodule.h"
+#define VERSION 1001
 #define TIME_OUT_NUM 3000
 #define REDISMODULE_REPLY_INTEGER_T long long
 #define REIDSMODULE_REPLY_STAT_OK   1
 #define REIDSMODULE_REPLY_STAT_FAIL 0
 #define REDISMODULE_DEBUG_LEVEL1 ALLOW_TRACE == 1
 #define REDISMODULE_TIME_INTERVAL 1000
-static int startup_atomic_lock = 0;
+
+static REDISMODULE_REPLY_INTEGER_T startup_atomic_lock = 0;
 
 static REDISMODULE_REPLY_INTEGER_T STARTUP_ATOMIC_LOCK (RedisModuleTimerID incr_id) {
-    return startup_atomic_lock += incr_id;
+    return startup_atomic_lock = incr_id;
 }
 
 /***
@@ -629,6 +631,10 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
     REDISMODULE_NOT_USED  (argv);
     REDISMODULE_NOT_USED  (argc);
 
+    #if REDISMODULE_DEBUG_LEVEL1
+    RedisModule_Log(ctx, "warning", "biz engine start");
+    #endif
+
     if (startup_atomic_lock == 0) { /*启动biz分析*/
         RedisModuleTimerID tid            = RedisModule_CreateTimer(ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
         RedisModuleString * codes_install = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
@@ -641,6 +647,7 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
         STARTUP_ATOMIC_LOCK (tid);
         RedisModule_Call(ctx, "EVAL", "sc", codes_install, "0");
     }
+    RedisModule_ReplyWithLongLong(ctx, REIDSMODULE_REPLY_STAT_OK);
     return REDISMODULE_OK;
 }
 
@@ -692,7 +699,7 @@ int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
     if (RedisModule_Init         (ctx, "sumavlib"                     , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.epoll"               , TimerCommand_RedisCommand, "readonly"     , 0, 0, 0) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.epoll"               , TimerCommand_RedisCommand,"write deny-oom", 0, 0, 0) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register" , suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_try_leader"     , suma_try_leader_string,   "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_keep_alive"     , suma_keep_alive_string,   "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
