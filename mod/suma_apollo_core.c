@@ -99,9 +99,7 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
      if (argc < 2) {
         return RedisModule_WrongArity(ctx);
      }
-     /// ip 
-     /// vip
-     /// port 
+     
      #if ALLOW_TRACE == 1
      RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
             "Got %d args. argv[1]: %s, argv[2]: %s", 
@@ -365,7 +363,6 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
          long long status = RedisModule_CallReplyInteger(pub_status_int);
          if (status > 0) {
-              //kill vip
               RedisModule_ReplyWithLongLong(ctx, 1);
               return  REDISMODULE_OK;
          }
@@ -444,15 +441,14 @@ int suma_keep_alive_string (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     }
 
     #if ALLOW_TRACE == 1
-    /*RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
-        "Got %d args. argv[1]: %s, argv[2]: %s", 
-        argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
+    // RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
+    //     "Got %d args. argv[1]: %s, argv[2]: %s", 
+    //     argc, 
+    //     RedisModule_StringPtrLen(argv[1], NULL),
+    //     RedisModule_StringPtrLen(argv[2], NULL)
+    // );
 
-    RedisModule_Log(ctx ,  "warning", "suma_keep_alive_string param = %s", RedisModule_StringPtrLen(s, NULL));
-    */
+    // RedisModule_Log(ctx ,  "warning", "suma_keep_alive_string param = %s", RedisModule_StringPtrLen(s, NULL));
 	#endif
 
     ///强制激活
@@ -497,7 +493,7 @@ int suma_keep_alive_string (RedisModuleCtx *ctx, RedisModuleString **argv, int a
                     return  REDISMODULE_OK;
                 }
             } else { 
-                  
+
                     void  * master_key  = RedisModule_OpenKey(ctx, argv[1],
                                                      REDISMODULE_READ|REDISMODULE_WRITE) ;
                     ret_expire_int = RedisModule_SetExpire((RedisModuleKey*) master_key,  TIME_OUT_NUM);
@@ -608,34 +604,52 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
 }
 
 
-static int runable = NULL;
+static int runable = 0;
 
-///定时任务
+///定时任务执行
 void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
     REDISMODULE_NOT_USED(ctx);
     REDISMODULE_NOT_USED(data);
-    #if ALLOW_TRACE == 1
-    RedisModule_Log(ctx ,  "warning", "tick......");
-    #endif
+ 
+ //    RedisModuleString * snapshot_cmd =  RedisModule_CreateStringPrintf(ctx, 
+ //        "local result = redis.call ('lrange', 'biz_info' , 0, -1); \
+ //         redis.call('del' , 'biz_info');\
+ //         local str = table.concat(result); \
+ //         redis.call ('set', 'biz_info.snapshot', str); \
+ //         return 1;" 
+	// );
 
-    RedisModuleString * snapshot_cmd =  RedisModule_CreateStringPrintf(ctx, 
-        "local result = redis.call ('lrange', 'biz_info' , 0, -1); \
-        redis.call('del' , 'biz_info');\
-        local str = table.concat(result); \
-        redis.call ('set', 'biz_info.snapshot', str); \
-        return 1;" 
-	);
+	// RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
 
-	RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
+    /////注册
+    // RedisModuleString * invoke_s =  RedisModule_CreateStringPrintf(ctx, 
+    //     "local result = redis.call ('lrange', 'biz_info.list', 0, -1); \
+    //      redis.log(redis.LOG_WARNING, 'range len=' .. table.getn(result)); \
+    //     for i, v in ipairs (result) do \
+    //         redis.log(redis.LOG_WARNING, 'range raw=' .. v); \
+    //         local code = redis.call ('get' , v); \
+    //         local status = register_c(v , code) ; \
+    //         if status == 1 then \
+    //             redis.log(redis.LOG_WARNING, 'register success'); \
+    //         end\
+    //     end \
+    //     return 1" 
+    // );
+    // RedisModule_Call(ctx, "EVAL", "sc", invoke_s, "0");
+
     /////分析处理
     RedisModuleString * codehook =  RedisModule_CreateStringPrintf(ctx, 
-        "runc(); return 1;"
+        "run_c();"
     );
-    RedisModule_Call(ctx, "EVAL", "sc", codehook, "0");
 
+    RedisModule_Call(ctx, "EVAL", "sc", codehook, "0");
+    #if ALLOW_TRACE == 1
+      RedisModule_Log(ctx ,  "warning", "tick......");
+    #endif
     RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
 }
 
+///定时任务启动
 int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
@@ -654,10 +668,73 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
             end \
             return 1" 
         );
-
         RedisModule_Call(ctx, "EVAL", "sc", codehook, "0");
     }
     return RedisModule_ReplyWithSimpleString(ctx, "OK");
+}
+
+/***
+*  数据分析函数注册
+*  func_name   $1
+*  func_source $2   
+*/
+int suma_biz_script_register (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    RedisModule_AutoMemory(ctx);
+    #if ALLOW_TRACE == 1
+    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
+        "Got %d args. argv[1]: %s, argv[2]: %s", 
+        argc, 
+        RedisModule_StringPtrLen(argv[1], NULL),
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    RedisModule_Log(ctx ,  "warning", "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
+    #endif
+    ///
+    ///  获取后编译
+    ///
+    RedisModuleString * codehook =  RedisModule_CreateStringPrintf(ctx,  "redis.log(redis.LOG_WARNING, KEYS[1])  \n"
+                                                                         "redis.log(redis.LOG_WARNING, KEYS[2])  \n"
+                                                                         "return biz_compile(KEYS[1], KEYS[2]);");
+    RedisModuleCallReply *rep = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2" , argv[1], argv[2]);
+    ///
+    /// 编译完成
+    ///
+    RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build pass");
+    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(rep)) {
+         long long status = RedisModule_CallReplyInteger(rep);
+         if (status == 1) {
+            RedisModuleString * invoke_s =  RedisModule_CreateStringPrintf(ctx, 
+                "local result = redis.call ('lrange', 'biz_info.list', 0, -1); \
+                for i, v in ipairs (result) do \
+                    local code = redis.call ('get' , v); \
+                    register_c(v , code) ; \
+                end \
+                return 1" 
+            );
+            RedisModule_Call(ctx, "EVAL", "sc", invoke_s, "0");
+            RedisModule_ReplyWithLongLong(ctx, 1);
+            return  REDISMODULE_OK;
+         }
+
+         if (status == 0) {
+             RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build pass1.1");
+         }
+    }
+    if (REDISMODULE_REPLY_STRING == RedisModule_CallReplyType(rep)) { // is string
+            RedisModuleString * ret_setnx_str = RedisModule_CreateStringFromCallReply(rep);
+            if (RedisModule_StringCompare (RedisModule_CreateString(ctx, "OK", 2), ret_setnx_str) == 0) {
+                RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build pass2");
+            } else {
+                RedisModuleString * logFormat =  RedisModule_CreateStringPrintf(ctx, "%s" , 
+                                                 RedisModule_StringPtrLen(ret_setnx_str, NULL));
+                RedisModule_Log(ctx ,  "warning", "error: %s", RedisModule_StringPtrLen(logFormat, NULL));
+            }
+    } 
+    RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build pass3");
+    RedisModule_ReplyWithLongLong(ctx, 0);
+    return  REDISMODULE_OK;
 }
 
 ///程序入口
@@ -673,7 +750,10 @@ int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
         TimerCommand_RedisCommand,"readonly",0,0,0) == REDISMODULE_ERR)
         return REDISMODULE_ERR;
 
-	///
+	if (RedisModule_CreateCommand(ctx,"sumavlib.biz_script_register",  suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
+          return REDISMODULE_ERR;
+    }
+
     if (RedisModule_CreateCommand(ctx,"sumavlib.suma_try_leader",  suma_try_leader_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
           return REDISMODULE_ERR;
     }
