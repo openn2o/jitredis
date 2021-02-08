@@ -704,61 +704,33 @@ int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
 
-    if (RedisModule_Init(ctx, "sumavlib" , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) {
+    if (RedisModule_Init(ctx, "sumavlib" , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR)
         return REDISMODULE_ERR;
-    } 
-
-    if (RedisModule_CreateCommand(ctx,"sumavlib.epoll",
-        TimerCommand_RedisCommand,"readonly",0,0,0) == REDISMODULE_ERR)
+    if (RedisModule_CreateCommand(ctx, "sumavlib.epoll",  TimerCommand_RedisCommand, "readonly", 0, 0, 0) == REDISMODULE_ERR)
         return REDISMODULE_ERR;
-
-	if (RedisModule_CreateCommand(ctx,"sumavlib.biz_script_register",  suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_try_leader",  suma_try_leader_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-    
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_keep_alive",  suma_keep_alive_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-    
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_vip_list",  suma_master_alive_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-    
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_vip_kill",  suma_vip_kill, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-        
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_vip_reset",  suma_vip_reset, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_vip_register",  suma_vip_register_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_message_publish",  suma_message_publish, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_diamond_publish",  suma_diamond_publish, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-
-    if (RedisModule_CreateCommand(ctx,"sumavlib.suma_diamond_list",  suma_diamond_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-    
-	if (RedisModule_CreateCommand(ctx,"sumavlib.suma_vip_server_list",  suma_vip_server_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-	
-	if (RedisModule_CreateCommand(ctx,"sumavlib.suma_ci_task",  suma_ci_task, "", 1, 1, 1) == REDISMODULE_ERR) {
-          return REDISMODULE_ERR;
-    }
-	
+	if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register", suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_try_leader", suma_try_leader_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_keep_alive", suma_keep_alive_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_list", suma_master_alive_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_kill", suma_vip_kill, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_reset", suma_vip_reset, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_ci_task", suma_ci_task, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_register", suma_vip_register_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_message_publish", suma_message_publish, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_publish", suma_diamond_publish, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_list", suma_diamond_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
+	if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+        return REDISMODULE_ERR;
     return REDISMODULE_OK;
 }
