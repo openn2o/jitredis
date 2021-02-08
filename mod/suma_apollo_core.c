@@ -18,7 +18,7 @@
 #define REDISMODULE_TIME_INTERVAL 1000
 static int startup_atomic_lock = 0;
 
-static void STARTUP_ATOMIC_LOCK (RedisModuleTimerID incr_id) {
+static REDISMODULE_REPLY_INTEGER_T STARTUP_ATOMIC_LOCK (RedisModuleTimerID incr_id) {
     return startup_atomic_lock += incr_id;
 }
 
@@ -599,10 +599,6 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     return  REDISMODULE_OK;
 }
 
-
-
-
-
 /***
 *  定时任务执行  V1
 *  注册回调函数，不需要外部调用。 
@@ -645,7 +641,7 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
         STARTUP_ATOMIC_LOCK (tid);
         RedisModule_Call(ctx, "EVAL", "sc", codes_install, "0");
     }
-    return REDISMODULE_OK；
+    return REDISMODULE_OK;
 }
 
 /***
