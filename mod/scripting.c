@@ -1180,14 +1180,14 @@ void scriptingInit(int setup) {
         *  注册动态biz函数 jit版本
         */
         char *register_c =  "function register_c (k, v)\n"
-                                    "if func_hash [k] ~= nil then return end\n"
-                                    "local ngx_log = redis.log; local func=nil;\n"
-                                    "local dd , status = pcall (function () func = load (v, k, 't', _G); end)\n"
-                                    "if func == nil then ngx_log(redis.LOG_WARNING,  'method failed' .. status) ; return 0 ;end\n"
-                                    "func_hash [k] = func;\n"
-                                    "ngx_log(redis.LOG_WARNING,  'register method ' .. k )\n"
-                                    "ngx_log(redis.LOG_WARNING,  'register body ' .. v )\n"
-                                    "return 1;\n"
+                                "if func_hash [k] ~= nil then return end\n"
+                                "local ngx_log = redis.log; local func=nil;\n"
+                                "local dd , status = pcall (function () func = load (v, k, 't', _G); end)\n"
+                                "if func == nil then ngx_log(redis.LOG_WARNING,  'method failed' .. status) ; return 0 ;end\n"
+                                "func_hash [k] = func();\n"
+                                "ngx_log(redis.LOG_WARNING,  'register method ' .. k )\n"
+                                "ngx_log(redis.LOG_WARNING,  'register body ' .. v )\n"
+                                "return 1;\n"
                             "end"; 
         luaL_loadbuffer(lua,register_c,strlen(register_c),"@register_c_def");
         lua_pcall(lua,0,0,0);
@@ -1206,19 +1206,23 @@ void scriptingInit(int setup) {
                                     "    v=string.char(bytes(v,4,string.len(v)))\n"
                                     "end\n"
                                     "local ngx_log = redis.log;\n"
-                                    "local func = nil; \n"
+                                    "local func    = nil; \n"
                                     "local a,error = pcall (function (v) \n"
                                     "   local cc, err = load(v);\n"
                                     "   if cc == nil then \n"
                                     "       ngx_log(redis.LOG_WARNING,  'method failed1 ' .. tostring(err))\n"
                                     "       return 0; \n"
                                     "   end \n"
+                                    "   if cc().process == nil then \n"
+                                    "     return 0;   \n"
+                                    "   end\n"
                                     "   func = string.dump(cc);\n"
                                     "end, v)\n"
                                     "if func == nil then \n"
                                     "   ngx_log(redis.LOG_WARNING,  'method failed2 ' .. tostring(error))\n"
                                     "   return 0 \n"
                                     "end\n"
+                                    "   func_hash[k] = 1; \n"
                                     "local f_name='biz_info_' .. k;\n"
                                     "redis.call('set'  ,  f_name, v);\n"
                                     "redis.call('lpush', 'biz_info.list', f_name)\n"
@@ -1232,16 +1236,15 @@ void scriptingInit(int setup) {
         /*** 
         *  执行动态biz计算函数 jit版本 
         */
-        char *run_c = "function run_c ()\n"
-                      "     redis.log (redis.LOG_WARNING,  'runc...')\n"
-                      "     for i, v in pairs (func_hash) do\n"
-                      "         redis.log (redis.LOG_WARNING,  '.name=' .. tostring(v))\n"
-                      "         if v ~= nil and (i ~= 'version') then\n"
-                      "             local a,b = pcall(v);\n"
-                      "             redis.log (redis.LOG_WARNING,  tostring(b))\n"
-                      "         end\n"
-                      "     end\n"
-                      "end"; 
+        char *run_c =       "function run_c ()\n"
+                            "     redis.log (redis.LOG_WARNING,  'runc...')\n"
+                            "     for i, v in pairs (func_hash) do\n"
+                            "         redis.log (redis.LOG_WARNING,  '.name=' .. tostring(i))\n"
+                            "         if v ~= nil and (i ~= 'version') then\n"
+                            "             pcall(v.process); \n"
+                            "         end\n"
+                            "     end\n"
+                            "end"; 
         luaL_loadbuffer(lua,run_c, strlen(run_c), "@run_c_def");
         lua_pcall(lua,0,0,0);
     }

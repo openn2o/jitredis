@@ -9,8 +9,13 @@ console.log("register script as subtask biz");
 
 
 var status = client["sumavlib.biz_script_register"]([
-	"pppc",
-	"function DDD()\n redis.log(reids.LOG_WARNING, '22') \n end"
+	"map_test",
+	"local _M = {} \
+	 _M.process = function () \
+		redis.log(redis.LOG_WARNING, 'this is map')\
+	 end\
+	 return _M;\
+	"
 	],function(e)
 {
 	 console.log("sumavlib function install");
