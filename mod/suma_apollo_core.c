@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include "redismodule.h"
 #define TIME_OUT_NUM 3000
-
+static int startup_atomic_lock = 0;
 /***
 * suma_ci_task
 */
@@ -590,8 +590,6 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
 }
 
 
-static int startup_atomic_lock = 0;
-
 ///定时任务执行 V1
 void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
     RedisModule_AutoMemory(ctx);
@@ -648,7 +646,7 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
         RedisModule_StringPtrLen(argv[1], NULL),
         RedisModule_StringPtrLen(argv[2], NULL)
     );
-    RedisModule_Log(ctx ,  "warning", "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
+    RedisModule_Log(ctx, "warning", "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
     RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx, "redis.log(redis.LOG_WARNING, KEYS[1]) \n"
                                                                       "redis.log(redis.LOG_WARNING, KEYS[2]) \n"
