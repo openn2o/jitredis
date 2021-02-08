@@ -590,7 +590,7 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
 }
 
 
-static int runable = 0;
+static int startup_atomic_lock = 0;
 
 ///定时任务执行 V1
 void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
@@ -617,7 +617,7 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
     REDISMODULE_NOT_USED  (argv);
     REDISMODULE_NOT_USED  (argc);
 
-    if (runable == 0) { /*启动biz分析*/
+    if (startup_atomic_lock == 0) { /*启动biz分析*/
         RedisModuleTimerID tid            = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
         RedisModuleString * codes_install = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
                                                                                 "for i, v in ipairs (result) do                               \n"
@@ -626,7 +626,7 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
                                                                                 "end                                                          \n"
                                                                                 "return 1");
         REDISMODULE_NOT_USED(tid);
-        runable ++;
+        startup_atomic_lock    ++;
         RedisModule_Call(ctx, "EVAL", "sc", codes_install, "0");
     }
     return RedisModule_ReplyWithSimpleString(ctx, "OK");
@@ -651,16 +651,16 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
     );
     RedisModule_Log(ctx ,  "warning", "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-    RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx,   "redis.log(redis.LOG_WARNING, KEYS[1])  \n"
-                                                                        "redis.log(redis.LOG_WARNING, KEYS[2])  \n"
-                                                                        "return biz_compile(KEYS[1] , KEYS[2])  \n");
-    RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx,   "local result = redis.call ('lrange', 'biz_info.list', 0, -1)\n"
-                                                                        "for i, v in ipairs (result) do         \n"
-                                                                        "    local code = redis.call ('get', v) \n"
-                                                                        "    register_c(v , code)               \n"
-                                                                        "end                                    \n"
-                                                                        "return 1");
-    RedisModuleCallReply *rep_i = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2" , argv[1], argv[2]);
+    RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx, "redis.log(redis.LOG_WARNING, KEYS[1])  \n"
+                                                                      "redis.log(redis.LOG_WARNING, KEYS[2])  \n"
+                                                                      "return biz_compile(KEYS[1] , KEYS[2])  \n");
+    RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1)\n"
+                                                                      "for i, v in ipairs (result) do         \n"
+                                                                      "    local code = redis.call ('get', v) \n"
+                                                                      "    register_c(v , code)               \n"
+                                                                      "end                                    \n"
+                                                                      "return 1");
+    RedisModuleCallReply *rep_i = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2", argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(rep_i)) {
          long long status = RedisModule_CallReplyInteger(rep_i);
          if (status == 1) {
@@ -668,7 +668,7 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
             RedisModule_ReplyWithLongLong(ctx, 1);
             return  REDISMODULE_OK;
          }
-         if (status == 0)  RedisModule_Log(ctx ,  "warning", "suma_biz_script_register build failed.");
+         if (status == 0)  RedisModule_Log(ctx, "warning", "suma_biz_script_register build failed.");
     }
     RedisModule_ReplyWithLongLong(ctx, 0);
     return  REDISMODULE_OK;
@@ -678,33 +678,19 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
 int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
-
-    if (RedisModule_Init(ctx, "sumavlib" , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.epoll",  TimerCommand_RedisCommand, "readonly", 0, 0, 0) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register", suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_try_leader", suma_try_leader_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_keep_alive", suma_keep_alive_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_list", suma_master_alive_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_kill", suma_vip_kill, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_reset", suma_vip_reset, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_ci_task", suma_ci_task, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_register", suma_vip_register_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_message_publish", suma_message_publish, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_publish", suma_diamond_publish, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_list", suma_diamond_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
-    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
+    if (RedisModule_Init         (ctx, "sumavlib"                     , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.epoll"               , TimerCommand_RedisCommand, "readonly"     , 0, 0, 0) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register" , suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_try_leader"     , suma_try_leader_string,   "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_keep_alive"     , suma_keep_alive_string,   "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_list"       , suma_master_alive_list,   "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_kill"       , suma_vip_kill,            "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_reset"      , suma_vip_reset,           "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_ci_task"        , suma_ci_task,             "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_register"   , suma_vip_register_list,   "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_message_publish", suma_message_publish,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_publish", suma_diamond_publish,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_list"   , suma_diamond_list,        "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     return REDISMODULE_OK;
 }
