@@ -698,17 +698,14 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
     return  REDISMODULE_OK;
 }
 
-
-///程序入口
 int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
 
-    if (RedisModule_Init(ctx, "sumavlib" , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR)
-        return REDISMODULE_ERR;
+    if (RedisModule_Init(ctx, "sumavlib" , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.epoll",  TimerCommand_RedisCommand, "readonly", 0, 0, 0) == REDISMODULE_ERR)
         return REDISMODULE_ERR;
-	if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register", suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
+    if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register", suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
         return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_try_leader", suma_try_leader_string, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) 
         return REDISMODULE_ERR;
@@ -730,7 +727,7 @@ int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
         return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_list", suma_diamond_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
         return REDISMODULE_ERR;
-	if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR)
         return REDISMODULE_ERR;
     return REDISMODULE_OK;
 }
