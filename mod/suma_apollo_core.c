@@ -592,47 +592,23 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
 
 static int runable = 0;
 
-///定时任务执行
+///定时任务执行 V1
 void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
-    REDISMODULE_NOT_USED(ctx);
-    REDISMODULE_NOT_USED(data);
- 
- //    RedisModuleString * snapshot_cmd =  RedisModule_CreateStringPrintf(ctx, 
- //        "local result = redis.call ('lrange', 'biz_info' , 0, -1); \
- //         redis.call('del' , 'biz_info');\
- //         local str = table.concat(result); \
- //         redis.call ('set', 'biz_info.snapshot', str); \
- //         return 1;" 
-	// );
-
-	// RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
-
-    /////注册
-    // RedisModuleString * invoke_s =  RedisModule_CreateStringPrintf(ctx, 
-    //     "local result = redis.call ('lrange', 'biz_info.list', 0, -1); \
-    //      redis.log(redis.LOG_WARNING, 'range len=' .. table.getn(result)); \
-    //     for i, v in ipairs (result) do \
-    //         redis.log(redis.LOG_WARNING, 'range raw=' .. v); \
-    //         local code = redis.call ('get' , v); \
-    //         local status = register_c(v , code) ; \
-    //         if status == 1 then \
-    //             redis.log(redis.LOG_WARNING, 'register success'); \
-    //         end\
-    //     end \
-    //     return 1" 
-    // );
-    // RedisModule_Call(ctx, "EVAL", "sc", invoke_s, "0");
-
-    /////分析处理
-    RedisModuleString * codehook =  RedisModule_CreateStringPrintf(ctx, 
-        "run_c();"
+    RedisModule_AutoMemory(ctx);
+    REDISMODULE_NOT_USED  (data);
+    RedisModuleString * snapshot_cmd = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info' , 0, -1); \n"
+                                                                           "redis.call('del' , 'biz_info');                           \n"
+                                                                           "local str = table.concat(result);                         \n"
+                                                                           "redis.call ('set', 'biz_info.snapshot', str);             \n"
     );
-
-    RedisModule_Call(ctx, "EVAL", "sc", codehook, "0");
+	RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
+    /////分析处理
+    RedisModule_Call(ctx, "EVAL", "sc", RedisModule_CreateStringPrintf(ctx, "run_c()\n"), "0");
     #if ALLOW_TRACE == 1
-      RedisModule_Log(ctx ,  "warning", "tick......");
+      RedisModule_Log(ctx ,  "warning", "tick.");
     #endif
-    RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
+    RedisModuleTimerID tid = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
+    REDISMODULE_NOT_USED(tid);
 }
 
 ///定时任务启动 V1
@@ -698,6 +674,7 @@ int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int 
     return  REDISMODULE_OK;
 }
 
+////程序入口 V1
 int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
