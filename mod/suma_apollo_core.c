@@ -601,11 +601,11 @@ void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
                                                                            "local str = table.concat(result);                         \n"
                                                                            "redis.call ('set', 'biz_info.snapshot', str);             \n"
     );
-	RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
+    RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
     /////分析处理
     RedisModule_Call(ctx, "EVAL", "sc", RedisModule_CreateStringPrintf(ctx, "run_c()\n"), "0");
     #if ALLOW_TRACE == 1
-      RedisModule_Log(ctx ,  "warning", "tick.");
+        RedisModule_Log(ctx ,  "warning", "tick.");
     #endif
     RedisModuleTimerID tid = RedisModule_CreateTimer(ctx, 1000, timerDataProcessorHandler, NULL);
     REDISMODULE_NOT_USED(tid);
