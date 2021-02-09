@@ -392,14 +392,12 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_ARGC_LGE_3 argc < 3
 #define REDISMODULE_ARGC_LGE_4 argc < 4
 #define REDISMODULE_EPOLL_START "sumavlib.epoll"
-// 选举master
+
 // (string, string)-> int
-///argv[1] master_key : owner  + bussinessid + 'master', argv[2] vip_addr: vip
 int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
     REDISMODULE_AUTO_GCD(ctx);
-
     if (REDISMODULE_ARGC_LGE_2) {
         REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
         return RedisModule_WrongArity(ctx);
@@ -417,18 +415,18 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     if (REDISMODULE_REPLY_INTEGER ==  REDISMODULE_TYPE_OF_ELEMENT(ret_setnx)) {
         REDISMODULE_REPLY_INTEGER_T exists_status = RedisModule_CallReplyInteger(ret_setnx);
         if (REIDSMODULE_REPLY_STAT_OK == exists_status) { 
-            void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
-            REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
-            RedisModule_SetExpire ((RedisModuleKey*)expire_key, (mstime_t)TIME_OUT_NUM); 
-            REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
-            return  REDISMODULE_OK;
+          void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
+          REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
+          RedisModule_SetExpire ((RedisModuleKey*)expire_key, (mstime_t)TIME_OUT_NUM); 
+          REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
+          return  REDISMODULE_OK;
         } else {
             RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
             if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(rep)) { 
-                 if (RedisModule_StringCompare(argv[2], (RedisModuleString *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
-                    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
-                    return  REDISMODULE_OK;
-                 }
+              if (RedisModule_StringCompare(argv[2], (RedisModuleString *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
+                REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+                return  REDISMODULE_OK;
+              }
             } 
         }
     }
@@ -602,7 +600,6 @@ static REDISMODULE_REPLY_INTEGER_T startup_atomic_lock = 0;
 static REDISMODULE_REPLY_INTEGER_T STARTUP_ATOMIC_ISLOCK () {
     return (startup_atomic_lock == 0 ? 1 : 0);
 }
-
 static REDISMODULE_REPLY_INTEGER_T STARTUP_ATOMIC_LOCK (RedisModuleTimerID incr_id) {
     return startup_atomic_lock = incr_id;
 }
