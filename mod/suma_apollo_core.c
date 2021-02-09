@@ -413,19 +413,19 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     );
     REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-    RedisModuleCallReply *ret_setnx = REDISMODULE_JIT_CALL(ctx, "SETNX", "ss", argv [1], argv [2]);
+    RedisModuleCallReply *ret_setnx = REDISMODULE_JIT_CALL(ctx, "SETNX", "ss", argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER ==  REDISMODULE_TYPE_OF_ELEMENT(ret_setnx)) {
         REDISMODULE_REPLY_INTEGER_T exists_status = RedisModule_CallReplyInteger(ret_setnx);
         if (REIDSMODULE_REPLY_STAT_OK == exists_status) { 
             void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
-            REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START);
+            REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
             RedisModule_SetExpire ((RedisModuleKey*)expire_key, (mstime_t)TIME_OUT_NUM); 
             REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
-            return  REDISMODULE_OK;  
+            return  REDISMODULE_OK;
         } else {
             RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
             if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(rep)) { 
-                 if (RedisModule_StringCompare(argv[2] , (RedisModuleString *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
+                 if (RedisModule_StringCompare(argv[2], (RedisModuleString *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
                     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
                     return  REDISMODULE_OK;
                  }
@@ -560,12 +560,10 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REDISMODULE_AUTO_GCD(ctx);
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
-
     if (REDISMODULE_ARGC_LGE_3) {
       REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
       return REDISMODULE_ERROR_CODE(ctx);
     }
-
     #if REDISMODULE_DEBUG_LEVEL1
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX (ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
@@ -573,32 +571,28 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         RedisModule_StringPtrLen(argv[1], NULL),
         RedisModule_StringPtrLen(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_master_alive_list param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_master_alive_list param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-
     RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[2], "COUNT", "1000000");
     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(resp)) {
         RedisModuleCallReply *vip_list               = REDISMODULE_ARRAY_GET(resp, 1);
+        REDISMODULE_REPLY_INTEGER_T i                = 0;
         if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
-            REDISMODULE_REPLY_INTEGER_T i            = 0;
             REDISMODULE_REPLY_INTEGER_T vip_list_len = REIDSMODULE_ARRAY_LENGTH(vip_list);
             if (vip_list_len == 0) {
               REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
-              return  REDISMODULE_OK;
-            }
-            if (vip_list_len > 100) {
-              vip_list_len = 100;
+              return REDISMODULE_OK;
             }
             REDISMODULE_ARRAY_ALLOC(ctx, vip_list_len);
             while(++ i <= vip_list_len) {
               RedisModuleCallReply * vip_ele = REDISMODULE_ARRAY_GET(vip_list, i);
               REDISMODULE_ARRAY_PUSH_STR (ctx, REDISMODULE_ELE_TO_STRING(vip_ele));
             }
-            return  REDISMODULE_OK;
+            return REDISMODULE_OK;
         }
     }
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
-    return  REDISMODULE_OK;
+    return REDISMODULE_OK;
 }
 
 /***
