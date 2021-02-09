@@ -396,14 +396,101 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_EPOLL_START "sumavlib.epoll"
 #define REDISMODULE_CMD_SETNEX "SETNX"
 #define REDISMODULE_CMD_GET "GET"
-// (string, string)-> int
+#define ALL_RETRY_LEADER_FUNC 10081
+#define REDISMODULE_STRCMP RedisModule_StringCompare
+
+//状态激活 V1
+int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_AUTO_GCD(ctx);
+
+    if (REDISMODULE_ARGC_LGE_3) {
+        REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+        return RedisModule_WrongArity(ctx);
+    }
+
+    #if REDISMODULE_DEBUG_LEVEL1
+    REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
+        "Got %d args. argv[1]: %s, argv[2]: %s", 
+        argc, 
+        RedisModule_StringPtrLen(argv[1], NULL),
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", RedisModule_StringPtrLen(s, NULL));
+	#endif
+    
+    RedisModuleCallReply *rep_leader_val = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
+    int is_leader    = 0;
+    void *expire_key = RedisModule_OpenKey(ctx, argv[2], REDISMODULE_READ|REDISMODULE_WRITE);
+    void *master_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
+
+    if (REDISMODULE_REPLY_NULL == REDISMODULE_TYPE_OF_ELEMENT(rep_leader_val)) {
+        REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+        return  REDISMODULE_OK;
+    } else {
+        REDISMODULE_STRING_T *ret_str = REDISMODULE_ELE_TO_STRING(rep_leader_val);
+        is_leader = ((REDISMODULE_STRCMP(ret_str, argv[2]) == 0) ? 1 : 0);
+    }
+    
+    int ret_set_int = RedisModule_StringSet((RedisModuleKey*) expire_key, argv[2]);
+    if(REDISMODULE_OK == ret_set_int) {
+        int ret_expire_int = REDISMODULE_SET_EXPR((RedisModuleKey*)expire_key, (mstime_t) TIME_OUT_NUM);
+        if(REDISMODULE_OK == ret_expire_int) {
+            if (0 == is_leader) {
+                RedisModuleCallReply *master_vip       = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
+                RedisModuleString    *master_vip_value = RedisModule_CreateStringFromCallReply(master_vip);
+                if(master_vip_value) {
+                    RedisModule_ReplyWithString(ctx, master_vip_value);
+                    return  REDISMODULE_OK;
+                }
+            } else { 
+                ret_expire_int = REDISMODULE_SET_EXPR((RedisModuleKey*) master_key, (mstime_t) TIME_OUT_NUM);
+                if (REDISMODULE_OK != ret_expire_int) {
+                    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+                    return  REDISMODULE_OK;
+                }
+                RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[3], "COUNT", "1000000");
+                if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
+                    RedisModuleCallReply * vip_list = REDISMODULE_ARRAY_GET(rep, 1);
+                    if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
+                        long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_list);
+                        if (size_vec == REIDSMODULE_REPLY_STATUS_OUT) {
+                            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+                            return  REDISMODULE_OK;
+                        }
+                        if (size_vec > 100) {
+                            size_vec = 100;
+                        }
+                        REDISMODULE_ARRAY_ALLOC(ctx, size_vec);
+                        for(int i = 0; i < size_vec; i++) {
+                            RedisModuleCallReply * ele = REDISMODULE_ARRAY_GET(vip_list, i);
+                            REDISMODULE_ARRAY_PUSH_STR(ctx, REDISMODULE_ELE_TO_STRING(ele));
+                        }
+                        return  REDISMODULE_OK;
+                    }
+                }
+            }
+        } 
+        REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+        return  REDISMODULE_OK;
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+    return  REDISMODULE_OK;
+}
+
+
+
+/***
+*  获取活跃leader状态  V1
+*/
 int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
     REDISMODULE_AUTO_GCD(ctx);
     if (REDISMODULE_ARGC_LGE_2) {
         REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
-        return RedisModule_WrongArity(ctx);
+        return REDISMODULE_ERROR_CODE(ctx);
     }
     #if REDISMODULE_DEBUG_LEVEL1
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
@@ -434,123 +521,6 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         }
     }
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
-    return  REDISMODULE_OK;
-}
-
-#define ALL_RETRY_LEADER_FUNC 10081
-///argv[1]  owner  + bussinessid  + vip, argv[2] master_vip
-//状态激活 keepalive
-int suma_keep_alive_string (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    REDISMODULE_NOT_USED(argv);
-    REDISMODULE_NOT_USED(argc);
-    #if ALLOW_TRACE == 1
-    //RedisModule_Log(ctx ,  "warning", "suma_keep_alive_string is exists");
-    #endif
-
-    if (argc < 3) {
-        return RedisModule_WrongArity(ctx);
-    }
-
-    #if ALLOW_TRACE == 1
-    // RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
-    //     "Got %d args. argv[1]: %s, argv[2]: %s", 
-    //     argc, 
-    //     RedisModule_StringPtrLen(argv[1], NULL),
-    //     RedisModule_StringPtrLen(argv[2], NULL)
-    // );
-
-    // RedisModule_Log(ctx ,  "warning", "suma_keep_alive_string param = %s", RedisModule_StringPtrLen(s, NULL));
-	#endif
-
-    ///强制激活
-    RedisModule_AutoMemory(ctx);
-    ///针对所有的请求的master key
-    RedisModuleCallReply *rep_leader_val = RedisModule_Call(ctx, "GET", "s", argv [1]);
-    int is_leader =  0;
-    ///目前重启后不是leader， 那么强制不是leader， 执行try leader 流程
-    if (REDISMODULE_REPLY_NULL ==  RedisModule_CallReplyType(rep_leader_val)) {
-        #if ALLOW_TRACE == 1
-        //RedisModule_Log(ctx ,  "warning", "rep_leader_val == null");
-        #endif
-        RedisModule_ReplyWithLongLong(ctx, (long long) 0);
-        return  REDISMODULE_OK;
-    } else {
-        RedisModuleString * ret_str          = RedisModule_CreateStringFromCallReply(rep_leader_val);
-        is_leader =  ((RedisModule_StringCompare (ret_str , argv[2]) == 0) ? 1 : 0) ;
-    }
-    // #if ALLOW_TRACE == 1
-    //     RedisModule_Log(ctx ,  "warning", "is_leader == %d", is_leader);
-    // #endif
-    ///local vip set expire 
-    mstime_t timeout_ms = (mstime_t) TIME_OUT_NUM ; //持有锁超时
-    void  * expire_key  = RedisModule_OpenKey(ctx, argv[2],
-                                                    REDISMODULE_READ|REDISMODULE_WRITE);
-    int ret_set_int = RedisModule_StringSet((RedisModuleKey*)expire_key,  argv[2]);
-
-    if(REDISMODULE_OK == ret_set_int) {
-        ///local vip set expire 
-        int ret_expire_int = RedisModule_SetExpire((RedisModuleKey*)expire_key,  timeout_ms);
-        if(REDISMODULE_OK == ret_expire_int) {
-             //#if ALLOW_TRACE == 1
-             //RedisModule_Log(ctx ,  "warning", "expire time set ok");
-             //#endif
-            if (0 == is_leader) { ///return master vip
-                RedisModuleCallReply *master_vip       = RedisModule_Call(ctx, "GET", "s", argv [1]);
-                RedisModuleString    *master_vip_value = RedisModule_CreateStringFromCallReply(master_vip);
-                if(master_vip_value) {
-                    RedisModule_ReplyWithString(ctx, master_vip_value);
-                    return  REDISMODULE_OK;
-                }
-            } else { 
-
-                    void  * master_key  = RedisModule_OpenKey(ctx, argv[1],
-                                                     REDISMODULE_READ|REDISMODULE_WRITE) ;
-                    ret_expire_int = RedisModule_SetExpire((RedisModuleKey*) master_key,  TIME_OUT_NUM);
-                    if (REDISMODULE_OK != ret_expire_int) {
-                            // #if ALLOW_TRACE == 1
-                            //RedisModule_Log(ctx ,  "warning", "master key is set failed");
-                            // #endif
-
-                            RedisModule_ReplyWithLongLong(ctx, 0);
-                            return  REDISMODULE_OK;
-                    }
-                    #if ALLOW_TRACE == 1
-                          //RedisModule_Log(ctx ,  "warning", "search indexer key = %s", RedisModule_StringPtrLen(s, NULL));
-                    #endif
-                    ////返回list
-                    RedisModuleCallReply *rep = RedisModule_Call(ctx, "SCAN", "ccscc", "0", "MATCH", argv[3], "COUNT", "1000000");
-                   
-                    if (REDISMODULE_REPLY_ARRAY ==  RedisModule_CallReplyType(rep)) {
-                    /// 0 是游标 目前这里不需要
-                        RedisModuleCallReply * vip_list =  RedisModule_CallReplyArrayElement( rep , 1);
-                        if (REDISMODULE_REPLY_ARRAY == RedisModule_CallReplyType(vip_list)) {
-                            
-                            long size_vec = RedisModule_CallReplyLength(vip_list);
-                            if (size_vec == 0) {
-                                RedisModule_ReplyWithLongLong(ctx, 0); // 防止挂起
-                                return  REDISMODULE_OK;
-                            }
-                            if (size_vec > 100) {
-                                size_vec = 100;
-                            }
-                            RedisModule_ReplyWithArray(ctx, size_vec); //begin
-                            for(int i = 0; i < size_vec ; i++) {
-                                RedisModuleCallReply * ele =  RedisModule_CallReplyArrayElement( vip_list , i);
-                                RedisModule_ReplyWithString(ctx, RedisModule_CreateStringFromCallReply(ele));
-                            }
-                            return  REDISMODULE_OK;
-                        }
-                }
-            }
-        } 
-        RedisModule_ReplyWithLongLong(ctx, 0);
-        return  REDISMODULE_OK;
-    } else {
-           #if ALLOW_TRACE == 1
-             //RedisModule_Log(ctx ,  "warning", "!!suma_keep_alive_string is set failed");
-          #endif
-    }
-    RedisModule_ReplyWithLongLong(ctx, 0);
     return  REDISMODULE_OK;
 }
 
