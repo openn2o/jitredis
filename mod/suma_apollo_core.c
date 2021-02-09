@@ -403,7 +403,7 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         return RedisModule_WrongArity(ctx);
     }
     #if REDISMODULE_DEBUG_LEVEL1
-    RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
+    REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
         RedisModule_StringPtrLen(argv[1], NULL),
@@ -415,18 +415,18 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     if (REDISMODULE_REPLY_INTEGER ==  REDISMODULE_TYPE_OF_ELEMENT(ret_setnx)) {
         REDISMODULE_REPLY_INTEGER_T exists_status = RedisModule_CallReplyInteger(ret_setnx);
         if (REIDSMODULE_REPLY_STAT_OK == exists_status) { 
-          void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
-          REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
-          RedisModule_SetExpire ((RedisModuleKey*)expire_key, (mstime_t)TIME_OUT_NUM); 
-          REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
-          return  REDISMODULE_OK;
+            void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
+            REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
+            RedisModule_SetExpire ((RedisModuleKey*) expire_key, (mstime_t) TIME_OUT_NUM); 
+            REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
+            return  REDISMODULE_OK;
         } else {
             RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
             if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(rep)) { 
-              if (RedisModule_StringCompare(argv[2], (RedisModuleString *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
-                REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
-                return  REDISMODULE_OK;
-              }
+                if (RedisModule_StringCompare(argv[2], (REDISMODULE_STRING_T *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
+                    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+                    return  REDISMODULE_OK;
+                }
             } 
         }
     }
