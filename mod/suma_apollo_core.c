@@ -231,138 +231,7 @@ int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     return  REDISMODULE_OK;
 }
 
-//TODO ..
-// publish 发布消息
-///argv[1] channel :, argv[2] cmd
-int suma_message_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 
-    REDISMODULE_NOT_USED(argv);
-    REDISMODULE_NOT_USED(argc);
-    if (argc < 3) {
-        return RedisModule_WrongArity(ctx);
-    }
-
-    #if ALLOW_TRACE == 1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
-        "Got %d args. argv[1]: %s, argv[2]: %s", 
-        argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-    RedisModule_Log(ctx ,  "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
-    #endif
-
-    RedisModule_AutoMemory(ctx);
-
-    RedisModuleString *scmd = RedisModule_CreateStringPrintf(ctx, 
-        "\"%s\"", 
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-
-    #if ALLOW_TRACE == 1
-         RedisModule_Log(ctx ,  "warning", "suma_vip_publish   %s",  RedisModule_StringPtrLen(scmd, NULL));
-    #endif
-
-    RedisModuleCallReply *pub_status_int = RedisModule_Call(ctx, "PUBLISH", "ss", argv [1], scmd);
-
-    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
-         long long status = RedisModule_CallReplyInteger(pub_status_int);
-         if (status > 0) {
-              RedisModule_ReplyWithLongLong(ctx, 1);
-              return  REDISMODULE_OK;
-         }
-    }
-
-    RedisModule_ReplyWithLongLong(ctx, 0);
-    return  REDISMODULE_OK;
-}
-
-
-//恢复某个主机的vip
-///argv[1] channel :, argv[2] vip_addr: vip
-int suma_vip_reset (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    REDISMODULE_NOT_USED(argv);
-    REDISMODULE_NOT_USED(argc);
-    if (argc < 3) {
-        return RedisModule_WrongArity(ctx);
-    }
-
-    #if ALLOW_TRACE == 1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
-        "Got %d args. argv[1]: %s, argv[2]: %s", 
-        argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-    RedisModule_Log(ctx ,  "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
-    #endif
-    RedisModule_AutoMemory(ctx);
-    ///pub
-    RedisModuleString *scmd = RedisModule_CreateStringPrintf(ctx, 
-        "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"reset_vip\"}", 
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-
-    #if ALLOW_TRACE == 1
-         RedisModule_Log(ctx ,  "warning", "reset_vip   %s",  RedisModule_StringPtrLen(scmd, NULL));
-    #endif
-
-    RedisModuleCallReply *pub_status_int = RedisModule_Call(ctx, "PUBLISH", "ss", argv [1], scmd);
-
-    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
-         long long status = RedisModule_CallReplyInteger(pub_status_int);
-         if (status > 0) {
-              RedisModule_ReplyWithLongLong(ctx, 1);
-              return  REDISMODULE_OK;
-         }
-    }
-
-    RedisModule_ReplyWithLongLong(ctx, 0);
-    return  REDISMODULE_OK;
-}
-
-///摘除某个主机的vip
-///argv[1] channel :, argv[2] vip_addr: vip
-int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    REDISMODULE_NOT_USED(argv);
-    REDISMODULE_NOT_USED(argc);
-    if (argc < 3) {
-        return RedisModule_WrongArity(ctx);
-    }
-
-    #if ALLOW_TRACE == 1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
-        "Got %d args. argv[1]: %s, argv[2]: %s", 
-        argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-    RedisModule_Log(ctx ,  "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
-    #endif
-    RedisModule_AutoMemory(ctx);
-    ///pub
-    RedisModuleString *scmd = RedisModule_CreateStringPrintf(ctx, 
-        "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}", 
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-
-    #if ALLOW_TRACE == 1
-         RedisModule_Log(ctx ,  "warning", "suma_vip_kill   %s",  RedisModule_StringPtrLen(scmd, NULL));
-    #endif
-
-    RedisModuleCallReply *pub_status_int = RedisModule_Call(ctx, "PUBLISH", "ss", argv [1], scmd);
-
-    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
-         long long status = RedisModule_CallReplyInteger(pub_status_int);
-         if (status > 0) {
-              RedisModule_ReplyWithLongLong(ctx, 1);
-              return  REDISMODULE_OK;
-         }
-    }
-
-    RedisModule_ReplyWithLongLong(ctx, 0);
-    return  REDISMODULE_OK;
-}
 #define REDISMODULE_REPLY_INTEGER_T long long
 #define REIDSMODULE_REPLY_STAT_OK   1
 #define REIDSMODULE_REPLY_STAT_FAIL 0
@@ -399,11 +268,124 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_CMD_SCAN "SCAN"
 #define REDISMODULE_CMD_MATCH "MATCH"
 #define REDISMODULE_CMD_COUNT "COUNT"
+#define REDISMODULE_CMD_PUBLISH "PUBLISH"
 #define REDISMODULE_CMD_MATCH_NUM "1000000"
 #define REDISMODULE_CMD_MATCH_FMT "ccscc"
 #define ALL_RETRY_LEADER_FUNC 10081
 #define REDISMODULE_STRCMP RedisModule_StringCompare
+#define REDISMODULE_MESSAGE_RESET_VIP "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"reset_vip\"}"
+#define REDISMODULE_MESSAGE_KILL_VIP  "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}"
+// publish 发布消息 V1
+int suma_message_publish (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_AUTO_GCD(ctx);
 
+    if (REDISMODULE_ARGC_LGE_3) {
+        REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+        return REDISMODULE_ERROR_CODE(ctx);
+    }
+
+    #if REDISMODULE_DEBUG_LEVEL1
+    REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
+        "Got %d args. argv[1]: %s, argv[2]: %s", 
+        argc, 
+        RedisModule_StringPtrLen(argv[1], NULL),
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    #endif
+    REDISMODULE_STRING_T *scmd = REDISMODULE_CREATE_STRING_EX(ctx, "\"%s\"", RedisModule_StringPtrLen(argv[2], NULL));
+    #if REDISMODULE_DEBUG_LEVEL1
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_publish  %s",  RedisModule_StringPtrLen(scmd, NULL));
+    #endif
+    RedisModuleCallReply *pub_status_int = RedisModule_Call(ctx, REDISMODULE_CMD_PUBLISH, REDISMODULE_CALL_NO_PARAM2, argv[1], scmd);
+    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
+        REDISMODULE_REPLY_INTEGER_T status = RedisModule_CallReplyInteger(pub_status_int);
+        if (status > 0) {
+            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+            return  REDISMODULE_OK;
+        }
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+    return  REDISMODULE_OK;
+}
+
+//恢复某个主机的vip V1
+int suma_vip_reset (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_AUTO_GCD(ctx);
+
+    if (REDISMODULE_ARGC_LGE_3) {
+        REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+        return REDISMODULE_ERROR_CODE(ctx);
+    }
+
+    #if REDISMODULE_DEBUG_LEVEL1
+    RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
+        "Got %d args. argv[1]: %s, argv[2]: %s", 
+        argc, 
+        RedisModule_StringPtrLen(argv[1], NULL),
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    #endif
+    RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, 
+        REDISMODULE_MESSAGE_RESET_VIP, 
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    #if REDISMODULE_DEBUG_LEVEL1
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "reset_vip =%s", RedisModule_StringPtrLen(scmd, NULL));
+    #endif
+    RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, REDISMODULE_CALL_NO_PARAM2, argv[1], scmd);
+    if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
+        REDISMODULE_REPLY_INTEGER_T status = RedisModule_CallReplyInteger(pub_status_int);
+        if (status > 0) {
+            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+            return  REDISMODULE_OK;
+        }
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+    return  REDISMODULE_OK;
+}
+///摘除某个主机的vip V1
+int suma_vip_kill (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_AUTO_GCD(ctx);
+
+    if (REDISMODULE_ARGC_LGE_3) {
+        REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+        return REDISMODULE_ERROR_CODE(ctx);
+    }
+
+    #if REDISMODULE_DEBUG_LEVEL1
+    RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
+        "Got %d args. argv[1]: %s, argv[2]: %s", 
+        argc, 
+        RedisModule_StringPtrLen(argv[1], NULL),
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_kill p= %s", RedisModule_StringPtrLen(s, NULL));
+    #endif
+    RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, 
+                                        REDISMODULE_MESSAGE_KILL_VIP, 
+                                        RedisModule_StringPtrLen(argv[2], NULL));
+    #if REDISMODULE_DEBUG_LEVEL1
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_kill c= %s", RedisModule_StringPtrLen(scmd, NULL));
+    #endif
+    RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, REDISMODULE_CALL_NO_PARAM2, argv[1], scmd);
+    if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
+        REDISMODULE_REPLY_INTEGER_T status = RedisModule_CallReplyInteger(pub_status_int);
+        if (status > 0) {
+            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+            return  REDISMODULE_OK;
+        }
+    }
+    REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+    return  REDISMODULE_OK;
+}
 //状态激活 V1
 int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -412,7 +394,7 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
 
     if (REDISMODULE_ARGC_LGE_3) {
         REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
-        return RedisModule_WrongArity(ctx);
+        return REDISMODULE_ERROR_CODE(ctx);
     }
 
     #if REDISMODULE_DEBUG_LEVEL1
