@@ -396,6 +396,11 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_EPOLL_START "sumavlib.epoll"
 #define REDISMODULE_CMD_SETNEX "SETNX"
 #define REDISMODULE_CMD_GET "GET"
+#define REDISMODULE_CMD_SCAN "SCAN"
+#define REDISMODULE_CMD_MATCH "MATCH"
+#define REDISMODULE_CMD_COUNT "COUNT"
+#define REDISMODULE_CMD_MATCH_NUM "1000000"
+#define REDISMODULE_CMD_MATCH_FMT "ccscc"
 #define ALL_RETRY_LEADER_FUNC 10081
 #define REDISMODULE_STRCMP RedisModule_StringCompare
 
@@ -424,7 +429,6 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     int is_leader    = 0;
     void *expire_key = RedisModule_OpenKey(ctx, argv[2], REDISMODULE_READ|REDISMODULE_WRITE);
     void *master_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
-
     if (REDISMODULE_REPLY_NULL == REDISMODULE_TYPE_OF_ELEMENT(rep_leader_val)) {
         REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
         return  REDISMODULE_OK;
@@ -432,13 +436,12 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         REDISMODULE_STRING_T *ret_str = REDISMODULE_ELE_TO_STRING(rep_leader_val);
         is_leader = ((REDISMODULE_STRCMP(ret_str, argv[2]) == 0) ? 1 : 0);
     }
-    
     int ret_set_int = RedisModule_StringSet((RedisModuleKey*) expire_key, argv[2]);
     if(REDISMODULE_OK == ret_set_int) {
         int ret_expire_int = REDISMODULE_SET_EXPR((RedisModuleKey*)expire_key, (mstime_t) TIME_OUT_NUM);
         if(REDISMODULE_OK == ret_expire_int) {
             if (0 == is_leader) {
-                RedisModuleCallReply *master_vip       = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
+                RedisModuleCallReply *master_vip       = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv [1]);
                 RedisModuleString    *master_vip_value = RedisModule_CreateStringFromCallReply(master_vip);
                 if(master_vip_value) {
                     RedisModule_ReplyWithString(ctx, master_vip_value);
@@ -450,18 +453,18 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
                     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
                     return  REDISMODULE_OK;
                 }
-                RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[3], "COUNT", "1000000");
+                RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SCAN, REDISMODULE_CMD_MATCH_FMT, 
+                                                                      "0", REDISMODULE_CMD_MATCH, argv[3], REDISMODULE_CMD_COUNT, 
+                                                                      REDISMODULE_CMD_MATCH_NUM);
                 if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
                     RedisModuleCallReply * vip_list = REDISMODULE_ARRAY_GET(rep, 1);
                     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
                         long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_list);
-                        if (size_vec == REIDSMODULE_REPLY_STATUS_OUT) {
+                        if (size_vec == 0) {
                             REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
                             return  REDISMODULE_OK;
                         }
-                        if (size_vec > 100) {
-                            size_vec = 100;
-                        }
+                        if (size_vec > 100)  size_vec = 100;
                         REDISMODULE_ARRAY_ALLOC(ctx, size_vec);
                         for(int i = 0; i < size_vec; i++) {
                             RedisModuleCallReply * ele = REDISMODULE_ARRAY_GET(vip_list, i);
