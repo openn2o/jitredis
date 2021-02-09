@@ -457,14 +457,14 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
                                                                       "0", REDISMODULE_CMD_MATCH, argv[3], REDISMODULE_CMD_COUNT, 
                                                                       REDISMODULE_CMD_MATCH_NUM);
                 if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
-                    RedisModuleCallReply * vip_list = REDISMODULE_ARRAY_GET(rep, 1);
+                    RedisModuleCallReply *vip_list = REDISMODULE_ARRAY_GET(rep, 1);
                     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
                         long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_list);
                         if (size_vec == 0) {
                             REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
                             return  REDISMODULE_OK;
                         }
-                        if (size_vec > 100)  size_vec = 100;
+                        if (size_vec > 100) size_vec = 100;
                         REDISMODULE_ARRAY_ALLOC(ctx, size_vec);
                         for(int i = 0; i < size_vec; i++) {
                             RedisModuleCallReply * ele = REDISMODULE_ARRAY_GET(vip_list, i);
@@ -481,9 +481,6 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
 }
-
-
-
 /***
 *  获取活跃leader状态  V1
 */
@@ -516,7 +513,7 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         } else {
             RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
             if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(rep)) { 
-                if (RedisModule_StringCompare(argv[2], (REDISMODULE_STRING_T *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
+                if (REDISMODULE_STRCMP(argv[2], (REDISMODULE_STRING_T *) REDISMODULE_ELE_TO_STRING(rep)) == 0) {
                     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
                     return  REDISMODULE_OK;
                 }
