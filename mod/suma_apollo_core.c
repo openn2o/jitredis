@@ -544,21 +544,31 @@ int suma_keep_alive_string (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     return  REDISMODULE_OK;
 }
 
-
+#define REDISMODULE_JIT_CALL RedisModule_Call
+#define REDISMODULE_STRING_T RedisModuleString
+#define REDISMODULE_CONTEXT_T RedisModuleCtx
+#define REDISMODULE_TIMER_T  RedisModuleTimerID
+#define REIDSMODULE_REPLY_STATUS_OUT RedisModule_ReplyWithLongLong
+#define REDISMODULE_CREATE_THREAD_EX RedisModule_CreateTimer
+#define REDISMODULE_CREATE_STRING_EX RedisModule_CreateStringPrintf
+#define REDISMODULE_EVAL_T "EVAL"
+#define REDISMODULE_WARN_S "warning"
+#define REDISMODULE_CALL_NO_PARAM "s"
+#define REIDSMODULE_DEBUG RedisModule_Log
 
 ///获取活跃主机状态
 ///argv[1]  owner  + bussinessid  + vip + '.keep', argv[2] live state
 int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
-    #if ALLOW_TRACE == 1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
+    #if REDISMODULE_DEBUG_LEVEL1
+    REDISMODULE_STRING_T *s = RedisModule_CreateStringPrintf(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
         RedisModule_StringPtrLen(argv[1], NULL),
         RedisModule_StringPtrLen(argv[2], NULL)
     );
-    RedisModule_Log(ctx ,  "warning", "suma_master_alive_list param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx ,  "warning", "suma_master_alive_list param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
 
     if (argc < 3) {
@@ -597,7 +607,7 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
              return  REDISMODULE_OK;
         }
     }
-    RedisModule_ReplyWithLongLong(ctx, 0);
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, 0);
     return  REDISMODULE_OK;
 }
 
@@ -605,20 +615,20 @@ int suma_master_alive_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
 *  定时任务执行  V1
 *  注册回调函数，不需要外部调用。 
 */
-void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
+void timerDataProcessorHandler(REDISMODULE_CONTEXT_T *ctx, void *data) {
     RedisModule_AutoMemory(ctx);
     REDISMODULE_NOT_USED  (data);
-    RedisModuleString * snapshot_cmd = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info' , 0, -1) \n"
-                                                                           "redis.call('del', 'biz_info')                            \n"
-                                                                           "local str = table.concat(result)                         \n"
-                                                                           "redis.call('set', 'biz_info.snapshot', str)              \n"
+    REDISMODULE_STRING_T * snapshot_cmd = REDISMODULE_CREATE_STRING_EX(ctx, "local result = redis.call ('lrange', 'biz_info' , 0, -1) \n"
+                                                                            "redis.call('del', 'biz_info')                            \n"
+                                                                            "local str = table.concat(result)                         \n"
+                                                                            "redis.call('set', 'biz_info.snapshot', str)              \n"
     );
-    RedisModule_Call(ctx, "EVAL", "sc", snapshot_cmd, "0");
-    RedisModule_Call(ctx, "EVAL", "sc", RedisModule_CreateStringPrintf(ctx, "run_c()\n"), "0");
+    REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, snapshot_cmd);
+    REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, REDISMODULE_CREATE_STRING_EX(ctx, "run_c()\n"));
     #if REDISMODULE_DEBUG_LEVEL1
-        RedisModule_Log(ctx, "warning", "tick is run.");
+        REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "tick is run.");
     #endif
-    RedisModuleTimerID tid = RedisModule_CreateTimer(ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
+    REDISMODULE_TIMER_T tid = REDISMODULE_CREATE_THREAD_EX (ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
     REDISMODULE_NOT_USED(tid);
 }
 
@@ -626,28 +636,28 @@ void timerDataProcessorHandler(RedisModuleCtx *ctx, void *data) {
 *  定时任务启动  V1
 *  注册回调函数，不需要外部调用。 
 */
-int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+int TimerCommand_RedisCommand(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     RedisModule_AutoMemory(ctx);
     REDISMODULE_NOT_USED  (argv);
     REDISMODULE_NOT_USED  (argc);
 
     #if REDISMODULE_DEBUG_LEVEL1
-    RedisModule_Log(ctx, "warning", "biz engine start");
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "biz engine start");
     #endif
 
     if (startup_atomic_lock == 0) { /*启动biz分析*/
-        RedisModuleTimerID tid            = RedisModule_CreateTimer(ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
-        RedisModuleString * codes_install = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
-                                                                                "for i, v in ipairs (result) do                               \n"
-                                                                                "  local code = redis.call ('get' , v)                        \n"
-                                                                                "  register_c(v , code)                                       \n"
-                                                                                "end                                                          \n"
-                                                                                "return 1");
+        REDISMODULE_TIMER_T  tid            = REDISMODULE_CREATE_THREAD_EX  (ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
+        REDISMODULE_STRING_T *codes_install = REDISMODULE_CREATE_STRING_EX  (ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
+                                                                                  "for i, v in ipairs (result) do                               \n"
+                                                                                  "  local code = redis.call ('get' , v)                        \n"
+                                                                                  "  register_c(v , code)                                       \n"
+                                                                                  "end                                                          \n"
+                                                                                  "return 1");
         REDISMODULE_NOT_USED(tid);
         STARTUP_ATOMIC_LOCK (tid);
-        RedisModule_Call(ctx, "EVAL", "sc", codes_install, "0");
+        REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, codes_install);
     }
-    RedisModule_ReplyWithLongLong(ctx, REIDSMODULE_REPLY_STAT_OK);
+    REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
     return REDISMODULE_OK;
 }
 
@@ -656,46 +666,46 @@ int TimerCommand_RedisCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int
 *  fname   $1
 *  fsource $2   
 */
-int suma_biz_script_register(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     RedisModule_AutoMemory(ctx);
     REDISMODULE_NOT_USED  (argv);
     REDISMODULE_NOT_USED  (argc);
     
     #if REDISMODULE_DEBUG_LEVEL1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
+    REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX (ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
         RedisModule_StringPtrLen(argv[1], NULL),
         RedisModule_StringPtrLen(argv[2], NULL)
     );
-    RedisModule_Log(ctx, "warning", "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-    RedisModuleString *codehook = RedisModule_CreateStringPrintf(ctx, "redis.log(redis.LOG_WARNING, KEYS[1]) \n"
-                                                                      "redis.log(redis.LOG_WARNING, KEYS[2]) \n"
-                                                                      "return biz_compile(KEYS[1], KEYS[2])  \n");
-    RedisModuleString *invoke_s = RedisModule_CreateStringPrintf(ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
-                                                                      "for i, v in ipairs (result) do        \n"
-                                                                      "  local code = redis.call ('get', v)  \n"
-                                                                      "  register_c(v , code)                \n"
-                                                                      "end                                   \n"
-                                                                      "return 1");
+    REDISMODULE_STRING_T *codehook = REDISMODULE_CREATE_STRING_EX(ctx, "redis.log(redis.LOG_WARNING, KEYS[1]) \n"
+                                                                       "redis.log(redis.LOG_WARNING, KEYS[2]) \n"
+                                                                       "return biz_compile(KEYS[1], KEYS[2])  \n");
+    REDISMODULE_STRING_T *invoke_s = REDISMODULE_CREATE_STRING_EX(ctx, "local result = redis.call('lrange', 'biz_info.list', 0, -1) \n"
+                                                                       "for i, v in ipairs (result) do        \n"
+                                                                       "  local code = redis.call('get', v)   \n"
+                                                                       "  register_c(v , code)                \n"
+                                                                       "end                                   \n"
+                                                                       "return 1");
 
-    RedisModuleCallReply *compile_status = RedisModule_Call(ctx, "EVAL", "scss", codehook, "2", argv[1], argv[2]);
+    RedisModuleCallReply *compile_status = REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, "scss", codehook, "2", argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(compile_status)) {
         REDISMODULE_REPLY_INTEGER_T status = RedisModule_CallReplyInteger(compile_status);
         if (status == REIDSMODULE_REPLY_STAT_OK) {
-          RedisModule_Call(ctx, "EVAL", "sc", invoke_s, "0");
-          RedisModule_ReplyWithLongLong(ctx, REIDSMODULE_REPLY_STAT_OK);
+          REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, invoke_s);
+          REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
           return  REDISMODULE_OK;
         }
-        if (status == REIDSMODULE_REPLY_STAT_FAIL) RedisModule_Log(ctx, "warning", "suma_biz_script_register build failed.");
+        if (status == REIDSMODULE_REPLY_STAT_FAIL) REIDSMODULE_DEBUG(ctx, "warning", "suma_biz_script_register build failed.");
     }
-    RedisModule_ReplyWithLongLong(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+    REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
 }
 
 ////程序入口 V1
-int RedisModule_OnLoad(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
     if (RedisModule_Init         (ctx, "sumavlib"                     , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) return REDISMODULE_ERR;
