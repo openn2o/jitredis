@@ -369,6 +369,7 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_DEBUG_LEVEL1 ALLOW_TRACE == 1
 #define REDISMODULE_TIME_INTERVAL 1000
 #define REDISMODULE_JIT_CALL RedisModule_Call
+#define REDISMODULE_SET_EXPR RedisModule_SetExpire
 #define REDISMODULE_STRING_T RedisModuleString
 #define REDISMODULE_CONTEXT_T RedisModuleCtx
 #define REDISMODULE_TIMER_T  RedisModuleTimerID
@@ -378,6 +379,7 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_EVAL_T "EVAL"
 #define REDISMODULE_WARN_S "warning"
 #define REDISMODULE_CALL_NO_PARAM "s"
+#define REDISMODULE_CALL_NO_PARAM2 "ss"
 #define REIDSMODULE_DEBUG RedisModule_Log
 #define REDISMODULE_AUTO_GCD RedisModule_AutoMemory
 #define REDISMODULE_ERROR_CODE RedisModule_WrongArity
@@ -392,7 +394,8 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 #define REDISMODULE_ARGC_LGE_3 argc < 3
 #define REDISMODULE_ARGC_LGE_4 argc < 4
 #define REDISMODULE_EPOLL_START "sumavlib.epoll"
-
+#define REDISMODULE_CMD_SETNEX "SETNX"
+#define REDISMODULE_CMD_GET "GET"
 // (string, string)-> int
 int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -411,17 +414,17 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     );
     REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-    RedisModuleCallReply *ret_setnx = REDISMODULE_JIT_CALL(ctx, "SETNX", "ss", argv[1], argv[2]);
+    RedisModuleCallReply *ret_setnx = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SETNEX, REDISMODULE_CALL_NO_PARAM2, argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER ==  REDISMODULE_TYPE_OF_ELEMENT(ret_setnx)) {
         REDISMODULE_REPLY_INTEGER_T exists_status = RedisModule_CallReplyInteger(ret_setnx);
-        if (REIDSMODULE_REPLY_STAT_OK == exists_status) { 
+        if (REIDSMODULE_REPLY_STAT_OK == exists_status) {
             void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
-            REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
-            RedisModule_SetExpire ((RedisModuleKey*) expire_key, (mstime_t) TIME_OUT_NUM); 
+            REDISMODULE_JIT_CALL (ctx, REDISMODULE_EPOLL_START, REDISMODULE_CALL_NO_PARAM, argv[1]);
+            REDISMODULE_SET_EXPR ((RedisModuleKey*) expire_key, (mstime_t) TIME_OUT_NUM); 
             REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
             return  REDISMODULE_OK;
         } else {
-            RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
+            RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
             if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(rep)) { 
                 if (RedisModule_StringCompare(argv[2], (REDISMODULE_STRING_T *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
                     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
