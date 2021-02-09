@@ -363,58 +363,76 @@ int suma_vip_kill (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     RedisModule_ReplyWithLongLong(ctx, 0);
     return  REDISMODULE_OK;
 }
-
+#define REDISMODULE_REPLY_INTEGER_T long long
+#define REIDSMODULE_REPLY_STAT_OK   1
+#define REIDSMODULE_REPLY_STAT_FAIL 0
+#define REDISMODULE_DEBUG_LEVEL1 ALLOW_TRACE == 1
+#define REDISMODULE_TIME_INTERVAL 1000
+#define REDISMODULE_JIT_CALL RedisModule_Call
+#define REDISMODULE_STRING_T RedisModuleString
+#define REDISMODULE_CONTEXT_T RedisModuleCtx
+#define REDISMODULE_TIMER_T  RedisModuleTimerID
+#define REIDSMODULE_REPLY_STATUS_OUT RedisModule_ReplyWithLongLong
+#define REDISMODULE_CREATE_THREAD_EX RedisModule_CreateTimer
+#define REDISMODULE_CREATE_STRING_EX RedisModule_CreateStringPrintf
+#define REDISMODULE_EVAL_T "EVAL"
+#define REDISMODULE_WARN_S "warning"
+#define REDISMODULE_CALL_NO_PARAM "s"
+#define REIDSMODULE_DEBUG RedisModule_Log
+#define REDISMODULE_AUTO_GCD RedisModule_AutoMemory
+#define REDISMODULE_ERROR_CODE RedisModule_WrongArity
+#define REDISMODULE_ARRAY_GET RedisModule_CallReplyArrayElement
+#define REDISMODULE_ARRAY_ALLOC RedisModule_ReplyWithArray
+#define REIDSMODULE_ARRAY_LENGTH RedisModule_CallReplyLength
+#define REDISMODULE_TYPE_OF_ELEMENT RedisModule_CallReplyType
+#define REDISMODULE_ELE_TO_STRING RedisModule_CreateStringFromCallReply
+#define REDISMODULE_ARRAY_PUSH_STR RedisModule_ReplyWithString
+#define REDISMODULE_ARGC_LGE_1 argc < 1
+#define REDISMODULE_ARGC_LGE_2 argc < 2
+#define REDISMODULE_ARGC_LGE_3 argc < 3
+#define REDISMODULE_ARGC_LGE_4 argc < 4
+#define REDISMODULE_EPOLL_START "sumavlib.epoll"
 // 选举master
 // (string, string)-> int
 ///argv[1] master_key : owner  + bussinessid + 'master', argv[2] vip_addr: vip
-int suma_try_leader_string (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
-    if (argc < 2) {
+    REDISMODULE_AUTO_GCD(ctx);
+
+    if (REDISMODULE_ARGC_LGE_2) {
+        REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
         return RedisModule_WrongArity(ctx);
     }
-    #if ALLOW_TRACE == 1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
+    #if REDISMODULE_DEBUG_LEVEL1
+    RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
         RedisModule_StringPtrLen(argv[1], NULL),
         RedisModule_StringPtrLen(argv[2], NULL)
     );
-    RedisModule_Log(ctx ,  "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
-
-    RedisModule_AutoMemory(ctx);
-    
-    ////
-    RedisModuleCallReply *ret_setnx = RedisModule_Call(ctx, "SETNX", "ss", argv [1], argv [2]);
-    
-    if (REDISMODULE_REPLY_INTEGER ==  RedisModule_CallReplyType(ret_setnx)) {
-        ///如果没有的话设置，master 竞争完成
-        long long exists_status = RedisModule_CallReplyInteger(ret_setnx);
-
-        if (1 == exists_status) { 
-             ///设置成功该主机是master 
-            void  * expire_key  = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE) ;
-            mstime_t timeout_ms = (mstime_t) TIME_OUT_NUM ; //持有锁超时
-            RedisModule_SetExpire((RedisModuleKey*)expire_key,  timeout_ms); 
-            RedisModule_ReplyWithLongLong(ctx, 1); //说明曾经注册过
-            /////启动自动客户端
-            RedisModule_Call(ctx, "sumavlib.epoll", "c", "0");
+    RedisModuleCallReply *ret_setnx = REDISMODULE_JIT_CALL(ctx, "SETNX", "ss", argv [1], argv [2]);
+    if (REDISMODULE_REPLY_INTEGER ==  REDISMODULE_TYPE_OF_ELEMENT(ret_setnx)) {
+        REDISMODULE_REPLY_INTEGER_T exists_status = RedisModule_CallReplyInteger(ret_setnx);
+        if (REIDSMODULE_REPLY_STAT_OK == exists_status) { 
+            void * expire_key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ|REDISMODULE_WRITE);
+            REDISMODULE_JIT_CALL  (ctx, REDISMODULE_EPOLL_START);
+            RedisModule_SetExpire ((RedisModuleKey*)expire_key, (mstime_t)TIME_OUT_NUM); 
+            REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
             return  REDISMODULE_OK;  
         } else {
-            ///存在master
-            RedisModuleCallReply *rep = RedisModule_Call(ctx, "GET", "s", argv [1]);
-        
-            if (REDISMODULE_REPLY_STRING == RedisModule_CallReplyType(rep)) { 
-                 RedisModuleString * master_vip = RedisModule_CreateStringFromCallReply(rep);
-                 if (RedisModule_StringCompare(argv[2] , master_vip) == 0) {
-                    RedisModule_ReplyWithLongLong(ctx, 1); //说明曾经注册过
+            RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, "GET", "s", argv [1]);
+            if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(rep)) { 
+                 if (RedisModule_StringCompare(argv[2] , (RedisModuleString *)REDISMODULE_ELE_TO_STRING(rep)) == 0) {
+                    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
                     return  REDISMODULE_OK;
                  }
             } 
         }
     }
-    RedisModule_ReplyWithLongLong(ctx, 0);
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
 }
 
@@ -534,30 +552,7 @@ int suma_keep_alive_string (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     RedisModule_ReplyWithLongLong(ctx, 0);
     return  REDISMODULE_OK;
 }
-#define REDISMODULE_REPLY_INTEGER_T long long
-#define REIDSMODULE_REPLY_STAT_OK   1
-#define REIDSMODULE_REPLY_STAT_FAIL 0
-#define REDISMODULE_DEBUG_LEVEL1 ALLOW_TRACE == 1
-#define REDISMODULE_TIME_INTERVAL 1000
-#define REDISMODULE_JIT_CALL RedisModule_Call
-#define REDISMODULE_STRING_T RedisModuleString
-#define REDISMODULE_CONTEXT_T RedisModuleCtx
-#define REDISMODULE_TIMER_T  RedisModuleTimerID
-#define REIDSMODULE_REPLY_STATUS_OUT RedisModule_ReplyWithLongLong
-#define REDISMODULE_CREATE_THREAD_EX RedisModule_CreateTimer
-#define REDISMODULE_CREATE_STRING_EX RedisModule_CreateStringPrintf
-#define REDISMODULE_EVAL_T "EVAL"
-#define REDISMODULE_WARN_S "warning"
-#define REDISMODULE_CALL_NO_PARAM "s"
-#define REIDSMODULE_DEBUG RedisModule_Log
-#define REDISMODULE_AUTO_GCD RedisModule_AutoMemory
-#define REDISMODULE_ERROR_CODE RedisModule_WrongArity
-#define REDISMODULE_ARRAY_GET RedisModule_CallReplyArrayElement
-#define REDISMODULE_ARRAY_ALLOC RedisModule_ReplyWithArray
-#define REIDSMODULE_ARRAY_LENGTH RedisModule_CallReplyLength
-#define REDISMODULE_TYPE_OF_ELEMENT RedisModule_CallReplyType
-#define REDISMODULE_ELE_TO_STRING RedisModule_CreateStringFromCallReply
-#define REDISMODULE_ARRAY_PUSH_STR RedisModule_ReplyWithString
+
 /***
 *  获取活跃主机状态  V1
 */
@@ -565,6 +560,11 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REDISMODULE_AUTO_GCD(ctx);
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
+
+    if (REDISMODULE_ARGC_LGE_3) {
+      REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+      return REDISMODULE_ERROR_CODE(ctx);
+    }
 
     #if REDISMODULE_DEBUG_LEVEL1
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX (ctx, 
@@ -576,10 +576,6 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_master_alive_list param = %s", RedisModule_StringPtrLen(s, NULL));
     #endif
 
-    if (argc < 3) {
-        REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL); 
-        return REDISMODULE_ERROR_CODE(ctx);
-    }
     RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[2], "COUNT", "1000000");
     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(resp)) {
         RedisModuleCallReply *vip_list               = REDISMODULE_ARRAY_GET(resp, 1);
