@@ -1027,8 +1027,8 @@ void scriptingInit(int setup) {
     /* Finally set the table as 'redis' global var. */
 
 
-    lua_pushstring(lua,"load");
-    lua_pushstring(lua,"agent.zy");
+    lua_pushstring(lua,"BIZ_DATA");
+    lua_pushstring(lua,"biz_info.snapshot");
     lua_settable(lua,-3);
     
     lua_setglobal(lua,"redis");

@@ -1,10 +1,9 @@
 
 console.log("create some data for test");
-
 console.log("frist create 10000+ BI logs ");
 
-var len  = 10000;
-var index= 0;
+var len  = 70000;
+var time_t = len / 1000;
 var temp = [];
 
 for(var i = 0; i< len ; i+=7) {
@@ -23,15 +22,14 @@ const redis  = require("redis");
 
 console.log("mock suma client to flush");
 var queue = [];
-for(var i = 0; i< 14; i++) {
-
-
+var len_t   = (len/700) >> 0 + 1; 
+for(var i = 0; i< len_t; i++) {
 	var data = temp.slice(i * 700, i * 700 + 701);
-	
 	if(data && data.length > 0) {
 		queue.push(data.join("\n"));
 	} 
 }
+
 var client = redis.createClient(require("./config.js"));
 
 setTimeout(function fetch_next() {
@@ -46,8 +44,8 @@ setTimeout(function fetch_next() {
 	client.lpush("biz_info", slice , function(err) {
 	  console.error(err);
 	});
-	setTimeout(fetch_next, Math.random() * 1000);
-},Math.random() * 1000)
+	setTimeout(fetch_next, Math.random() * time_t);
+},Math.random() * time_t)
 
 
 
