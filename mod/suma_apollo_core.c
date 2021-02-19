@@ -363,7 +363,8 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
         REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
+    REDISMODULE_NOT_USED(s);
+    //REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleCallReply *rep_leader_val = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
     int is_leader    = 0;
@@ -529,10 +530,10 @@ void timerDataProcessorHandler(REDISMODULE_CONTEXT_T *ctx, void *data) {
                                                                             "local str = table.concat(result)                         \n"
                                                                             "redis.call('set', 'biz_info.snapshot', str)              \n"
     );
-    REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, snapshot_cmd);
-    REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, REDISMODULE_CREATE_STRING_EX(ctx, "run_c()\n"));
+    REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, "sc", snapshot_cmd, "0");
+    REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, "sc", REDISMODULE_CREATE_STRING_EX(ctx, "run_c()\n"), "0");
     #if REDISMODULE_DEBUG_LEVEL1
-        REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "tick is run.");
+       // REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "tick is run.");
     #endif
     REDISMODULE_TIMER_T tid = REDISMODULE_CREATE_THREAD_EX (ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
     REDISMODULE_NOT_USED(tid);
@@ -554,22 +555,18 @@ int TimerCommand_RedisCommand(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T *
         REDISMODULE_STRING_T *codes_install = REDISMODULE_CREATE_STRING_EX  (ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
                                                                                   "for i, v in ipairs (result) do                               \n"
                                                                                   "  local code = redis.call ('get' , v)                        \n"
-                                                                                  "  register_c(v , code)                                       \n"
+                                                                                  "  register_c(v, code)                                        \n"
                                                                                   "end                                                          \n"
                                                                                   "return 1");
         REDISMODULE_NOT_USED(tid);
         STARTUP_ATOMIC_LOCK (tid);
-        REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, codes_install);
+        REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, "sc", codes_install, "0");
     }
     REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
     return REDISMODULE_OK;
 }
 
-/***
-*  数据分析函数注册  V1
-*  fname   $1
-*  fsource $2   
-*/
+// 数据分析函数注册  V1
 int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_AUTO_GCD (ctx);
     REDISMODULE_NOT_USED (argv);
@@ -585,7 +582,7 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
     #endif
     REDISMODULE_STRING_T *codehook = REDISMODULE_CREATE_STRING_EX(ctx, "redis.log(redis.LOG_WARNING, KEYS[1]) \n"
                                                                        "redis.log(redis.LOG_WARNING, KEYS[2]) \n"
-                                                                       "return biz_compile(KEYS[1], KEYS[2])  \n");
+                                                                       "biz_compile(KEYS[1], KEYS[2]);return 1\n");
     REDISMODULE_STRING_T *invoke_s = REDISMODULE_CREATE_STRING_EX(ctx, "local result = redis.call('lrange', 'biz_info.list', 0, -1) \n"
                                                                        "for i, v in ipairs (result) do        \n"
                                                                        "  local code = redis.call('get', v)   \n"
@@ -593,14 +590,39 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
                                                                        "end                                   \n"
                                                                        "return 1");
     RedisModuleCallReply *compile_status = REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, "scss", codehook, "2", argv[1], argv[2]);
-    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(compile_status)) {
+    #if REDISMODULE_DEBUG_LEVEL1
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "compile status = %d", REDISMODULE_TYPE_OF_ELEMENT(compile_status));
+    #endif
+
+    if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(compile_status)) {
         REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(compile_status);
         if (status == REIDSMODULE_REPLY_STAT_OK) {
-          REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, REDISMODULE_CALL_NO_PARAM, invoke_s);
+          RedisModuleCallReply *invoke_status = REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, "sc", invoke_s, "0");
+          #if REDISMODULE_DEBUG_LEVEL1
+          REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "invoke status = %d", REDISMODULE_TYPE_OF_ELEMENT(invoke_status));
+          #endif
+
+          if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(invoke_status)) {
+               if (!REDISMODULE_INTEGER_GET(invoke_status)) {
+                   REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL);
+                   #if REDISMODULE_DEBUG_LEVEL1
+                   REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "user code compile failed1.");
+                   #endif
+                   return  REDISMODULE_OK;
+               }
+          }
           REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_OK);
           return  REDISMODULE_OK;
+        } else {
+            #if REDISMODULE_DEBUG_LEVEL1
+            REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "user code compile failed2.");
+            #endif
         }
         if (status == REIDSMODULE_REPLY_STAT_FAIL) REIDSMODULE_DEBUG(ctx, "warning", "suma_biz_script_register build failed.");
+    } else {
+        #if REDISMODULE_DEBUG_LEVEL1
+        REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "user code compile ret type error.");
+        #endif
     }
     REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;

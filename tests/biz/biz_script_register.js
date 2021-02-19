@@ -10,10 +10,11 @@ console.log("register script as subtask biz");
 
 var status = client["sumavlib.biz_script_register"]([
 	"map_test",
-	"local _M = {} \
-	 _M.process = function () \
-		redis.log(redis.LOG_WARNING, 'this is map')\
-	 end\
+	"\n \
+	 local _M = {} \n\
+	 _M.process = function () \n\
+		redis.log(redis.LOG_WARNING, 'this is map')\n\
+	 end\n\
 	 return _M;\
 	"
 	],function(e)

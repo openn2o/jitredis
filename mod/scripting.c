@@ -1180,10 +1180,9 @@ void scriptingInit(int setup) {
         *  注册动态biz函数 jit版本
         */
         char *register_c =  "function register_c (k, v)\n"
-                                "if func_hash [k] ~= nil then return end\n"
                                 "local ngx_log = redis.log; local func=nil;\n"
                                 "local dd , status = pcall (function () func = load (v, k, 't', _G); end)\n"
-                                "if func == nil then ngx_log(redis.LOG_WARNING,  'method failed' .. status) ; return 0 ;end\n"
+                                "if func == nil then ngx_log(redis.LOG_WARNING,  'method failed') ; return 0 ;end\n"
                                 "func_hash [k] = func();\n"
                                 "ngx_log(redis.LOG_WARNING,  'register method ' .. k )\n"
                                 "ngx_log(redis.LOG_WARNING,  'register body ' .. v )\n"
@@ -1199,34 +1198,32 @@ void scriptingInit(int setup) {
         *  return 编译成功返回1 
         *  编译失败返回 0
         */
-        char *biz_compile =        "function biz_compile (k, v)\n"
-                                    "if func_hash [k] ~= nil then return end\n"
-                                    "local bytes =string.byte; \n"
-                                    "if (bytes(v,1)==239) and (bytes(v,2)==187) and (bytes(v,3)==191) then \n"
-                                    "    v=string.char(bytes(v,4,string.len(v)))\n"
-                                    "end\n"
-                                    "local ngx_log = redis.log;\n"
-                                    "local func    = nil; \n"
-                                    "local a,error = pcall (function (v) \n"
-                                    "   local cc, err = load(v);\n"
-                                    "   if cc == nil then \n"
-                                    "       ngx_log(redis.LOG_WARNING,  'method failed1 ' .. tostring(err))\n"
-                                    "       return 0; \n"
-                                    "   end \n"
-                                    "   if cc().process == nil then \n"
-                                    "     return 0;   \n"
-                                    "   end\n"
-                                    "   func = string.dump(cc);\n"
-                                    "end, v)\n"
-                                    "if func == nil then \n"
-                                    "   ngx_log(redis.LOG_WARNING,  'method failed2 ' .. tostring(error))\n"
-                                    "   return 0 \n"
-                                    "end\n"
-                                    "   func_hash[k] = 1; \n"
-                                    "local f_name='biz_info_' .. k;\n"
-                                    "redis.call('set'  ,  f_name, v);\n"
-                                    "redis.call('lpush', 'biz_info.list', f_name)\n"
-                                    "return 1\n"
+        char *biz_compile = "function biz_compile (k, v)\n"
+                            "local bytes =string.byte; \n"
+                            "if (bytes(v,1)==239) and (bytes(v,2)==187) and (bytes(v,3)==191) then \n"
+                            "    v=string.char(bytes(v,4,string.len(v)))\n"
+                            "end\n"
+                            "local ngx_log = redis.log;\n"
+                            "local func    = nil; \n"
+                            "local a,error = pcall (function (v) \n"
+                            "   local cc, err = load(v);\n"
+                            "   if cc == nil then \n"
+                            "       return 0; \n"
+                            "   end \n"
+                            "   if cc().process == nil then \n"
+                            "     ngx_log(redis.LOG_WARNING,  'method process not find')\n"
+                            "     return 0;   \n"
+                            "   end\n"
+                            "   func = string.dump(cc);\n"
+                            "end, v)\n"
+                            "--if func == nil then \n"
+                            "--   ngx_log(redis.LOG_WARNING,  'method failed2 ' .. tostring(error))\n"
+                            "--   return 0 \n"
+                            "--end\n"
+                            "local f_name='biz_info_' .. k;\n"
+                            "redis.call('set', f_name, v);\n"
+                            "redis.call('lpush', 'biz_info.list', f_name)\n"
+                            "return 1\n"
                             "end"; 
         luaL_loadbuffer(lua,biz_compile,strlen(biz_compile),"@biz_compile_def");
         lua_pcall(lua,0,0,0);
@@ -1237,9 +1234,7 @@ void scriptingInit(int setup) {
         *  执行动态biz计算函数 jit版本 
         */
         char *run_c =       "function run_c ()\n"
-                            "     redis.log (redis.LOG_WARNING,  'runc...')\n"
                             "     for i, v in pairs (func_hash) do\n"
-                            "         redis.log (redis.LOG_WARNING,  '.name=' .. tostring(i))\n"
                             "         if v ~= nil and (i ~= 'version') then\n"
                             "             pcall(v.process); \n"
                             "         end\n"
@@ -1248,7 +1243,6 @@ void scriptingInit(int setup) {
         luaL_loadbuffer(lua,run_c, strlen(run_c), "@run_c_def");
         lua_pcall(lua,0,0,0);
     }
-
 
     {
         char *errh_func =       "local dbg = debug\n"
@@ -1273,7 +1267,6 @@ void scriptingInit(int setup) {
     }
 
     scriptingEnableGlobalsProtection(lua);
-
     server.lua = lua;
 }
 
