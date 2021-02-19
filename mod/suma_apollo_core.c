@@ -57,11 +57,12 @@
 #define REDISMODULE_CMD_MATCH_FMT "ccscc"
 #define ALL_RETRY_LEADER_FUNC 10081
 #define REDISMODULE_STRCMP RedisModule_StringCompare
+#define REDISMODULE_MESSAGE_CI_TASK   "{\"type\":1, \"cmd\":\"ci_task\"}"
 #define REDISMODULE_MESSAGE_RESET_VIP "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"reset_vip\"}"
 #define REDISMODULE_MESSAGE_KILL_VIP  "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}"
 #define REDISMODULE_MESSAGE_DIAMOND_PUBLISH   "{\"path\":\"%s\", \"type\":1, \"cmd\":\"diamond_config\"}"
-#define REDISMODULE_MESSAGE_CI_TASK "{\"type\":1, \"cmd\":\"ci_task\"}"
 
+///获取所有vip列表 V1
 int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED (argv);
     REDISMODULE_NOT_USED (argc);
@@ -83,7 +84,7 @@ int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     return  REDISMODULE_OK;
 }
 
-///获取所有vip列表
+///获取所有vip列表 V1
 int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
@@ -99,7 +100,6 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     );
     RedisModule_Log(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
-	
 	RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SSCAN, "sccc", argv[1], "0", "COUNT", "100");
 	if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
 		RedisModuleCallReply * vip_server_list =  REDISMODULE_ARRAY_GET(rep, 1);
@@ -120,7 +120,7 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
 	REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
     return  REDISMODULE_OK;
 }
-
+///vip 注册 V1
 int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
@@ -137,7 +137,6 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     );
     REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
-
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "!ss", argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
         REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
@@ -149,8 +148,6 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
 }
-
-
 // diamond list
 int suma_diamond_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -169,7 +166,6 @@ int suma_diamond_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
     #endif
     RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SCAN, "ccscc", "0", REDISMODULE_CMD_MATCH, argv[1], "COUNT", "1000000");
     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
-        /// 0 是游标 目前这里不需要
             RedisModuleCallReply * diamond_list = REDISMODULE_ARRAY_GET(rep, 1);
             if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(diamond_list)) {
                 long size_vec = REIDSMODULE_ARRAY_LENGTH(diamond_list);
@@ -191,7 +187,6 @@ int suma_diamond_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
     return  REDISMODULE_OK;
 }
-
 // diamond publish V1
 int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -242,7 +237,6 @@ int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
     return  REDISMODULE_OK;
 }
-
 // publish 发布消息 V1
 int suma_message_publish (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -276,7 +270,6 @@ int suma_message_publish (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **arg
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
 }
-
 //恢复某个主机的vip V1
 int suma_vip_reset (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -366,7 +359,7 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
     REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
-	#endif
+    #endif
     
     RedisModuleCallReply *rep_leader_val = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
     int is_leader    = 0;
