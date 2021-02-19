@@ -167,70 +167,6 @@ int suma_diamond_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
     return  REDISMODULE_OK;
 }
 
-// diamond publish 
-///argv[1] channel , argv[2] key , argv[3] value ,argv[4] diamond_list
-int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    
-    REDISMODULE_NOT_USED(argv);
-    REDISMODULE_NOT_USED(argc);
-    if (argc < 3) {
-        return RedisModule_WrongArity(ctx);
-    }
-
-    #if ALLOW_TRACE == 1
-    RedisModuleString *s = RedisModule_CreateStringPrintf(ctx, 
-        "Got %d args. argv[1]: %s, argv[2]: %s", 
-        argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-    RedisModule_Log(ctx ,  "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
-    #endif
-
-    RedisModule_AutoMemory(ctx);
-    int state = 0;
-    ///argv[2] stoire key, argv[3] stoire value
-    RedisModuleCallReply *ret_setnx = RedisModule_Call(ctx, "SET", "!ss", argv [2], argv [3]);
-
-    if (REDISMODULE_REPLY_STRING == RedisModule_CallReplyType(ret_setnx)) { // is string
-        RedisModuleString * ret_setnx_str = RedisModule_CreateStringFromCallReply(ret_setnx);
-                if (RedisModule_StringCompare (RedisModule_CreateString(ctx, "OK", 2), ret_setnx_str) == 0) {
-                        state = 1;
-                }
-    } else{
-        RedisModule_ReplyWithLongLong(ctx, 0);
-        return  REDISMODULE_OK;
-    }
-
-    if (!state) { ///访问失败
-        RedisModule_ReplyWithLongLong(ctx, 0);
-        return  REDISMODULE_OK;
-    }
-
-    ///publish data
-    RedisModuleString *scmd = RedisModule_CreateStringPrintf(ctx, 
-        "{\"path\":\"%s\", \"type\":1, \"cmd\":\"diamond_config\"}", 
-        RedisModule_StringPtrLen(argv[2], NULL)
-    );
-
-    #if ALLOW_TRACE == 1
-         RedisModule_Log(ctx ,  "warning", "diamond_config   %s",  RedisModule_StringPtrLen(scmd, NULL));
-    #endif
-
-    RedisModuleCallReply *pub_status_int = RedisModule_Call(ctx, "PUBLISH", "ss", argv [1], scmd);
-
-    if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
-         long long status = RedisModule_CallReplyInteger(pub_status_int);
-         if (status > 0) {
-              RedisModule_ReplyWithLongLong(ctx, 1);
-              return  REDISMODULE_OK;
-         }
-    }
-
-    RedisModule_ReplyWithLongLong(ctx, 0);
-    return  REDISMODULE_OK;
-}
-
 
 #define REDISMODULE_REPLY_INTEGER_T long long
 #define REIDSMODULE_REPLY_STAT_OK   1
@@ -275,6 +211,60 @@ int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
 #define REDISMODULE_STRCMP RedisModule_StringCompare
 #define REDISMODULE_MESSAGE_RESET_VIP "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"reset_vip\"}"
 #define REDISMODULE_MESSAGE_KILL_VIP  "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}"
+#define REDISMODULE_MESSAGE_DIAMOND_PUBLISH   "{\"path\":\"%s\", \"type\":1, \"cmd\":\"diamond_config\"}"
+// diamond publish V1
+int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_AUTO_GCD(ctx);
+
+    if (REDISMODULE_ARGC_LGE_3) {
+        return REDISMODULE_ERROR_CODE(ctx);
+    }
+
+    #if REDISMODULE_DEBUG_LEVEL1
+    RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
+        "Got %d args. argv[1]: %s, argv[2]: %s", 
+        argc, 
+        RedisModule_StringPtrLen(argv[1], NULL),
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    #endif
+    int state = 0;
+    RedisModuleCallReply *setnx = REDISMODULE_JIT_CALL(ctx, "SET", "!ss", argv[2], argv[3]);
+    if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(setnx)) {
+        RedisModuleString * setnx_str = REDISMODULE_ELE_TO_STRING(setnx);
+        if (REDISMODULE_STRCMP(RedisModule_CreateString(ctx, "OK", 2), setnx_str) == 0) {
+            state = 1;
+        }
+    } else{
+        REIDSMODULE_REPLY_STATUS_OUT(ctx, 0);
+        return  REDISMODULE_OK;
+    }
+    if (!state) {
+        REIDSMODULE_REPLY_STATUS_OUT(ctx, 0);
+        return  REDISMODULE_OK;
+    }
+    RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, 
+        REDISMODULE_MESSAGE_DIAMOND_PUBLISH,
+        RedisModule_StringPtrLen(argv[2], NULL)
+    );
+    #if ALLOW_TRACE == 1
+        REIDSMODULE_DEBUG(ctx, "warning", "diamond_config %s", RedisModule_StringPtrLen(scmd, NULL));
+    #endif
+    RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "PUBLISH", "ss", argv[1], scmd);
+    if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
+        REDISMODULE_REPLY_INTEGER_T status = RedisModule_CallReplyInteger(pub_status_int);
+        if (status > 0) {
+            REIDSMODULE_REPLY_STATUS_OUT(ctx, 1);
+            return  REDISMODULE_OK;
+        }
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, 0);
+    return  REDISMODULE_OK;
+}
+
 // publish 发布消息 V1
 int suma_message_publish (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
