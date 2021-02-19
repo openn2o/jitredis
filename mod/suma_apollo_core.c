@@ -64,24 +64,27 @@
 
 ///获取所有vip列表 V1
 int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    REDISMODULE_NOT_USED (argv);
-    REDISMODULE_NOT_USED (argc);
-    REDISMODULE_AUTO_GCD (ctx);
-   
-    #if REDISMODULE_DEBUG_LEVEL1
-        REIDSMODULE_DEBUG(ctx, "warning", "suma_ci_task %s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
-    #endif
-    RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, REDISMODULE_MESSAGE_CI_TASK);
-    RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, "ss", argv[1], scmd);
-    if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
-        REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
-        if (status != REIDSMODULE_REPLY_STAT_FAIL) {
-            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
-            return  REDISMODULE_OK;
-        }
+  REDISMODULE_NOT_USED (argv);
+  REDISMODULE_NOT_USED (argc);
+  REDISMODULE_AUTO_GCD (ctx); 
+  #if REDISMODULE_DEBUG_LEVEL1
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_ci_task %s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
+  #endif
+  RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, REDISMODULE_MESSAGE_CI_TASK);
+  RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, 
+                        REDISMODULE_CMD_PUBLISH, 
+                        REDISMODULE_CALL_NO_PARAM2,
+                        argv[1], 
+                        scmd);
+  if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
+    REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
+    if (status != REIDSMODULE_REPLY_STAT_FAIL) {
+      REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+      return  REDISMODULE_OK;
     }
-    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
-    return  REDISMODULE_OK;
+  }
+  REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+  return  REDISMODULE_OK;
 }
 
 ///获取所有vip列表 V1
