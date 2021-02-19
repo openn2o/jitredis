@@ -364,7 +364,6 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     );
     REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
-    
     RedisModuleCallReply *rep_leader_val = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
     int is_leader    = 0;
     void *expire_key = RedisModule_OpenKey(ctx, argv[2], REDISMODULE_READ|REDISMODULE_WRITE);
@@ -546,11 +545,9 @@ int TimerCommand_RedisCommand(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T *
     REDISMODULE_AUTO_GCD (ctx);
     REDISMODULE_NOT_USED (argv);
     REDISMODULE_NOT_USED (argc);
-
     #if REDISMODULE_DEBUG_LEVEL1
     REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "biz engine start");
     #endif
-
     if (STARTUP_ATOMIC_ISLOCK()) { /*启动biz分析*/
         REDISMODULE_TIMER_T  tid            = REDISMODULE_CREATE_THREAD_EX  (ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
         REDISMODULE_STRING_T *codes_install = REDISMODULE_CREATE_STRING_EX  (ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
@@ -576,7 +573,6 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
     REDISMODULE_AUTO_GCD (ctx);
     REDISMODULE_NOT_USED (argv);
     REDISMODULE_NOT_USED (argc);
-    
     #if REDISMODULE_DEBUG_LEVEL1
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX (ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
@@ -595,7 +591,6 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
                                                                        "  register_c(v , code)                \n"
                                                                        "end                                   \n"
                                                                        "return 1");
-
     RedisModuleCallReply *compile_status = REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, "scss", codehook, "2", argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(compile_status)) {
         REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(compile_status);
