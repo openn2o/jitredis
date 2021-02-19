@@ -79,8 +79,8 @@ int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
     REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
     if (status != REIDSMODULE_REPLY_STAT_FAIL) {
-    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
-    return  REDISMODULE_OK;
+        REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+        return  REDISMODULE_OK;
     }
   }
   REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
@@ -93,7 +93,7 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     REDISMODULE_NOT_USED(argc);
     REDISMODULE_AUTO_GCD(ctx);
     if (REDISMODULE_ARGC_LGE_2) {
-    return REDISMODULE_ERROR_CODE(ctx);
+        return REDISMODULE_ERROR_CODE(ctx);
     }
     #if REDISMODULE_DEBUG_LEVEL1
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
