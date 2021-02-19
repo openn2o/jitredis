@@ -67,10 +67,11 @@ int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
   REDISMODULE_NOT_USED (argv);
   REDISMODULE_NOT_USED (argc);
   REDISMODULE_AUTO_GCD (ctx); 
+
+  RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, REDISMODULE_MESSAGE_CI_TASK);
   #if REDISMODULE_DEBUG_LEVEL1
     REIDSMODULE_DEBUG(ctx, "warning", "suma_ci_task %s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
   #endif
-  RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, REDISMODULE_MESSAGE_CI_TASK);
   RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, 
                         REDISMODULE_CMD_PUBLISH, 
                         REDISMODULE_CALL_NO_PARAM2,
