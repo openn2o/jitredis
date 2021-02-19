@@ -40,6 +40,7 @@
 #define REDISMODULE_TYPE_OF_ELEMENT RedisModule_CallReplyType
 #define REDISMODULE_ELE_TO_STRING RedisModule_CreateStringFromCallReply
 #define REDISMODULE_ARRAY_PUSH_STR RedisModule_ReplyWithString
+#define REDISMODULE_STRING_PTR_LEN RedisModule_StringPtrLen
 #define REDISMODULE_ARGC_LGE_1 argc < 1
 #define REDISMODULE_ARGC_LGE_2 argc < 2
 #define REDISMODULE_ARGC_LGE_3 argc < 3
@@ -67,7 +68,7 @@ int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     REDISMODULE_AUTO_GCD (ctx);
    
     #if REDISMODULE_DEBUG_LEVEL1
-        REIDSMODULE_DEBUG(ctx, "warning", "suma_ci_task %s", RedisModule_StringPtrLen(scmd, NULL));
+        REIDSMODULE_DEBUG(ctx, "warning", "suma_ci_task %s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
     #endif
     RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, REDISMODULE_MESSAGE_CI_TASK);
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, "ss", argv[1], scmd);
@@ -94,9 +95,9 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL)
     );
-    RedisModule_Log(ctx, "warning", "suma_vip_register_list param = %s", RedisModule_StringPtrLen(s, NULL));
+    RedisModule_Log(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
 	
 	RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SSCAN, "sccc", argv[1], "0", "COUNT", "100");
@@ -110,7 +111,7 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
 			}
 			REDISMODULE_ARRAY_ALLOC(ctx, size_vec); 
 			for(int i = 0; i < size_vec; i++) {
-				RedisModuleCallReply * ele =  REDISMODULE_ARRAY_GET(vip_server_list , i);
+				RedisModuleCallReply * ele = REDISMODULE_ARRAY_GET(vip_server_list , i);
 				REDISMODULE_ARRAY_PUSH_STR(ctx, REDISMODULE_ELE_TO_STRING(ele));
 			}
 			return  REDISMODULE_OK;
@@ -131,10 +132,10 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
 
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "!ss", argv[1], argv[2]);
@@ -162,9 +163,9 @@ int suma_diamond_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s", 
         argc,
-        RedisModule_StringPtrLen(argv[1], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, "warning", "suma_diamond_list param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_diamond_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SCAN, "ccscc", "0", REDISMODULE_CMD_MATCH, argv[1], "COUNT", "1000000");
     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
@@ -203,10 +204,10 @@ int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, "warning", "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_try_leader_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     int state = 0;
     RedisModuleCallReply *setnx = REDISMODULE_JIT_CALL(ctx, "SET", "!ss", argv[2], argv[3]);
@@ -225,10 +226,10 @@ int suma_diamond_publish (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
     }
     RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, 
         REDISMODULE_MESSAGE_DIAMOND_PUBLISH,
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
     #if ALLOW_TRACE == 1
-        REIDSMODULE_DEBUG(ctx, "warning", "diamond_config %s", RedisModule_StringPtrLen(scmd, NULL));
+        REIDSMODULE_DEBUG(ctx, "warning", "diamond_config %s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
     #endif
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, "ss", argv[1], scmd);
     if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
@@ -255,14 +256,14 @@ int suma_message_publish (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **arg
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_try_leader_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
-    REDISMODULE_STRING_T *scmd = REDISMODULE_CREATE_STRING_EX(ctx, "\"%s\"", RedisModule_StringPtrLen(argv[2], NULL));
+    REDISMODULE_STRING_T *scmd = REDISMODULE_CREATE_STRING_EX(ctx, "\"%s\"", REDISMODULE_STRING_PTR_LEN(argv[2], NULL));
     #if REDISMODULE_DEBUG_LEVEL1
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_publish  %s",  RedisModule_StringPtrLen(scmd, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_publish  %s",  REDISMODULE_STRING_PTR_LEN(scmd, NULL));
     #endif
     RedisModuleCallReply *pub_status_int = RedisModule_Call(ctx, REDISMODULE_CMD_PUBLISH, REDISMODULE_CALL_NO_PARAM2, argv[1], scmd);
     if (REDISMODULE_REPLY_INTEGER == RedisModule_CallReplyType(pub_status_int)) {
@@ -290,17 +291,17 @@ int suma_vip_reset (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_try_leader_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, 
         REDISMODULE_MESSAGE_RESET_VIP, 
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
     #if REDISMODULE_DEBUG_LEVEL1
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "reset_vip =%s", RedisModule_StringPtrLen(scmd, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "reset_vip =%s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
     #endif
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, REDISMODULE_CALL_NO_PARAM2, argv[1], scmd);
     if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
@@ -326,16 +327,16 @@ int suma_vip_kill (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int 
     RedisModuleString *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_kill p= %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_kill p= %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleString *scmd = REDISMODULE_CREATE_STRING_EX(ctx, 
                                         REDISMODULE_MESSAGE_KILL_VIP, 
-                                        RedisModule_StringPtrLen(argv[2], NULL));
+                                        REDISMODULE_STRING_PTR_LEN(argv[2], NULL));
     #if REDISMODULE_DEBUG_LEVEL1
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_kill c= %s", RedisModule_StringPtrLen(scmd, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_vip_kill c= %s", REDISMODULE_STRING_PTR_LEN(scmd, NULL));
     #endif
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_PUBLISH, REDISMODULE_CALL_NO_PARAM2, argv[1], scmd);
     if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
@@ -361,10 +362,10 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
 	#endif
     
     RedisModuleCallReply *rep_leader_val = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
@@ -438,10 +439,10 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX(ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_try_leader_string param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx , REDISMODULE_WARN_S, "suma_try_leader_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleCallReply *ret_setnx = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SETNEX, REDISMODULE_CALL_NO_PARAM2, argv[1], argv[2]);
     if (REDISMODULE_REPLY_INTEGER ==  REDISMODULE_TYPE_OF_ELEMENT(ret_setnx)) {
@@ -481,10 +482,10 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX (ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_master_alive_list param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_master_alive_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[2], "COUNT", "1000000");
     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(resp)) {
@@ -583,10 +584,10 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
     REDISMODULE_STRING_T *s = REDISMODULE_CREATE_STRING_EX (ctx, 
         "Got %d args. argv[1]: %s, argv[2]: %s", 
         argc, 
-        RedisModule_StringPtrLen(argv[1], NULL),
-        RedisModule_StringPtrLen(argv[2], NULL)
+        REDISMODULE_STRING_PTR_LEN(argv[1], NULL),
+        REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_biz_script_register param = %s", RedisModule_StringPtrLen(s, NULL));
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_biz_script_register param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     REDISMODULE_STRING_T *codehook = REDISMODULE_CREATE_STRING_EX(ctx, "redis.log(redis.LOG_WARNING, KEYS[1]) \n"
                                                                        "redis.log(redis.LOG_WARNING, KEYS[2]) \n"
