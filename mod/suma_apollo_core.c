@@ -106,7 +106,7 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
 		if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_server_list)) {
 			long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_server_list);
 			if (size_vec == 0) {
-				REIDSMODULE_REPLY_STATUS_OUT(ctx, 0); 
+				REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
 				return  REDISMODULE_OK;
 			}
 			REDISMODULE_ARRAY_ALLOC(ctx, size_vec); 
@@ -174,7 +174,7 @@ int suma_diamond_list (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) 
             if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(diamond_list)) {
                 long size_vec = REIDSMODULE_ARRAY_LENGTH(diamond_list);
                 if (size_vec == 0) {
-                    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+                    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
                     return  REDISMODULE_OK;
                 }
                 if (size_vec > 100) {
@@ -404,7 +404,7 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
                     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
                         long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_list);
                         if (size_vec == 0) {
-                            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+                            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
                             return  REDISMODULE_OK;
                         }
                         if (size_vec > 100) size_vec = 100;
@@ -494,7 +494,7 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
             REDISMODULE_REPLY_INTEGER_T vip_list_len = REIDSMODULE_ARRAY_LENGTH(vip_list);
             if (vip_list_len == 0) {
-              REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL); 
+              REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
               return REDISMODULE_OK;
             }
             REDISMODULE_ARRAY_ALLOC(ctx, vip_list_len);
@@ -612,8 +612,6 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
     REIDSMODULE_REPLY_STATUS_OUT (ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
 }
-
-
 
 ////程序入口 V1
 int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
