@@ -98,22 +98,22 @@ int suma_vip_server_list (RedisModuleCtx *ctx, RedisModuleString **argv, int arg
         argc, 
         REDISMODULE_STRING_PTR_LEN(argv[1], NULL)
     );
-    RedisModule_Log(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
 	RedisModuleCallReply *rep = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_SSCAN, "sccc", argv[1], "0", "COUNT", "100");
 	if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(rep)) {
 		RedisModuleCallReply * vip_server_list =  REDISMODULE_ARRAY_GET(rep, 1);
 		if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_server_list)) {
-			long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_server_list);
-			if (size_vec == 0) {
+		    long size_vec = REIDSMODULE_ARRAY_LENGTH(vip_server_list);
+		    if (size_vec == 0) {
 				REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
 				return  REDISMODULE_OK;
-			}
-			REDISMODULE_ARRAY_ALLOC(ctx, size_vec); 
-			for(int i = 0; i < size_vec; i++) {
-				RedisModuleCallReply * ele = REDISMODULE_ARRAY_GET(vip_server_list , i);
+		    }
+		    REDISMODULE_ARRAY_ALLOC(ctx, size_vec); 
+		    for(int i = 0; i < size_vec; i++) {
+			    RedisModuleCallReply * ele = REDISMODULE_ARRAY_GET(vip_server_list , i);
 				REDISMODULE_ARRAY_PUSH_STR(ctx, REDISMODULE_ELE_TO_STRING(ele));
-			}
+		    }
 			return  REDISMODULE_OK;
 		}
 	}
