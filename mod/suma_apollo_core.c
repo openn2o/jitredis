@@ -485,20 +485,22 @@ int suma_master_alive_list (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     );
     REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "suma_master_alive_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
-    RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[2], "COUNT", "1000000");
+    RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccscc", "0", "MATCH", argv[2], "COUNT", "100000");
     if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(resp)) {
-        RedisModuleCallReply *vip_list               = REDISMODULE_ARRAY_GET(resp, 1);
-        REDISMODULE_REPLY_INTEGER_T i                = 0;
+        RedisModuleCallReply *vip_list  = REDISMODULE_ARRAY_GET(resp, 1);
+        
         if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
-            REDISMODULE_REPLY_INTEGER_T vip_list_len = REIDSMODULE_ARRAY_LENGTH(vip_list);
+            int vip_list_len = REIDSMODULE_ARRAY_LENGTH(vip_list);
             if (vip_list_len == 0) {
               REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
               return REDISMODULE_OK;
             }
             REDISMODULE_ARRAY_ALLOC(ctx, vip_list_len);
-            while(++ i <= vip_list_len) {
+            int i  = 0;
+            while(i < vip_list_len) {
               RedisModuleCallReply * vip_ele = REDISMODULE_ARRAY_GET(vip_list, i);
               REDISMODULE_ARRAY_PUSH_STR (ctx, REDISMODULE_ELE_TO_STRING(vip_ele));
+              i++;
             }
             return REDISMODULE_OK;
         }

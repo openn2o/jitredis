@@ -1157,8 +1157,6 @@ void scriptingInit(int setup) {
                                             "local item    = {}; \n"
                                             "item.ip       = arr[i+5]; \n"
                                             "item.biz_id   = arr[i+4]; \n"
-                                            "ngx_log(ERROR, \"ip=\" .. item.ip)\n"
-                                            "ngx_log(ERROR, \"biz_id=\" .. item.biz_id )\n"
                                             "if links[item.biz_id] == nil then \n"
                                                 "links[item.biz_id] = {} \n"
                                             "end \n"
@@ -1173,7 +1171,6 @@ void scriptingInit(int setup) {
         luaL_loadbuffer(lua,data_ip_format,strlen(data_ip_format),"@data_ip_format_def");
         lua_pcall(lua,0,0,0);
     }
-
 
     {
         /*** 
