@@ -537,7 +537,7 @@ end
 local wasm_compile = compiler.newInstance;
 ---------------------------test
 local data   = nil;
-local handle = io.open("./tests/for.wasm", "rb")
+local handle = io.open("./tests/string.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local loc_section = wasm_loader_decode(data);

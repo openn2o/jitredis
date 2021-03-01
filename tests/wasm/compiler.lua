@@ -603,6 +603,14 @@ function compiler.newInstance(sectionData)
       t.source = t.source .. ("%s = 0,"):format(mangleImport(v.module, v.field))
     end
     t.source = t.source .. "}\n" .. prefabs.unlinked
+
+--     t.source = t.source .. [[
+-- imports.console__log2 = function (A, i, j)
+--       if A ~= nil then
+--         print(222);
+--       end
+-- end
+--     ]]
   end
 
   t.source = t.source .. prefabs.cache
@@ -725,6 +733,7 @@ function compiler.newInstance(sectionData)
   t.source =  t.source .. [[if exportTable.main ~= nil then
   print(exportTable.main());
 end
+
 ]]
   t.source = t.source .. "return { "
 
