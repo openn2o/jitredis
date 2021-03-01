@@ -55,8 +55,9 @@ end
 local prefabs = {
   unlinked = [[
 for k, v in pairs(imports) do
-  imports[k] = function()
-    return error("Unlinked function: '" .. k .. "'")
+  imports[k] = function(...)
+    print(...);
+    -- return error("Unlinked function: '" .. k .. "'")
   end
 end
 ]],
@@ -70,7 +71,6 @@ local function storeMem(mem, memSize, addr, val, bytes)
   if addr < 0 or addr > memSize*(2^16) then
     error("Attempt to store outside bounds", 2)
   end
-  
   if bytes == 8 then
     ffi.cast("uint" .. bytes .. "_t*", mem + addr)[0] = val
   else
@@ -82,7 +82,6 @@ local function storeFloat(mem, memSize, addr, val, bytes)
   if addr < 0 or addr > memSize*(2^16) then
     error("Attempt to store outside bounds", 2)
   end
-  
   if bytes == 8 then
     ffi.cast("double*", mem + addr)[0] = val
   else
@@ -101,7 +100,8 @@ local function readMem(mem, memSize, addr, bytes)
 end
 ]],
 cache = [[
-local bit = require("bit")
+local bit = require("bit");
+local ffi = require("ffi");
 ]]
 }
 
@@ -611,7 +611,7 @@ function compiler.newInstance(sectionData)
 
   if sectionData[7] then
     -- Forward declare export section so that we can swap out entries at runtime
-    t.source = t.source .. "local exportTable = {}"
+    t.source = t.source .. "local exportTable = {}\n"
   end
 
   if sectionData[5] then
@@ -722,6 +722,10 @@ function compiler.newInstance(sectionData)
     end
   end
 
+  t.source =  t.source .. [[if exportTable.main ~= nil then
+  print(exportTable.main());
+end
+]]
   t.source = t.source .. "return { "
 
   if sectionData[7] then
@@ -740,7 +744,6 @@ function compiler.newInstance(sectionData)
   end
 
   t.source = t.source .. "}\n"
-
   do
     local handle = io.open("debug.out.lua", "w")
     handle:write(t.source)

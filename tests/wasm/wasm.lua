@@ -1,9 +1,11 @@
 
+
+local jit = require("jit");
+local bit = require("bit");
+local ffi = require("ffi");
 if jit.status() ~= nil then
     print("status 2 ");
 end
-local jit = require("jit");
-local bit = require("bit");
 local opcodes = require("opcodes")
 local compiler = require("compiler")
 
@@ -26,6 +28,9 @@ local parseLEBu = function (stream, nBytes)
     local bitCnt = nBytes * 7
     for shift = 0, bitCnt, 7 do
       byte, stream = stream:sub(1, 1):byte(), stream:sub(2)
+      if byte == nil then
+        return 1 , stream;  
+      end
       result = bit.bor(result, bit.lshift(bit.band(byte, 0x7F), shift))
       if bit.band(byte, 0x80) == 0 then
         break
@@ -40,7 +45,6 @@ function parseVLString(stream)
     stringLen, stream = parseLEBu(stream, 4)
     return stream:sub(1, stringLen), stream:sub(stringLen + 1)
 end
-
 
 local types = {
     [0x7f] = 1, -- i32
@@ -272,7 +276,22 @@ local sections = {
         if import.kind == kinds.Function then
           import.typeIndex, stream = parseLEBu(stream, 4)
         else
-          error("Unsupported import kind '" .. import.kind .. "'", 0)
+          if import.kind == 0x03 then
+            error("03..")
+            --[[
+0000011: 03                                         ; import.kind
+0000012: 656e 76                                    env  ; import module name
+0000015: 01                                        ; string length
+0000016: 67                                         g  ; import field name
+0000017: 03                                        ; import kind
+0000018: 7f                                        ; i32
+0000019: 01                                        ; global mutability
+000000f: 0a                                        ; FIXUP section size
+            ]]
+          else
+            error("Unsupported import kind '" .. import.kind .. "'", 0)
+          end
+         
         end
   
         imports[i - 1] = import
@@ -493,7 +512,8 @@ local wasm_loader_decode = function (bytes)
         sectionID        = sectionID:byte();
         sectionLength, bytes = parseLEBu(bytes, 4);
         if sectionID == 0 then
-            local sectionName = parseVLString(bytes)
+            local sectionName  
+            sectionName = parseVLString(bytes)
             local sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1);
             sectionData[0][#sectionData[0] + 1] = {
               name = sectionName,
@@ -504,23 +524,23 @@ local wasm_loader_decode = function (bytes)
                 local sectionStream
                 sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
                 sectionData[sectionID] = sections[sectionID](sectionStream, sectionData)
-              else
+            else
                 print("Invalid section id '" .. sectionID .. "'.. skipping..")
                 local sectionStream
                 sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
-              end
+            end
         end
     end
     return sectionData
 end
 
 local wasm_compile = compiler.newInstance;
-
 ---------------------------test
 local data   = nil;
-local handle = io.open("./test.wasm", "rb")
+local handle = io.open("./tests/for.wasm", "rb")
 data   = handle:read("*a");
-print(#data);
 handle:close();
 local loc_section = wasm_loader_decode(data);
 local instance    = wasm_compile(loc_section);
+
+
