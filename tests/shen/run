@@ -1,0 +1,8 @@
+rm -rf build/*
+make all
+sleep 1
+node build/app.min.js
+sleep 1
+bin/wat2wasm build/out.wat -o build/out.wasm
+sleep 1
+node run.js

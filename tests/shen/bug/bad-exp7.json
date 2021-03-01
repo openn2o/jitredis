@@ -1,0 +1,34 @@
+[
+  { op: 'TNEW', args: [ 0, 0, 'gc' ], idx: 0 },
+  { op: 'KSHORT', args: [ 1, 10 ], idx: 1 },
+  { op: 'KSHORT', args: [ 2, 1 ], idx: 2 },
+  { op: 'KSHORT', args: [ 3, -1 ], idx: 3 },
+  { op: 'FORI', args: [ 1, 5 ], idx: 4 },
+  { op: 'GGET', args: [ 5, 'print', 'index' ], fname: '$print' },
+  { op: 'MOV', args: [ 6, 4 ], idx: 4 },
+  { op: 'CALL', args: [ 5, 1, 2, 'call' ] },
+  { op: 'TSETV', args: [ 4, 0, 4, 'newindex' ] },
+  { op: 'FORL', args: [ 1, -5 ], loop: 5 },
+  { op: 'GGET', args: [ 1, 'print', 'index' ] },
+  { op: 'TGETB', args: [ 2, 0, 1, 'index' ] },
+  { op: 'CALL', args: [ 1, 1, 2, 'call' ] },
+  { op: 'GGET', args: [ 1, 'print', 'index' ] },
+  { op: 'TGETB', args: [ 2, 0, 2, 'index' ] },
+  { op: 'CALL', args: [ 1, 1, 2, 'call' ] },
+  { op: 'GGET', args: [ 1, 'print', 'index' ] },
+  { op: 'TGETB', args: [ 2, 0, 3, 'index' ] },
+  { op: 'CALL', args: [ 1, 1, 2, 'call' ] },
+  { op: 'RET0', args: [ 0, 1 ] }
+]
+[
+  { pc: 0, type: 'KOBJECT' },
+  { pc: 24, type: 'KSHORT' },
+  { pc: 32, type: 'KSHORT' },
+  { pc: 40, type: 'KSHORT' },
+  { pc: 48, type: 'KNUM' },
+  <1 empty item>,
+  { pc: 48, type: 'KNUM' },
+  { pc: 56, type: 'KNUM' },
+  { pc: 64, type: 'KNUM' },
+  { pc: 72, type: 'KNUM' }
+]

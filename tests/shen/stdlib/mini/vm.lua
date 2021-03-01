@@ -1,0 +1,6 @@
+
+
+
+local  WASM_MAGIC = "\x00\x61\x73\x6D\x01\x00\x00\x00";
+
+

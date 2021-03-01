@@ -5,12 +5,7 @@ for k, v in pairs(imports) do
     -- return error("Unlinked function: '" .. k .. "'")
   end
 end
-imports.console__log2 = function (A, i, j)
-      if A ~= nil then
-        print(222);
-      end
-end
-    local bit = require("bit");
+local bit = require("bit");
 local ffi = require("ffi");
 local function checkCondition(cond)
   return cond == true or (cond ~= false and cond ~= 0)

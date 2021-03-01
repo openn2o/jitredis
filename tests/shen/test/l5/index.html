@@ -1,0 +1,493 @@
+<!doctype html>
+<html>
+<head>
+  <title>Widgets Demo</title>
+</head>
+<body>
+  <p>See javascript console for output</p>
+  <script src="../browser-buffer.js"></script>
+  <script src="../parser.js"></script>
+  <script src="../interpreter.js"></script>
+  <script src="../runtime.js"></script>
+  <script src="../globals.js"></script>
+  <script src="wx_template.js"></script>
+  <script src="libwabt.js"></script>
+  <script>
+	 function run(code) {
+		 var Flags = {  	"exceptions": false,
+		 				"mutable_globals": true,
+		 				"sat_float_to_int":false,
+		 				"sign_extension":false,
+		 				"simd":false,
+		 				"threads":false,
+		 				"multi_value":false,
+		 				"tail_call":false     }
+		var module = WabtModule().parseWat('test.wast',code, Flags); /// compile
+		console.log(module.resolveNames());
+		console.log(module.validate(Flags));
+		var binaryOutput = module.toBinary({	log: true, write_debug_names:true	});
+		var binaryBuffer = binaryOutput.buffer;
+		
+		var wasm = new WebAssembly.Module(binaryBuffer);
+		const wasmInstance = new WebAssembly.Instance(wasm, {});
+		const { main } = wasmInstance.exports;
+		console.log(main());
+		console.time("main")
+		for(var i=0; i<10000000; i++) {
+			main();
+		}
+		console.timeEnd("main")
+		
+		console.time("main_js")
+		var  main_js = function () {
+			return 10;
+		}
+		for(var i=0; i<10000000; i++) {
+			main_js();
+		}
+		console.timeEnd("main_js")
+	 }
+
+	
+
+	
+
+
+    function load(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'arraybuffer';
+
+      xhr.onload = function(e) {
+        var buffer = Buffer(this.response);
+        var protos = brozula.parse(buffer);
+        console.log(protos)
+        
+        
+	        function Block () {
+	        	this.data     = [];
+	        	this.func     = null;
+	        	this.fname    = "";
+	        	this.index    = 0;
+				this.regnum   = "";//寄存器
+				this.symblos  = [];
+				this.isfloat  = 0;
+	        }
+	        
+          var func_tml = `
+		   (func $\m{*data.index*}
+		   {%if (data.fname) do %}
+		   (export {{fname}}) 
+		   {%end%} 
+		  
+		   (param i32)
+		   
+		   (result 
+		   {%if (data.isfloat) do%}
+		   f32
+		   {%else%}
+		   i32
+		   {%end%}
+		   ) 
+		   
+		   {{regnum}}
+			    {{data}}
+		   )
+		  `;
+		  var stack  = [];
+		  var blocks = [];
+		  var funcIndex_G = 0;
+		  function find_block_index_by_name  (name) {
+		  		var len = blocks.length;
+				var search = "\"" + name + "\"";
+		  		for(var i = 0; i< len; i++) {
+		  			if(blocks[i].fname == search) {
+		  				return i;
+		  			}
+		  		}
+		  		return 0;
+		  }
+		  
+		  function find_block_by_idx (idx) {
+		  		var len = blocks.length;
+		  		for(var i = 0; i< len; i++) {
+		  			if(blocks[i].index == idx) {
+		  				return blocks[i];
+		  			}
+		  		}
+		  		
+		  		return null;
+		  }
+		  var alloc_pc = 0;
+		  
+		  function inline_build_in_number(arr, n) {
+			  arr.push("i32.const " + alloc_pc);
+			  arr.push("f32.const " + n);
+			  arr.push("f32.store");
+			  return alloc_pc++;
+		  }
+		  
+		  function gen_block_code (codes, cindex, main) {
+		  	  var _block = new Block();
+			  var len  = codes.length;
+			  _block.data  = [";;code section"];
+			  _block.index = cindex ;
+			  var index = 0;
+			  for(var i = 0; i< len; i++) {
+				var code = codes[i];
+				
+				console.log(code);
+				var s1 = _block.symblos.indexOf(code.args[2]) != -1;
+				var s2 = _block.symblos.indexOf(code.args[1]) != -1;
+				var hasfloat = s1 || s2;
+				_block.data.push(";; " + code.op);
+				switch (code.op){
+					case "KSHORT":
+						_block.data.push("i32.const " + code.args[1]);
+						_block.data.push("set_local " + (index ++));
+					break;
+					case "KNUM":
+						var pc = inline_build_in_number(_block.data, code.args[1]);
+						_block.symblos[index ++] = pc;
+					break;
+					case "RET1":
+					case "RET":
+					case "RET0":
+						if(_block.isfloat) {
+							console.log(_block.symblos)
+							_block.data.push("i32.const "+code.args[0]);
+							_block.data.push("f32.load ");
+							
+						} else {
+							_block.data.push("get_local "+code.args[0]);
+							_block.data.push("return");
+						}
+					break;
+					case "FNEW":
+						var inline = code.args[1];
+						var id =  code.args[1].index - 1;
+						stack.push(id);
+					break;
+					case "GSET":
+						if(code.args[2] == "newindex") {
+							var fun_e = stack.pop();
+							var mblocks= find_block_by_idx(fun_e)
+							if(mblocks != null) {
+								mblocks.fname = "\"" + code.args[1] +"\""
+							}
+						}
+					break;
+					case "GGET":
+						if(code.args[2] == "index") {
+							var name = code.args[1];
+							var idx  = find_block_index_by_name(name)
+							if(name) {
+								funcIndex_G = idx;
+							}
+						}
+					break;
+					case "CALL":
+					case "CALLT":
+						if(funcIndex_G != -1) {
+							var mblocks= find_block_by_idx(funcIndex_G)
+							_block.data.push("get_local 0");
+							_block.data.push("call $m" +  mblocks.index);
+							funcIndex_G = -1;
+						}
+						
+					break;
+					case "ADDVN" ://isfloat
+					case "ADDVV" ://add
+					if(hasfloat) {
+						if("ADDVN" == code.op) {
+							var isFloat = (code.args[2]+"").indexOf(".") != -1;
+							var val =  code.args[2];
+							if(!isFloat) {
+								val = val + ".0"
+							}
+							_block.data.push("i32.const " + code.args[0]);
+							_block.data.push("f32.const " + val);
+							_block.data.push("i32.const " + _block.symblos[code.args[1]]);
+							_block.data.push("f32.load " );
+							_block.data.push("f32.add " );
+							_block.data.push("f32.store");
+							_block.isfloat = true;
+							_block.symblos[code.args[0]] = code.args[0];
+							continue;
+						} else {
+							_block.data.push("i32.const " + code.args[0]); 
+							if(!s1) {  ///转换 2
+								
+								_block.data.push("get_local " + code.args[2]);
+								_block.data.push("f32.convert_u/i32");
+								_block.data.push("i32.const " + _block.symblos.indexOf(code.args[1]));
+								_block.data.push("f32.load " );
+								_block.data.push("f32.add " );
+							}
+							
+							if(!s2) {
+								_block.data.push("get_local " + code.args[1]);
+								_block.data.push("f32.convert_u/i32");
+								_block.data.push("i32.const " + _block.symblos.indexOf(code.args[2]));
+								_block.data.push("f32.load " );
+								_block.data.push("f32.add " );
+							}
+							
+							///存入
+							_block.data.push("f32.store");
+							_block.isfloat = true;
+						}
+						
+						
+						if(_block.symblos.indexOf(code.args[0]) == -1) { ///创建一个
+							_block.symblos[code.args[0]] = code.args[0];
+						}
+					} else {
+						if("ADDVN" == code.op) {
+							// [1, 0, 10, "add"]
+							_block.data.push("i32.const " + code.args[2]);
+							_block.data.push("get_local " + code.args[1]);
+							_block.data.push("i32.add ");
+							_block.data.push("set_local " + code.args[0] );
+							continue;
+						}
+						_block.data.push("get_local " + code.args[2]);
+						_block.data.push("get_local " + code.args[1]);
+						_block.data.push("i32.add ");
+						_block.data.push("set_local " + code.args[0] );
+					}
+					
+					
+					break;
+					case "SUBVV"://sub
+					_block.data.push("get_local " + code.args[1]);
+					_block.data.push("get_local " + code.args[2]);
+					_block.data.push("i32.sub ");
+					_block.data.push("set_local " + code.args[0]);
+					break;
+					case "MULVV":
+					case "MULVN":
+					
+					
+					if(hasfloat) {
+						if("MULVN" == code.op) {
+							var isFloat = (code.args[2]+"").indexOf(".") != -1;
+							var val =  code.args[2];
+							if(!isFloat) {
+								val = val + ".0"
+							}
+							_block.data.push("i32.const " + code.args[0]);
+							_block.data.push("f32.const " + val);
+							_block.data.push("i32.const " + _block.symblos[code.args[1]]);
+							_block.data.push("f32.load " );
+							_block.data.push("f32.mul " );
+							_block.data.push("f32.store");
+							_block.isfloat = true;
+							_block.symblos[code.args[0]] = code.args[0];
+							continue;
+						} else {
+							_block.data.push("i32.const " + code.args[0]); 
+							if(!s1) {  ///转换 2
+								
+								_block.data.push("get_local " + code.args[2]);
+								_block.data.push("f32.convert_u/i32");
+								_block.data.push("i32.const " + _block.symblos.indexOf(code.args[1]));
+								_block.data.push("f32.load " );
+								_block.data.push("f32.mul " );
+							}
+							
+							if(!s2) {
+								_block.data.push("get_local " + code.args[1]);
+								_block.data.push("f32.convert_u/i32");
+								_block.data.push("i32.const " + _block.symblos.indexOf(code.args[2]));
+								_block.data.push("f32.load " );
+								_block.data.push("f32.mul " );
+							}
+							
+							///存入
+							_block.data.push("f32.store");
+							_block.isfloat = true;
+						}
+						
+						
+						if(_block.symblos.indexOf(code.args[0]) == -1) { ///创建一个
+							_block.symblos[code.args[0]] = code.args[0];
+						}
+					} else {
+						//[1, 0, 10, "add"]
+						if("MULVN" == code.op) {
+								// [1, 0, 10, "add"]
+							_block.data.push("i32.const " + code.args[2]);
+							_block.data.push("get_local " + code.args[1]);
+							_block.data.push("i32.mul ");
+							_block.data.push("set_local " + code.args[0] );
+							continue;
+						}
+						_block.data.push("get_local " + code.args[1]);
+						_block.data.push("get_local " + code.args[2]);
+						_block.data.push("i32.mul ");
+						_block.data.push("set_local " + code.args[0]);
+					}
+
+					break;
+					case "DIVVV":
+					case "DIVVN":
+					// if(hasfloat) {
+					// 	if("DIVVN" == code.op) {
+							
+					// 		[0, 0, 3.1400009536743165, "div"]
+
+					// 		var isFloat = (code.args[2]+"").indexOf(".") != -1;
+					// 		var val =  code.args[2];
+					// 		if(!isFloat) {
+					// 			val = val + ".0"
+					// 		}
+					// 		_block.data.push("i32.const " + code.args[0]);
+					// 		_block.data.push("i32.const " + _block.symblos[code.args[1]]);
+					// 		_block.data.push("f32.const " + val);
+					// 		//_block.data.push("f32.load " );
+					// 		if(Number(code.args[1]) > 0 && Number(code.args[2]) > 0) {
+					// 			_block.data.push("i32.div_u ");
+					// 		}else {
+					// 			_block.data.push("i32.div_s ");
+					// 		}
+					// 		_block.data.push("f32.store");
+					// 		_block.isfloat = true;
+					// 		_block.symblos[code.args[0]] = code.args[0];
+					// 		continue;
+					// 	} else {
+					// 		_block.data.push("i32.const " + code.args[0]); 
+					// 		if(!s1) {  ///转换 2
+								
+					// 			_block.data.push("get_local " + code.args[2]);
+					// 			_block.data.push("f32.convert_u/i32");
+					// 			_block.data.push("i32.const " + _block.symblos.indexOf(code.args[1]));
+					// 			_block.data.push("f32.load " );
+					// 			if(Number(code.args[1]) > 0 && Number(code.args[2]) > 0) {
+					// 				_block.data.push("i32.div_u ");
+					// 			}else {
+					// 				_block.data.push("i32.div_s ");
+					// 			}
+					// 		}
+							
+					// 		if(!s2) {
+					// 			_block.data.push("get_local " + code.args[1]);
+					// 			_block.data.push("f32.convert_u/i32");
+					// 			_block.data.push("i32.const " + _block.symblos.indexOf(code.args[2]));
+					// 			_block.data.push("f32.load " );
+					// 			if(Number(code.args[1]) > 0 && Number(code.args[2]) > 0) {
+					// 				_block.data.push("i32.div_u ");
+					// 			}else {
+					// 				_block.data.push("i32.div_s ");
+					// 			}
+					// 		}
+							
+					// 		///存入
+					// 		_block.data.push("f32.store");
+					// 		_block.isfloat = true;
+					// 	}
+						
+						
+					// 	if(_block.symblos.indexOf(code.args[0]) == -1) { ///创建一个
+					// 		_block.symblos[code.args[0]] = code.args[0];
+					// 	}
+					// } else {
+						
+						
+					
+					// 	_block.data.push("get_local " + code.args[1]);
+					// 	_block.data.push("get_local " + code.args[2]);
+					// 	if(Number(code.args[1]) > 0 && Number(code.args[2]) > 0) {
+					// 		_block.data.push("i32.div_u ");
+					// 	}else {
+					// 		_block.data.push("i32.div_s ");
+					// 	}
+						
+					// 	_block.data.push("set_local " + code.args[0]);
+					// }
+					break;
+					case "MODVV":
+					_block.data.push("get_local " + code.args[1]);
+					_block.data.push("get_local " + code.args[2]);
+					if(Number(code.args[1]) > 0 && Number(code.args[2]) > 0) {
+						_block.data.push("i32.rem_u ");
+					}else {
+						_block.data.push("i32.rem_s ");
+					}
+					
+					_block.data.push("set_local " + code.args[0]);
+					break;
+					default:
+					
+						_block.data.push(";;; not implements " + code.op);
+					break;
+				}
+			  }
+			  
+			  var f = template.compile( func_tml );
+			  _block.func = f;
+			  if(main) {
+				  _block.fname = "\"main\"";
+			  }
+			  _block.data = _block.data.join("\n");
+			  _block.regnum = "(local i32 i32 i32)";
+			  if(index > 1) {
+				  _block.regnum = "(local ";
+				  for(var i = 0; i< index + 4; i++) {
+					   _block.regnum += "i32 "
+				  }
+				  _block.regnum += ")"
+			  } else {
+				  
+			  }
+			  blocks[_block.index] = _block;
+		  }
+		  //{op: "KSHORT", args: Array(2)}
+		  function compile (v) {
+			var len = v.length;
+			for(var i = 0; i< len; i++){
+				var block = v[i];
+//				console.log(block);
+				if(block.bcins) {
+					///生成函数
+					if(block.flags == 3 || len ==1) {
+						gen_block_code(block.bcins, block.index, true);
+					} else {
+						gen_block_code(block.bcins, block.index);
+					}
+				}
+			}
+			
+			var output=  [];
+			for(var i = 0; i< blocks.length; i++){
+				var block = blocks[i];
+				output.push(block.func (block));
+			}
+			
+			///导入内存
+			output.unshift("(memory 1)")
+			
+			console.log(output.join("\n"))
+			run(output.join("\n"))
+		  }
+		  compile(protos);
+  
+  
+        
+        var fn = brozula.interpret(protos, protos.length - 1, brozula.runtime);
+        callback(null, fn);
+      };
+      xhr.send();
+    }
+
+	
+    load("l0/def_mul.luax", function (err, fn) {
+      if (err) throw err;
+      console.time("t")
+      fn();
+      console.timeEnd("t")
+    });
+  </script>
+</body>
+</head>
+</html>

@@ -1,0 +1,1 @@
+local a = array:new (10);

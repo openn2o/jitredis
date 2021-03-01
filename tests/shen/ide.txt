@@ -1,0 +1,6 @@
+const wasmInstance =
+      new WebAssembly.Instance(wasmModule, {console:{log:console.log}});
+const { main } = wasmInstance.exports;
+console.time("t");
+main()
+console.timeEnd("t");

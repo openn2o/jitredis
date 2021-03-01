@@ -1,0 +1,102 @@
+local 
+7 特殊 loop 占用
+8 特殊 table占用
+
+0x01 不支持 && || ! 运算符
+0x02 不支持 else if
+0x03 在循环中dist 递增变量不能超过1500万
+0x04 不支持递归调用
+
+
+0x11 常量折叠
+0x22 fori 循环中的 step 和 end 可存在数据段中
+
+0x301 需要支持LOOP指令
+升级64位处理      [ok]
+l3 for3 死循环处理[ok]
+常量区被覆盖
+
+
+0x401 object存取   [ok]
+0x401.1 obejct 更新[ok]
+0x401.2 obejct 性能测试[ok]
+0x401.3 eax 覆盖的问题[ok]
+0x401.4 key 是连接字符串
+0x401.5 key 是指针存
+0x401.5 key 是指针取
+
+0x402 object扩容
+0x403 object清理
+0x404 全局object和局部object
+0x405 object 存取字符串
+
+1.1 大重构
+
+1 临时区 	 随着函数退出释放
+2 常量区         永远不会释放
+3 数据区         根据内存管理算法回收
+4 非安全区       全局
+
+数据分全局和局部， 生命周期不同。
+
+
+
+
+引用
+
+静态字符串
+
+addr -> (i32) -> i32
+
+   i32.const 0 
+   i32.const -1 
+   i32.sub
+   f64.load
+
+addr_type -> (i32) -> i32
+addr_len  ->
+addr_size ->
+
+
+[
+type 0,类型
+len,  长度
+ptr	  addr
+size   n
+.....
+]
+
+动态字符串
+[
+type 1,类型
+len,  长度
+ptr	  addr
+size   n
+.....
+]
+
+对象 - > 默认10个field
+[
+type 3,类型
+len,  长度
+ptr	  addr,
+size   n
+]
+
+动态数组 ->
+[
+type 3,类型
+len,  长度
+ptr	  addr,
+size  n
+]
+
+
+next
+
+
+
+
+
+
+

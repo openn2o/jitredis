@@ -1,0 +1,4 @@
+#define NATIVE_LINUX_X86 0
+#define BROWSER_JS 1
+#define BROWSER_WASM 2
+#define NATIVE_WINDOWS_X86 0
