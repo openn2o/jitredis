@@ -1,4 +1,4 @@
-local imports = {console__log2 = 0,console__log = 0,console__log = 0,}
+local imports = {i____ZN6client7print_nEi = 0,}
 for k, v in pairs(imports) do
   imports[k] = function(...)
     print(...);
@@ -42,86 +42,73 @@ local function readMem(mem, memSize, addr, bytes)
   end
 end
 local exportTable = {}
-local A = ffi.new("uint8_t[655360]")
-local ASize = 10
-local B = 0
-local C = 0
-local D = 0
-local E = 0
-local F = 0
-A[8092] = 104
-A[8093] = 101
-A[8094] = 108
-A[8095] = 108
-A[8096] = 111
-A[8097] = 119
-A[8098] = 111
-A[8099] = 114
-A[8100] = 108
-A[8101] = 100
-A[8102] = 115
-A[8103] = 97
-A[8104] = 121
-A[8105] = 50
-A[8106] = 58
-A[8107] = 32
-A[8108] = 33
-local G, H
-function G(I, J, K)
-  local L = 0
-  local M = 0
-  local N = 0
-  local O = 0
-  K = (I + K)
-  do ::PStart::
-  storeMem(A, ASize, I, (readMem(A, ASize, J, 8)), 32)
+local A = ffi.new("uint8_t[1114112]")
+local ASize = 17
+exportTable.memory = A
+local B = 1048576
+local C = {  }
+local D, E, F
+function D()
+  error("Unreachable code reached..", 2)
+end
+function E()
+  return 0
+end
+function F(G, H)
+  local I = 0
+  if checkCondition(((H > 0) and 1 or 0)) then ::JStart::
+  I = (readMem(A, ASize, G, 8))
+  do ::KStart::
+  imports.i____ZN6client7print_nEi(I)
+  imports.i____ZN6client7print_nEi(0)
+  imports.i____ZN6client7print_nEi(1)
+  storeMem(A, ASize, (I + G), 0, 8)
   I = (I + 1)
-  J = (J + 1)
-  if checkCondition(((I <= K) and 1 or 0)) then ::QStart::
- goto PStart
-::QFinish::
+  if checkCondition((((I + 1) < ((readMem(A, ASize, G, 8)) + H)) and 1 or 0)) then
+      goto KStart
+  end
+::KFinish::
     end
-::PFinish::
+::JFinish::
     end
-  return K
 end
-function H()
-  local R = 0
-  local S = 0
-  local T = 0
-  local U = 0
-  local V = 0
-  local W = 0
-  local X = 0
-  local Y = 0
-  local Z = 0
-  local BA = 0
-  storeFloat(A, ASize, 0, 10000, 8)  storeFloat(A, ASize, 8, 1, 8)  storeFloat(A, ASize, 16, -1, 8)  storeFloat(A, ASize, 24, 0, 8)  do ::BBStart::
-  storeFloat(A, ASize, 24, (ffi.cast("double*", A + 0)[0]), 8)  R = 32
-  S = R
-  local BC = G(S, 8102, 6)
-  S = BC
-  local BD = G(S, 8092, 5)
-  S = BD
-  local BE = G(S, 8097, 5)
-  S = BE
-  local BF = G(S, 8108, 1)
-  S = BF
-  S = 17
-  imports.console__log2(32, 17)
-  Y = (((ffi.cast("double*", A + 0)[0]) ~= (ffi.cast("double*", A + 8)[0])) and 1 or 0)
-  storeFloat(A, ASize, 0, ((ffi.cast("double*", A + 0)[0]) + (ffi.cast("double*", A + 16)[0])), 8)  if checkCondition(Y) then ::BGStart::
- goto BBStart
-::BGFinish::
-    end
-::BBFinish::
-    end
-  if true then return 0 end
-end
-exportTable.main = H
-exportTable.mem = A
+exportTable.__Z19get_module_version2Phi = F
+exportTable.memory = A
+exportTable._main = E
 if exportTable.main ~= nil then
   print(exportTable.main());
+end
+if exportTable._main ~= nil then
+  print(exportTable._main());
+end
+exportTable.grow_ip = 0;
+
+exportTable.write_uint8_array = function (buff) 
+  local len = table.getn(buff);
+  if len < 1 then
+    return -1;
+  end 
+  local i    = exportTable.grow_ip;
+  local dist = exportTable.grow_ip + len;
+  local d    = 1;
+  while i < dist do
+    exportTable.memory[i] = buff[ d ];
+    i = i + 1;
+    d = d + 1;
+  end
+  exportTable.grow_ip = exportTable.grow_ip + len;
+  return exportTable.grow_ip - len, len;
+end
+
+exportTable.read_uint8_array = function (i, len) 
+  local dist = i + len;
+  local tmp  = {}
+  while dist > i do
+    print(i);
+    tmp [#tmp + 1] = exportTable.memory[i];
+    i = i+1;
+  end
+  return tmp;
 end
 
 return { exports = exportTable, importTable = imports, }

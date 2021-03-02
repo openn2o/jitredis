@@ -4,7 +4,7 @@ local jit = require("jit");
 local bit = require("bit");
 local ffi = require("ffi");
 if jit.status() ~= nil then
-    print("status 2 ");
+    print("jit is run.");
 end
 local opcodes = require("opcodes")
 local compiler = require("compiler")
@@ -277,21 +277,20 @@ local sections = {
           import.typeIndex, stream = parseLEBu(stream, 4)
         else
           if import.kind == 0x03 then
-            error("03..")
+            error("Unsupported import kind caught..")
             --[[
-0000011: 03                                         ; import.kind
-0000012: 656e 76                                    env  ; import module name
-0000015: 01                                        ; string length
-0000016: 67                                         g  ; import field name
-0000017: 03                                        ; import kind
-0000018: 7f                                        ; i32
-0000019: 01                                        ; global mutability
-000000f: 0a                                        ; FIXUP section size
+            0000011: 03           ; import.kind
+            0000012: 656e 76      env; import module name
+            0000015: 01           ; string length
+            0000016: 67           g  ; import field name
+            0000017: 03           ; import kind
+            0000018: 7f           ; i32
+            0000019: 01           ; global mutability
+            000000f: 0a           ; FIXUP section size
             ]]
           else
             error("Unsupported import kind '" .. import.kind .. "'", 0)
           end
-         
         end
   
         imports[i - 1] = import
@@ -501,10 +500,7 @@ local wasm_loader_decode = function (bytes)
     if bytes:sub(1, WASM_VERSION_MAGIC_LEN) ~= WASM_VERSION_MAGIC then
         print("Not a valid wasm 1.0 binary");
     end
-
     bytes = bytes:sub(WASM_VERSION_MAGIC_LEN + 1);
-    print(#bytes);
-
     local sectionData = {[0] = {}}
     while #bytes > 0 do
         local sectionID, sectionLength;
@@ -531,16 +527,36 @@ local wasm_loader_decode = function (bytes)
             end
         end
     end
-    return sectionData
+    local instance = compiler.newInstance(sectionData);
+
+    instance:link("env", "print_n", print);
+    return instance.chunk.exports;
 end
 
 local wasm_compile = compiler.newInstance;
+local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
-local handle = io.open("./tests/string.wasm", "rb")
+local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
-local loc_section = wasm_loader_decode(data);
-local instance    = wasm_compile(loc_section);
+local exports = wasm_loader_decode(data);
+---写入内存把首地址拿回
+---调用参数
+
+print(exports.write_uint8_array)
+local addr,size  = exports.write_uint8_array({1,0,0,8,6});
+
+print(exports.__Z19get_module_version2Phi)
+exports.__Z19get_module_version2Phi(addr, 5)
+local t =  exports.read_uint8_array(addr, size)
+print(table.concat(t, ","))
+
+local addr,size  =  exports.write_uint8_array({1,0,0,8,7});
+
+ exports.__Z19get_module_version2Phi(addr, 5)
+
+local t =  exports.read_uint8_array(addr, size)
+print(table.concat(t, ","))
 
 

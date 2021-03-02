@@ -15,6 +15,7 @@ local function makeMemory(name, size)
   return ([[
 local %s = ffi.new("uint8_t[%d]")
 local %sSize = %d
+exportTable.memory = A
 ]]):format(name, size*pageSize, name, size)
 end
 
@@ -179,6 +180,7 @@ generators = {
         -- TODO rework this as we allow more import types because it WILL break
       fnKind = instance.sectionData[2][instr.imVal].typeIndex
       local import = instance.sectionData[2][instr.imVal]
+      print(import.field)
       fnName = ("imports.%s"):format(mangleImport(import.module, import.field))
     end
 
@@ -722,8 +724,41 @@ function compiler.newInstance(sectionData)
     end
   end
 
-  t.source =  t.source .. [[if exportTable.main ~= nil then
+  t.source =  t.source .. [[
+if exportTable.main ~= nil then
   print(exportTable.main());
+end
+if exportTable._main ~= nil then
+  print(exportTable._main());
+end
+exportTable.grow_ip = 0;
+
+exportTable.write_uint8_array = function (buff) 
+  local len = table.getn(buff);
+  if len < 1 then
+    return -1;
+  end 
+  local i    = exportTable.grow_ip;
+  local dist = exportTable.grow_ip + len;
+  local d    = 1;
+  while i < dist do
+    exportTable.memory[i] = buff[ d ];
+    i = i + 1;
+    d = d + 1;
+  end
+  exportTable.grow_ip = exportTable.grow_ip + len;
+  return exportTable.grow_ip - len, len;
+end
+
+exportTable.read_uint8_array = function (i, len) 
+  local dist = i + len;
+  local tmp  = {}
+  while dist > i do
+    print(i);
+    tmp [#tmp + 1] = exportTable.memory[i];
+    i = i+1;
+  end
+  return tmp;
 end
 
 ]]
@@ -745,14 +780,19 @@ end
   end
 
   t.source = t.source .. "}\n"
-  do
-    local handle = io.open("debug.out.lua", "w")
-    handle:write(t.source)
-    handle:close()
-  end
 
-  --print(t.source)
-  print(t.source);
+  -----------------debug
+  do 
+     local handle = io.open("debug.out.lua", "w")
+     handle:write(t.source)
+     handle:close()
+  
+    --  local handle = io.open("debug.out.lua", "r")
+    --  t.source = handle:read("*a")
+    --  handle:close()
+  end
+  ---------------------
+  -- print(t.source);
   local success, er = load(t.source)
   if not success then
     error("DID NOT COMPILE: " .. er)
