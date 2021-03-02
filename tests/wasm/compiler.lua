@@ -47,7 +47,6 @@ function makeName()
       build = string.char(nameAB + (thisCount % 26)) .. build
       thisCount = math.floor(thisCount / 26)
     until thisCount == 0
-
     nameCounter = nameCounter + 1
     return build
   end
@@ -754,7 +753,6 @@ exportTable.read_uint8_array = function (i, len)
   local dist = i + len;
   local tmp  = {}
   while dist > i do
-    print(i);
     tmp [#tmp + 1] = exportTable.memory[i];
     i = i+1;
   end
@@ -787,9 +785,9 @@ end
      handle:write(t.source)
      handle:close()
   
-    --  local handle = io.open("debug.out.lua", "r")
-    --  t.source = handle:read("*a")
-    --  handle:close()
+     local handle = io.open("debug.out.lua", "r")
+     t.source = handle:read("*a")
+     handle:close()
   end
   ---------------------
   -- print(t.source);

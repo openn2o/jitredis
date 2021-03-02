@@ -1,4 +1,4 @@
-local imports = {i____ZN6client7print_nEi = 0,}
+local imports = {i____ZN6client5printEi = 0,}
 for k, v in pairs(imports) do
   imports[k] = function(...)
     print(...);
@@ -56,25 +56,30 @@ function E()
 end
 function F(G, H)
   local I = 0
-  if checkCondition(((H > 0) and 1 or 0)) then ::JStart::
-  I = (readMem(A, ASize, G, 8))
-  do ::KStart::
-  imports.i____ZN6client7print_nEi(I)
-  imports.i____ZN6client7print_nEi(0)
-  imports.i____ZN6client7print_nEi(1)
-  storeMem(A, ASize, (I + G), 0, 8)
-  I = (I + 1)
-  if checkCondition((((I + 1) < ((readMem(A, ASize, G, 8)) + H)) and 1 or 0)) then
-      goto KStart
+  local J = 0
+  local K = 0
+  I = B
+  K = (-8 + I)
+  B = (-8 + I)
+  storeMem(A, ASize, K, G, 32)
+  if checkCondition(((H > 0) and 1 or 0)) then ::LStart::
+  K = (4 + K)
+  J = ((4 + K) + H)
+  do ::MStart::
+  imports.i____ZN6client5printEi(K)
+  K = (K + 1)
+  if checkCondition((((K + 1) < J) and 1 or 0)) then
+      goto MStart
   end
-::KFinish::
+::MFinish::
     end
-::JFinish::
+::LFinish::
     end
+  B = B
 end
-exportTable.__Z19get_module_version2Phi = F
-exportTable.memory = A
 exportTable._main = E
+exportTable.__Z19get_module_version2ii = F
+exportTable.memory = A
 if exportTable.main ~= nil then
   print(exportTable.main());
 end
@@ -104,7 +109,6 @@ exportTable.read_uint8_array = function (i, len)
   local dist = i + len;
   local tmp  = {}
   while dist > i do
-    print(i);
     tmp [#tmp + 1] = exportTable.memory[i];
     i = i+1;
   end

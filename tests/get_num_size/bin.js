@@ -19,29 +19,24 @@ function fetchBuffer(p){
 	});
 	return b;
 }
-function assignHeaps(L$p01){
-	HEAP8=new Uint8Array(L$p01);
-	HEAP16=new Uint16Array(L$p01);
-	HEAP32=new Int32Array(L$p01);
-	HEAPF32=new Float32Array(L$p01);
-	HEAPF64=new Float64Array(L$p01);
-}
-var HEAP8=null,HEAP16=null,HEAP32=null,HEAPF32=null,HEAPF64=null,__asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
-var __Z19get_module_version2Phi=null;
-var _Z19get_module_version2Phi={};
-_Z19get_module_version2Phi.promise=
-fetchBuffer('bin.wasm').then(L$p01=>
-WebAssembly.instantiate(L$p01,
+var __asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
+var __Z19get_module_version2ii=null;
+var get_module_version2=__dummy;
+__dummy.promise=
+fetchBuffer('bin.wasm').then(tmp1=>
+WebAssembly.instantiate(tmp1,
 {i:{
-		__ZN6client7print_nEi:print_n,
+		__ZN6client5printEi:print,
 	}})
-,console.log).then(L$p01=>{
-	__asm=L$p01.instance.exports;
+).then(tmp1=>{
+	__asm=tmp1.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
-	__Z19get_module_version2Phi=__asm.__Z19get_module_version2Phi;
-	_Z19get_module_version2Phi=__Z19get_module_version2Phi;
-	_Z19get_module_version2Phi.promise=
+	__Z19get_module_version2ii=__asm.__Z19get_module_version2ii;
+	get_module_version2=__Z19get_module_version2ii;
+	get_module_version2.promise=
 	Promise.resolve();
 	__asm._main();
-},console.log,console.log);
+});
+function assignHeaps(tmp1){
+}

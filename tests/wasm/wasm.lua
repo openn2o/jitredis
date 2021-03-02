@@ -1,12 +1,22 @@
 
+----
+---- 通用计算模块(CCM) VM
+----
+local COMMON_COMPUTE_MODULE_VERSION="v1.0"
+local WASM_VERSION_MAGIC     = "\x00\x61\x73\x6D\x01\x00\x00\x00"
+local WASM_VERSION_MAGIC_LEN = #WASM_VERSION_MAGIC
 
 local jit = require("jit");
 local bit = require("bit");
 local ffi = require("ffi");
-if jit.status() ~= nil then
-    print("jit is run.");
+
+if jit.status() == nil then
+  print("not support this platform!");
+  print("not support jit.");
+  return 0;
 end
-local opcodes = require("opcodes")
+
+local opcodes  = require("opcodes")
 local compiler = require("compiler")
 
 local _M = {
@@ -17,12 +27,11 @@ local _M = {
 --
 -- 解码
 --
-local WASM_VERSION_MAGIC     = "\x00\x61\x73\x6D\x01\x00\x00\x00"
-local WASM_VERSION_MAGIC_LEN = #WASM_VERSION_MAGIC
+
 local function nibble(stream)
     return stream:sub(1, 1), stream:sub(2)
 end
-  
+
 local parseLEBu = function (stream, nBytes)
     local result, byte = 0
     local bitCnt = nBytes * 7
@@ -149,7 +158,6 @@ function  parseFloat(stream, bytes)
     else
       error("Unsupported immediate type required: '" .. type .. "'", 0)
     end
-  
     return result, stream
   end
   
@@ -537,24 +545,25 @@ local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
-local handle = io.open("./tests/bin.wasm", "rb")
+local handle = io.open("/tmp/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
 ---写入内存把首地址拿回
 ---调用参数
 
-print(exports.write_uint8_array)
+print("write_uint8_array" , exports.write_uint8_array)
 local addr,size  = exports.write_uint8_array({1,0,0,8,6});
 
-print(exports.__Z19get_module_version2Phi)
-exports.__Z19get_module_version2Phi(addr, 5)
+print("__Z19get_module_version2ii", exports.__Z19get_module_version2ii)
+exports.__Z19get_module_version2ii(addr, 5)
 local t =  exports.read_uint8_array(addr, size)
 print(table.concat(t, ","))
 
 local addr,size  =  exports.write_uint8_array({1,0,0,8,7});
 
- exports.__Z19get_module_version2Phi(addr, 5)
+print(addr)
+ exports.__Z19get_module_version2ii(addr, 5)
 
 local t =  exports.read_uint8_array(addr, size)
 print(table.concat(t, ","))

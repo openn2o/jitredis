@@ -1,6 +1,6 @@
 rm -rf *.wasm
 
-clang++ \
+/Applications/cheerp/bin/clang++ \
   -target cheerp-wasm \
   -cheerp-linear-heap-size=128 \
   -cheerp-linear-output=wasm \
@@ -10,3 +10,6 @@ clang++ \
   -cheerp-global-prefix=g \
   -cheerp-avoid-wasm-traps \
   main.cpp
+
+rm -f /tmp/bin.wasm
+mv -f bin.wasm /tmp
