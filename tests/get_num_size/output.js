@@ -33,7 +33,7 @@ var _Z19get_module_version2Phi={};
 var _Z3fibi={};
 _Z19get_module_version2Phi.promise=
 _Z3fibi.promise=
-fetchBuffer('bin.wasm').then(tmp1=>
+fetchBuffer('output.wast').then(tmp1=>
 WebAssembly.instantiate(tmp1,
 {i:{
 		__ZN6client5printEi:print,

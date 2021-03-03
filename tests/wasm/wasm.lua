@@ -19,15 +19,6 @@ end
 local opcodes  = require("opcodes")
 local compiler = require("compiler")
 
-local _M = {
-    ["main"] = nil,
-    ["exports"] = nil,
-    ["instance"]= nil
-}
---
--- 解码
---
-
 local function nibble(stream)
     return stream:sub(1, 1), stream:sub(2)
 end
@@ -35,7 +26,7 @@ end
 local parseLEBu = function (stream, nBytes)
     local result, byte = 0
     local bitCnt = nBytes * 7
-    for shift = 0, bitCnt, 7 do
+    for shift = 0, bitCnt,  7 do
       byte, stream = stream:sub(1, 1):byte(), stream:sub(2)
       if byte == nil then
         return 1 , stream;  
@@ -155,6 +146,18 @@ function  parseFloat(stream, bytes)
       -- We don't (currently) care about the alignment or the offset
       _, stream = parseLEBu(stream, 1)
       _, stream = parseLEBu(stream, 1)
+    elseif type == typeMap.BRTB then
+      -- result, stream =  parseLEBu(stream, 32);
+      -- local i = 0;
+      -- while  i < result do
+      --   print(parseLEBu(stream, 32));
+      --   i = i+1;
+      -- end
+      -- parseLEBu(stream, 32)
+      print("BRTB caught..", result)
+    elseif type == typeMap.CALI then
+      print("CALI caught..")
+      -- result, stream = parseLEBu(stream, 4)
     else
       error("Unsupported immediate type required: '" .. type .. "'", 0)
     end
@@ -210,6 +213,7 @@ function  parseFloat(stream, bytes)
     local endByte
     endByte, stream = nibble(stream)
     if endByte:byte() ~= opcodes.enum.End.opcode then
+      print(endByte:byte(), opcodes.enum.End.opcode)
       error("getGlobal initializer expression NYI", 0)
     end
   
@@ -537,7 +541,7 @@ local wasm_loader_decode = function (bytes)
     end
     local instance = compiler.newInstance(sectionData);
 
-    instance:link("env", "print_n", print);
+    -- instance:link("env", "print_n", print);
     return instance.chunk.exports;
 end
 
@@ -545,27 +549,29 @@ local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
-local handle = io.open("/tmp/bin.wasm", "rb")
+-- local handle = io.open("/tmp/bin.wasm", "rb")
+---V1.wasm
+-- notpass.wasm
+local handle = io.open("./tests/V1.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
----写入内存把首地址拿回
----调用参数
 
-print("write_uint8_array" , exports.write_uint8_array)
-local addr,size  = exports.write_uint8_array({1,0,0,8,6});
-
-print("__Z19get_module_version2ii", exports.__Z19get_module_version2ii)
-exports.__Z19get_module_version2ii(addr, 5)
+local addr,size  = exports.write_uint8_array({2,0,0,8,6});
+exports.get_module_version2(addr, 5)
 local t =  exports.read_uint8_array(addr, size)
 print(table.concat(t, ","))
 
-local addr,size  =  exports.write_uint8_array({1,0,0,8,7});
+local addr,size  =  exports.write_uint8_array({2,0,0,8,7});
 
-print(addr)
- exports.__Z19get_module_version2ii(addr, 5)
-
+exports.get_module_version2(addr, 5)
 local t =  exports.read_uint8_array(addr, size)
 print(table.concat(t, ","))
+
+
+
+local addr1,size1  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
+local addr2,size2  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
+local addr3 = exports.aes_encode(addr1, addr2);
 
 

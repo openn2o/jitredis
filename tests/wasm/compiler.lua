@@ -10,6 +10,57 @@ local kinds = {
   Global = 3
 }
 
+ ---解码 c++符号
+local ccm1_cpp_ns_symblos_decode = function (v)
+  local magic_tag = string.sub(v, 1,4);
+  if magic_tag ~= "__ZN" then
+    return "", v;
+  end
+
+  -- __ZN6client5printEi
+
+  local name_size_t = {};
+  local is_long_name = 0;
+  local num_of_name  = 0;
+  local look_up = string.sub(v, 5, 5);
+  if (look_up >= '0' and look_up <= '9') then
+    name_size_t [1] = tonumber(look_up) ;
+    is_long_name = 1;
+  end
+  local look_up = string.sub(v, 6, 6);
+  if (look_up >= '0' and look_up <= '9') then
+    is_long_name = 2;
+    name_size_t [2] = tonumber(look_up) ;
+  end
+  if is_long_name == 2 then
+    num_of_name = (name_size_t[1] * 10) + name_size_t[2];
+  else
+    num_of_name = name_size_t[1];
+  end
+  ---namespace 
+  local ns_name  = string.sub(v, 5 + is_long_name, 5 + is_long_name + num_of_name - 1);
+  local next_n = 5 + is_long_name + num_of_name ;
+  local look_up = string.sub(v, next_n, next_n);
+  if (look_up >= '0' and look_up <= '9') then
+    name_size_t [1] = tonumber(look_up) ;
+    is_long_name = 1;
+  end
+  local look_up = string.sub(v, next_n+1, next_n+1);
+  if (look_up >= '0' and look_up <= '9') then
+    is_long_name = 2;
+    name_size_t [2] = tonumber(look_up) ;
+  end
+  if is_long_name == 2 then
+    num_of_name = (name_size_t[1] * 10) + name_size_t[2];
+  else
+    num_of_name = name_size_t[1];
+  end
+  local method_name = string.sub(v, next_n + is_long_name, next_n + is_long_name + num_of_name - 1);
+  return ns_name, method_name;
+end
+
+
+
 local pageSize = 2^16
 local function makeMemory(name, size)
   return ([[
@@ -55,9 +106,10 @@ end
 local prefabs = {
   unlinked = [[
 for k, v in pairs(imports) do
-  imports[k] = function(...)
-    print(...);
-    -- return error("Unlinked function: '" .. k .. "'")
+  if not imports[k] then
+    imports[k] = function(...)
+      print("Unlinked Method " .. k);
+    end
   end
 end
 ]],
@@ -130,24 +182,40 @@ end
 
 local generators
 generators = {
+  ReturnCallIndirect = function (stack, instr, argList, fnLocals)
+  end,
+  CallIndirect = function (stack, instr, argList, fnLocals)
+  end,
+  BrTable      = function (stack, instr, argList, fnLocals)
+  end,
+  Select   = function (stack, instr, argList, fnLocals)
+    local p1 = pop(stack);
+    local p2 = pop(stack);
+    local p3 = pop(stack);
+    if p1 == 0 then
+      push(stack, p1)
+    else
+      push(stack, p1)
+    end
+  end,
   GetLocal = function(stack, instr, argList, fnLocals)
     local index = instr.imVal
-
     if index < #argList then
       stack[#stack + 1] = argList[index + 1]
     else
       stack[#stack + 1] = fnLocals[index - #argList + 1]
     end
   end,
+
   SetLocal = function(stack, instr, argList, fnLocals)
     local index = instr.imVal
-
     if index < #argList then
       return ("  %s = %s\n"):format(argList[index + 1], pop(stack))
     else
       return ("  %s = %s\n"):format(fnLocals[index - #argList + 1], pop(stack))
     end
   end,
+
   TeeLocal = function(stack, instr, argList, fnLocals)
     local index = instr.imVal
 
@@ -166,24 +234,21 @@ generators = {
   end,
 
   Call = function(stack, instr, argList, fnLocals, blockStack, instance)
-    -- TODO: ability to call imported functions
     local realIndex = instr.imVal - instance.functionImportCount
     local fnKind, fnName
-    
     if realIndex >= 0 then
       local fn = instance.functions[instr.imVal]
       fnKind = instance.sectionData[3][realIndex]
       fnName = fn.name
     else
-      -- Imported function
-        -- TODO rework this as we allow more import types because it WILL break
       fnKind = instance.sectionData[2][instr.imVal].typeIndex
       local import = instance.sectionData[2][instr.imVal]
-      print(import.field)
-      fnName = ("imports.%s"):format(mangleImport(import.module, import.field))
+      local ns_name , method_name = ccm1_cpp_ns_symblos_decode(import.field);
+      -- import.module = ns_name ;
+      -- import.field  = method_name;
+      fnName = ("imports.%s"):format(mangleImport(ns_name, method_name))
     end
 
-    
     local sig = instance.sectionData[1][fnKind]
     local passingArguments = {}
     for i = 1, #sig.params do
@@ -570,22 +635,14 @@ do -- Redundant Generators
 
   g.F64ConvertSI32 = g.Nop
 end
-
+local static_link = {
+  ["client__print"] = [[print]]
+}
 function compiler.newInstance(sectionData)
   local t = {}
 
   t.sectionData = sectionData
-
-  -- TODO 'imported' functions DONE?
-  -- TODO setup memory DONE?
-  -- TODO setup globals DONE?
-  -- TODO setup table
-  
-  print("STARTED COMPILATION")
-  --shell.draw()
-
   t.source = ""
-
   t.importTable = {}
 
   t.tables = {}
@@ -600,8 +657,15 @@ function compiler.newInstance(sectionData)
     for k, v in pairs(sectionData[2]) do
       importCount = importCount + 1
       t.functionImportCount = t.functionImportCount + 1
-
-      t.source = t.source .. ("%s = 0,"):format(mangleImport(v.module, v.field))
+      local ns_name , method_name = ccm1_cpp_ns_symblos_decode(v.field);
+      if (static_link[ns_name .. "__" .. method_name]) then
+        t.source = t.source .. ("%s = %s\n,"):format(mangleImport(ns_name, method_name),
+          static_link[ns_name .. "__" .. method_name]
+        );
+      else
+        t.source = t.source .. ("%s = 0,"):format(mangleImport(ns_name, method_name))
+      end
+     
     end
     t.source = t.source .. "}\n" .. prefabs.unlinked
   end
@@ -706,13 +770,44 @@ function compiler.newInstance(sectionData)
 
     t.source = t.source .. "end\n"
   end
+  
+  local ccm1_cpp_symblos_decode = function (v)
+    ---解码 c++符号
+    if v == "_main" then
+      return "main";
+    end
+    local magic_tag = string.sub(v, 1,3);
+    if magic_tag ~= "__Z" then
+      return v;
+    end
 
+    local name_size_t = {};
+    local look_up = string.sub(v, 4, 4);
+    local is_long_name = 0;
+    local num_of_name  = 0;
+
+    if (look_up >= '0' and look_up <= '9') then
+      name_size_t [1] = tonumber(look_up) ;
+      is_long_name = 1;
+    end
+    local look_up = string.sub(v, 5, 5);
+    if (look_up >= '0' and look_up <= '9') then
+      is_long_name = 2;
+      name_size_t [2] = tonumber(look_up) ;
+    end
+    if is_long_name == 2 then
+      num_of_name = (name_size_t[1] * 10) + name_size_t[2];
+    else
+      num_of_name = name_size_t[1];
+    end
+    return string.sub(v, 4 + is_long_name, 4 + is_long_name + num_of_name - 1);
+  end
   -- Exports
   if sectionData[7] then
     for k, v in pairs(sectionData[7]) do
       t.source = t.source .. "exportTable."
       if v.kind == kinds.Function then
-        t.source = t.source .. ("%s = %s\n"):format(k, t.functions[v.index].name)
+        t.source = t.source .. ("%s = %s\n"):format(ccm1_cpp_symblos_decode(k), t.functions[v.index].name)
       elseif v.kind == kinds.Memory then
         t.source = t.source .. ("%s = %s\n"):format(k, t.memories[v.index])
       elseif v.kind == kinds.Table then
@@ -726,9 +821,6 @@ function compiler.newInstance(sectionData)
   t.source =  t.source .. [[
 if exportTable.main ~= nil then
   print(exportTable.main());
-end
-if exportTable._main ~= nil then
-  print(exportTable._main());
 end
 exportTable.grow_ip = 0;
 
@@ -778,7 +870,6 @@ end
   end
 
   t.source = t.source .. "}\n"
-
   -----------------debug
   do 
      local handle = io.open("debug.out.lua", "w")

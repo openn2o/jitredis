@@ -1,8 +1,10 @@
-local imports = {i____ZN6client5printEi = 0,}
+local imports = {client__print = print
+,}
 for k, v in pairs(imports) do
-  imports[k] = function(...)
-    print(...);
-    -- return error("Unlinked function: '" .. k .. "'")
+  if not imports[k] then
+    imports[k] = function(...)
+      print("Unlinked Method " .. k);
+    end
   end
 end
 local bit = require("bit");
@@ -47,44 +49,63 @@ local ASize = 17
 exportTable.memory = A
 local B = 1048576
 local C = {  }
-local D, E, F
+local D, E, F, G
 function D()
   error("Unreachable code reached..", 2)
 end
-function E()
-  return 0
-end
-function F(G, H)
+function E(H)
   local I = 0
   local J = 0
   local K = 0
-  I = B
-  K = (-8 + I)
-  B = (-8 + I)
-  storeMem(A, ASize, K, G, 32)
-  if checkCondition(((H > 0) and 1 or 0)) then ::LStart::
-  K = (4 + K)
-  J = ((4 + K) + H)
-  do ::MStart::
-  imports.i____ZN6client5printEi(K)
-  K = (K + 1)
-  if checkCondition((((K + 1) < J) and 1 or 0)) then
-      goto MStart
-  end
-::MFinish::
-    end
+  J = (H + -1)
+  if checkCondition((((H + -1) < 2) and 1 or 0)) then ::LStart::
+  if true then return 1 end
 ::LFinish::
     end
-  B = B
+  K = 1
+  I = H
+  do ::MStart::
+  local N = E(J)
+  K = (N + K)
+  J = (I + -3)
+  if checkCondition((((I + -3) < 2) and 1 or 0)) then ::OStart::
+  if true then return K end
+::OFinish::
+    end
+  I = (I + -2)
+ goto MStart
+::MFinish::
+    end
+  return 0
 end
-exportTable._main = E
-exportTable.__Z19get_module_version2ii = F
+function F()
+  return 0
+end
+function G(P, Q)
+  local R = 0
+  local S = 0
+  if checkCondition(((Q >= 0) and 1 or 0)) then ::TStart::
+  R = 0
+  do ::UStart::
+  S = (R + P)
+  imports.client__print((readMem(A, ASize, (R + P), 8)))
+  storeMem(A, ASize, S, 1, 8)
+  if checkCondition(((R ~= Q) and 1 or 0)) then ::VStart::
+  R = (R + 1)
+ goto UStart
+::VFinish::
+    end
+::UFinish::
+    end
+::TFinish::
+    end
+end
+exportTable.main = F
+exportTable.get_module_version2 = G
 exportTable.memory = A
+exportTable.fib = E
 if exportTable.main ~= nil then
   print(exportTable.main());
-end
-if exportTable._main ~= nil then
-  print(exportTable._main());
 end
 exportTable.grow_ip = 0;
 
