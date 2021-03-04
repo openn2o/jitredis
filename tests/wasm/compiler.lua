@@ -15,6 +15,7 @@ local kinds = {
 local dumps = "DUMPS=>"
 compiler.dumps = dumps;
 compiler.brtable_stack = {}
+compiler.brtable_stack_pc = 1;
  --- 解码 c++符号
 local ccm1_cpp_ns_symblos_decode = function (v)
   local magic_tag = string.sub(v, 1,4);
@@ -200,7 +201,31 @@ generators = {
     -- return 111;
   end,
   Select   = function (stack, instr, argList, fnLocals)
-    print("Select stack1 =" , table.concat(stack, ","))
+    print("Select stack1 =" , table.concat(stack, ","));
+
+    local effect = "";
+    if compiler.brtable_stack_depth > 0 then
+      
+      local br_pop = pop(stack);
+      print("select pop", br_pop);
+      if br_pop then
+        print("depth= ", compiler.brtable_stack_depth, ",br_tables=" , table.concat(compiler.brtable_stack) )
+        
+
+        local br_depth= compiler.br_tables[compiler.brtable_stack_pc];
+        if br_depth == 0 then
+          br_depth = 1;
+        end
+        local br_name = compiler.brtable_stack[br_depth];
+        print("br_name=" , br_name);
+        effect = ("if %s then goto %sFinish end\n") :format(br_pop, br_name) ;
+        if effect then
+          compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
+          compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
+        end
+      end
+    end
+
     local p1 = pop(stack);
     local p2 = pop(stack);
     local p3 = pop(stack);
@@ -215,12 +240,10 @@ generators = {
       push(stack, p3)
     end
 
-    if (#compiler.brtable_stack > 0) then
-      local d = pop(stack);
-    end
+
     print("Select stack2 =" , table.concat(stack, ","))
     -- return 333;
-    return "";
+    return effect;
   end,
   GetLocal = function(stack, instr, argList, fnLocals)
     local index = instr.imVal
@@ -501,6 +524,7 @@ generators = {
     return effect .. "  else\n"
   end,
   End = function(stack, _, _, _, blockStack)
+    --debug_end
     local effect = ""
     local block = pop(blockStack)
     block.exit(function(str)
@@ -508,17 +532,26 @@ generators = {
     end, true, true)
   
     if compiler.brtable_stack_depth > 0 then
-      compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
       print(table.concat( compiler.brtable_stack ,","))
 
       local br_pop = pop(stack);
 
       if br_pop then
-        local br_name = compiler.brtable_stack[compiler.br_tables[compiler.brtable_stack_depth]];
+        local br_depth= compiler.br_tables[compiler.brtable_stack_pc];
+        if br_depth == 0 then
+          br_depth = 1;
+        end
+        local br_name = compiler.brtable_stack[br_depth];
+
         effect = effect .. ("if %s then goto %sFinish end\n") :format(br_pop, br_name) ;
+        --print("%%%%" , compiler.brtable_stack_pc, compiler.brtable_stack[compiler.br_tables[compiler.brtable_stack_pc] + 1])
+        compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
+        compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
+        -- return  ("end\n::%sFinish::\n  %s  \n"):format(block.label, effect)
       end
     end
     print( "End stack =" , table.concat(stack, "\n"));
+    -- return ("end\n::%sFinish::\n  %s  "):format(block.label, effect)
     return ("::%sFinish::\n  %s  end\n"):format(block.label, effect)
   end,
   BrIf = function(stack, instr, a, b, blockStack, c, fn)
@@ -619,7 +652,7 @@ generators = {
       print("stack is empty and pop is null ptr")
       return;
     end
-    push(stack, 2)
+    --push(stack, 2)
 
     -- TODO: find a better way to do this
     local extraLogic = ""

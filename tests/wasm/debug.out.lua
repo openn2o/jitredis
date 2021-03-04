@@ -52,7 +52,7 @@ function F(G)
   do ::IStart::
   do ::JStart::
 ::JFinish::
-  if (bit.band((G - 43), 255)) then goto IFinish end
+  if (bit.band((G - 43), 255)) then goto HFinish end
   end
   if true then return 62 end
 ::IFinish::
@@ -60,7 +60,8 @@ function F(G)
   if true then return 63 end
 ::HFinish::
     end
-  return (((bit.band(G, 255)) == 61) and 1 or 0)
+if (((bit.band(G, 255)) == 61) and 1 or 0) then goto IFinish end
+  return 0
 end
 exportTable.h = E
 exportTable.J = A
