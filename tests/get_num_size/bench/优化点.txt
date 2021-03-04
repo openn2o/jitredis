@@ -3,7 +3,7 @@
 (type $vt_i (func (result i32)))
 (type $vt_ii (func (param i32)(result i32)))
 (table anyfunc (elem $__wasm_nullptr))
-(memory (export "J") 17 2048)
+(memory (export "L") 17 2048)
 (global (mut i32) (i32.const 1048576))
 (func $__wasm_nullptr (export "___wasm_nullptr")
 (local)
@@ -11,6 +11,15 @@ unreachable
 )
 (func $main (export "_main")(result i32)
 (local)
+i32.const 0
+i32.const 62
+i32.store8 offset=1048627
+i32.const 0
+i32.const 63
+i32.store8 offset=1048631
+i32.const 0
+i32.const 64
+i32.store8 offset=1048645
 i32.const 0
 )
 (func $_Z7b64_inth (export "__Z7b64_inth")(param i32)(result i32)
@@ -40,4 +49,23 @@ i32.const 61
 i32.eq
 select
 )
+(func $_Z8b64_int2h (export "__Z8b64_int2h")(param i32)(result i32)
+(local)
+get_local 0
+i32.const 255
+i32.and
+i32.load8_u offset=1048584
 )
+)
+Êý×éÌæ»»brtable
+
+
+const wasmInstance =
+      new WebAssembly.Instance(wasmModule, {});
+const { __Z8b64_int2h,_main,__Z7b64_inth } = wasmInstance.exports;
+_main();
+console.time("t");
+for (let i = 0; i < 100000001; i++) {
+ __Z7b64_inth(43)
+}
+console.timeEnd("t");

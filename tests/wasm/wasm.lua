@@ -125,9 +125,13 @@ function  parseFloat(stream, bytes)
     end
     return floatPtr[0], stream
  end
-
-  local function decodeImmediate(type, stream)
+  
+ local  _M ={
+   ["br_tables"] = {}
+ }
+  local function decodeImmediate(type, stream, stacks_imm)
     local result
+    local count
     if type == typeMap.VUI1 then
       result, stream =  parseLEBu(stream, 1)
     elseif type == typeMap.VUI3 then
@@ -147,17 +151,39 @@ function  parseFloat(stream, bytes)
       _, stream = parseLEBu(stream, 1)
       _, stream = parseLEBu(stream, 1)
     elseif type == typeMap.BRTB then
+      count, stream = parseLEBu(stream, 32);
       -- result, stream =  parseLEBu(stream, 32);
-      -- local i = 0;
-      -- while  i < result do
-      --   print(parseLEBu(stream, 32));
-      --   i = i+1;
-      -- end
-      -- parseLEBu(stream, 32)
+      local i = 1;
+      local ctl ;
+      local depth;
+      while  i <= count do
+        ctl, stream = parseLEBu(stream, 32);
+        compiler.br_tables[i] = ctl;
+        i = i+1;
+      end
+      depth, stream = parseLEBu(stream, 32); -- depth
+      compiler.brtable_stack_depth = depth + 1;
+      -- print("depth=", depth);
+      -- print(compiler.push(compiler.open_stack, 1))
+      -- print(compiler.push(compiler.open_stack, 1))
+      print("brtable=", table.concat(compiler.br_tables, ","))
+
+      -- result, stream = parseLEBu(stream, 32); -- depth
+      -- print("cc=", #stacks_imm, result)
+      -- local didx = stacks_imm[#stacks_imm];
+      -- print("didx=" , didx.imVal);
+      
+      -- int32_t didx = stack[m->sp--].value.int32;
+      -- if (didx >= 0 && didx < (int32_t)count) {
+      --     depth = m->br_table[didx];
+      -- }
+
+      -- stacks_imm
       print("BRTB caught..", result)
     elseif type == typeMap.CALI then
       print("CALI caught..")
-      -- result, stream = parseLEBu(stream, 4)
+      result, stream = parseLEBu(stream, 1)
+      result, stream = parseLEBu(stream, 32)
     else
       error("Unsupported immediate type required: '" .. type .. "'", 0)
     end
@@ -187,14 +213,18 @@ function  parseFloat(stream, bytes)
       local immediate = opcodeDef.immediate
   
       if immediate ~= typeMap.NONE then
-        instr.imVal, stream = decodeImmediate(immediate, stream)
+        instr.imVal, stream = decodeImmediate(immediate, stream, body)
       end
   
       body[#body + 1] = instr
     end
   
+    if stream:byte() == nil then
+      print("caught..", compiler.dumps);
+    end
+    print(stream:byte(), opcodes.enum.End.opcode)
     if stream:byte() ~= opcodes.enum.End.opcode then
-      error("Function declaration did not end with 'End' opcode", 0)
+      print("Function declaration did not end with 'End' opcode", 0)
     end
   
     return body
@@ -552,26 +582,26 @@ local data   = nil;
 -- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/V1.wasm", "rb")
+local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
 
-local addr,size  = exports.write_uint8_array({2,0,0,8,6});
-exports.get_module_version2(addr, 5)
-local t =  exports.read_uint8_array(addr, size)
-print(table.concat(t, ","))
+-- local addr,size  = exports.write_uint8_array({2,0,0,8,6});
+-- exports.get_module_version2(addr, 5)
+-- local t =  exports.read_uint8_array(addr, size)
+-- print(table.concat(t, ","))
 
-local addr,size  =  exports.write_uint8_array({2,0,0,8,7});
+-- local addr,size  =  exports.write_uint8_array({2,0,0,8,7});
 
-exports.get_module_version2(addr, 5)
-local t =  exports.read_uint8_array(addr, size)
-print(table.concat(t, ","))
+-- exports.get_module_version2(addr, 5)
+-- local t =  exports.read_uint8_array(addr, size)
+-- print(table.concat(t, ","))
 
 
 
-local addr1,size1  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
-local addr2,size2  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
-local addr3 = exports.aes_encode(addr1, addr2);
+-- local addr1,size1  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
+-- local addr2,size2  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
+-- local addr3 = exports.aes_encode(addr1, addr2);
 
 

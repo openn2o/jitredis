@@ -6,9 +6,8 @@ clang++ \
   -target cheerp-wasm \
   -cheerp-linear-heap-size=128 \
   -cheerp-linear-output=wast \
-  -cheerp-wasm-disable=anyref \
-  -cheerp-pretty-code \
-  -o output.js \
+  -o output.js -O3 \
+  -cheerp-avoid-wasm-traps \
   main.cpp
   
 
@@ -16,10 +15,8 @@ clang++ \
   -target cheerp-wasm \
   -cheerp-linear-heap-size=128 \
   -cheerp-linear-output=wasm \
-  -cheerp-pretty-code \
   -cheerp-no-icf \
-  -o bin.js \
-  -cheerp-global-prefix=g \
+  -o bin.js -O3 \
   -cheerp-avoid-wasm-traps \
   main.cpp 
 

@@ -1,6 +1,8 @@
 local memoryManager = require("memory")
 
 local compiler = {}
+compiler.br_tables  = {}
+compiler.open_stack = {}
 local instructions
 
 local kinds = {
@@ -10,15 +12,15 @@ local kinds = {
   Global = 3
 }
 
- ---解码 c++符号
+local dumps = "DUMPS=>"
+compiler.dumps = dumps;
+compiler.brtable_stack = {}
+ --- 解码 c++符号
 local ccm1_cpp_ns_symblos_decode = function (v)
   local magic_tag = string.sub(v, 1,4);
   if magic_tag ~= "__ZN" then
     return "", v;
   end
-
-  -- __ZN6client5printEi
-
   local name_size_t = {};
   local is_long_name = 0;
   local num_of_name  = 0;
@@ -39,8 +41,8 @@ local ccm1_cpp_ns_symblos_decode = function (v)
   end
   ---namespace 
   local ns_name  = string.sub(v, 5 + is_long_name, 5 + is_long_name + num_of_name - 1);
-  local next_n = 5 + is_long_name + num_of_name ;
-  local look_up = string.sub(v, next_n, next_n);
+  local next_n   = 5 + is_long_name + num_of_name ;
+  local look_up  = string.sub(v, next_n, next_n);
   if (look_up >= '0' and look_up <= '9') then
     name_size_t [1] = tonumber(look_up) ;
     is_long_name = 1;
@@ -85,8 +87,8 @@ local function mangleImport(ns, field)
 end
 
 local nameDebug = false
-nameCounter = 0
-nameAB = ("A"):byte()
+local nameCounter = 0
+local nameAB = ("A"):byte()
 function makeName()
   if nameDebug then
     nameCounter = nameCounter + 1
@@ -172,6 +174,8 @@ local function push(stack, val)
   stack[#stack + 1] = val
 end
 
+compiler.push = push;
+
 local function jumpInstr(loopQ)
   if loopQ then
     return "Start"
@@ -186,17 +190,37 @@ generators = {
   end,
   CallIndirect = function (stack, instr, argList, fnLocals)
   end,
-  BrTable      = function (stack, instr, argList, fnLocals)
+  BrTable      = function (stack, instr, argList, fnLocals, blockStack, instance)
+    print("BRTable is run");
+    print(table.concat(stack),",");
+    -- tee(stack, 2)
+    -- tee(stack, 2);
+    -- local out = generators[instr.enum](valueStack, instr, argList, fnLocals, blockStack, t, k)
+    -- return (("  if %s then \n goto ::IFinish:: \nend \n"):format(pop(stack)));
+    -- return 111;
   end,
   Select   = function (stack, instr, argList, fnLocals)
+    print("Select stack1 =" , table.concat(stack, ","))
     local p1 = pop(stack);
     local p2 = pop(stack);
     local p3 = pop(stack);
+
     if p1 == 0 then
+      print("Select1")
       push(stack, p1)
+      push(stack, p2)
     else
+      print("Select2")
       push(stack, p1)
+      push(stack, p3)
     end
+
+    if (#compiler.brtable_stack > 0) then
+      local d = pop(stack);
+    end
+    print("Select stack2 =" , table.concat(stack, ","))
+    -- return 333;
+    return "";
   end,
   GetLocal = function(stack, instr, argList, fnLocals)
     local index = instr.imVal
@@ -430,17 +454,25 @@ generators = {
   Block = function(stack, instr, argList, fnLocals, blockStack, instance, fn, customDo, loopq)
     loopq = loopq or false
     customDo = customDo or "do"
+      -- print(instr.imVal)
     if instr.imVal == -0x40 then
       -- Block does not return anything
       local blockLabel = makeName()
       push(blockStack, {label = blockLabel, exit = function()
         -- We got popped by an 'End', but we have nothing to return
       end, loop = loopq})
-      return ("  %s ::%sStart::\n"):format(customDo, blockLabel)
+      -- print( ("  %s ::%sStart::\n"):format(customDo, blockLabel) )
+      if compiler.brtable_stack_depth > 0 then
+         compiler.brtable_stack [#compiler.brtable_stack+1] = blockLabel;
+      end
+
+      return ("  %s ::%sStart::\n"):format(customDo, blockLabel);
+
+    
     else
       -- Block returns something
       local blockResult = makeName()
-      local blockLabel = makeName()
+      local blockLabel  = makeName()
       push(blockStack, {label = blockLabel, exit = function(actor, shouldAct, shouldPop)
         -- We got popped by an 'End'
         local res = shouldPop and pop(stack) or tee(stack)
@@ -449,6 +481,7 @@ generators = {
           push(stack, blockResult)
         end
       end, loop = loopq})
+      print( ("  local %s\n  %s ::%sStart::\n"):format(blockResult, customDo, blockLabel))
       return ("  local %s\n  %s ::%sStart::\n"):format(blockResult, customDo, blockLabel)
     end
   end,
@@ -473,7 +506,19 @@ generators = {
     block.exit(function(str)
       effect = str
     end, true, true)
+  
+    if compiler.brtable_stack_depth > 0 then
+      compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
+      print(table.concat( compiler.brtable_stack ,","))
 
+      local br_pop = pop(stack);
+
+      if br_pop then
+        local br_name = compiler.brtable_stack[compiler.br_tables[compiler.brtable_stack_depth]];
+        effect = effect .. ("if %s then goto %sFinish end\n") :format(br_pop, br_name) ;
+      end
+    end
+    print( "End stack =" , table.concat(stack, "\n"));
     return ("::%sFinish::\n  %s  end\n"):format(block.label, effect)
   end,
   BrIf = function(stack, instr, a, b, blockStack, c, fn)
@@ -569,6 +614,11 @@ generators = {
   MemoryGrow = function(stack, _, _, _, _, instance)
     local temp = makeName()
     local delta = pop(stack)
+
+    if not delta then
+      print("stack is empty and pop is null ptr")
+      return;
+    end
     push(stack, 2)
 
     -- TODO: find a better way to do this
@@ -600,7 +650,7 @@ generators = {
     for i = 1, #sig.returns do
       push(results, pop(stack))
     end
-
+    print("return val tack" , table.concat(stack, ","));
     return ("  if true then return %s end\n"):format(table.concat(results, ", "))
   end,
   Unreachable = function()
@@ -638,13 +688,14 @@ end
 local static_link = {
   ["client__print"] = [[print]]
 }
+
+
 function compiler.newInstance(sectionData)
   local t = {}
-
   t.sectionData = sectionData
   t.source = ""
   t.importTable = {}
-
+  dumps = t.source;
   t.tables = {}
   t.globals = {}
   t.memories = {}
@@ -686,7 +737,6 @@ function compiler.newInstance(sectionData)
       t.source = t.source .. makeMemory(name, v.limits.initial)
       t.memories[k] = name
     end
-    
   end
 
   if sectionData[6] then
@@ -742,7 +792,7 @@ function compiler.newInstance(sectionData)
     -- Function stack, used only for generation, we can optimize away the stack using inlining
     local valueStack = {}
     local blockStack = {}
-
+    compiler.open_stack = valueStack;
     -- Generate function locals
     local fnLocals = {}
     for i = 1, #v.locals do
@@ -750,9 +800,10 @@ function compiler.newInstance(sectionData)
       t.source = t.source .. ("  local %s = 0\n"):format(fnLocals[i])
     end
 
-    -- Generate opcode instructions
+    -- Generate opcode instructions agent.zy1
     for i, instr in ipairs(v.instructions) do
       if generators[instr.enum] then
+        -- print(instr.enum)
         local out = generators[instr.enum](valueStack, instr, argList, fnLocals, blockStack, t, k)
         if out then
           t.source = t.source .. out
@@ -860,7 +911,6 @@ end
 
   -- Import Linking
   if sectionData[2] then
-    -- TODO other imports
     t.source = t.source .. "importTable = imports, "
   end
 
@@ -881,7 +931,6 @@ end
      handle:close()
   end
   ---------------------
-  -- print(t.source);
   local success, er = load(t.source)
   if not success then
     error("DID NOT COMPILE: " .. er)
