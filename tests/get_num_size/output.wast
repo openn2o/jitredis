@@ -16,15 +16,15 @@ i32.const 0
 (func $_Z7b64_inth (export "__Z7b64_inth")(param i32)(result i32)
 (local)
 block
-  block
-    block
+block
+block
 get_local 0
 i32.const 43
 i32.sub
 i32.const 255
 i32.and
 br_table 0 2 2 2 1 2
-    end
+end
 i32.const 62
 return
   end

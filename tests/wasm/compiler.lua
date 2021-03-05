@@ -192,33 +192,37 @@ generators = {
   CallIndirect = function (stack, instr, argList, fnLocals)
   end,
   BrTable      = function (stack, instr, argList, fnLocals, blockStack, instance)
-    print("BRTable is run");
+    print("BRTable is run debug2");
     print(table.concat(stack),",");
     -- tee(stack, 2)
     -- tee(stack, 2);
     -- local out = generators[instr.enum](valueStack, instr, argList, fnLocals, blockStack, t, k)
     -- return (("  if %s then \n goto ::IFinish:: \nend \n"):format(pop(stack)));
-    -- return 111;
+    local effect = {};
+    local depth_ = 1;
+    while depth_ <=  compiler.brtable_stack_depth do
+      effect [depth_] = "\tend -- brtable";
+      depth_ = depth_ + 1;
+    end
+    return table.concat(effect, "\n");
   end,
   Select   = function (stack, instr, argList, fnLocals)
     print("Select stack1 =" , table.concat(stack, ","));
-
     local effect = "";
     if compiler.brtable_stack_depth > 0 then
-      
       local br_pop = pop(stack);
       print("select pop", br_pop);
       if br_pop then
         print("depth= ", compiler.brtable_stack_depth, ",br_tables=" , table.concat(compiler.brtable_stack) )
         
-
-        local br_depth= compiler.br_tables[compiler.brtable_stack_pc];
-        if br_depth == 0 then
-          br_depth = 1;
-        end
+        local br_depth = compiler.br_tables[compiler.brtable_stack_pc];
+        if br_depth == 0 then br_depth = 1 end
+        
         local br_name = compiler.brtable_stack[br_depth];
         print("br_name=" , br_name);
-        effect = ("if %s then goto %sFinish end\n") :format(br_pop, br_name) ;
+        local retVal = pop(stack);
+        
+        effect = ("if checkCondition(%s) then \n\t\t --  %s \n\t else \n\t\t goto %sFinish \n\tend\n") :format(br_pop,retVal, br_name) ;
         if effect then
           compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
           compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
@@ -234,12 +238,13 @@ generators = {
       print("Select1")
       push(stack, p1)
       push(stack, p2)
+      push(stack, p3)
     else
       print("Select2")
       push(stack, p1)
       push(stack, p3)
+      push(stack, p2)
     end
-
 
     print("Select stack2 =" , table.concat(stack, ","))
     -- return 333;
@@ -524,7 +529,7 @@ generators = {
     return effect .. "  else\n"
   end,
   End = function(stack, _, _, _, blockStack)
-    --debug_end
+    --debug1
     local effect = ""
     local block = pop(blockStack)
     block.exit(function(str)
@@ -543,16 +548,16 @@ generators = {
         end
         local br_name = compiler.brtable_stack[br_depth];
 
-        effect = effect .. ("if %s then goto %sFinish end\n") :format(br_pop, br_name) ;
+        effect = effect .. ("if checkCondition(%s) then goto %sFinish end\n") :format(br_pop, br_name) ;
         --print("%%%%" , compiler.brtable_stack_pc, compiler.brtable_stack[compiler.br_tables[compiler.brtable_stack_pc] + 1])
         compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
         compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
-        -- return  ("end\n::%sFinish::\n  %s  \n"):format(block.label, effect)
       end
+      return  ("\n::%sFinish::\n\t%s  -- end\n  "):format(block.label, effect)
     end
     print( "End stack =" , table.concat(stack, "\n"));
     -- return ("end\n::%sFinish::\n  %s  "):format(block.label, effect)
-    return ("::%sFinish::\n  %s  end\n"):format(block.label, effect)
+    return ("::%sFinish::\n %s end\n"):format(block.label, effect)
   end,
   BrIf = function(stack, instr, a, b, blockStack, c, fn)
     local cond = pop(stack)
@@ -676,6 +681,7 @@ generators = {
   end,
 
   Return = function(stack, _, _, _, _, instance, fn)
+    --debug3
     local fnKind = instance.sectionData[3][fn]
     local sig = instance.sectionData[1][fnKind]
 

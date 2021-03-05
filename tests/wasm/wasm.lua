@@ -162,7 +162,7 @@ function  parseFloat(stream, bytes)
         i = i+1;
       end
       depth, stream = parseLEBu(stream, 32); -- depth
-      compiler.brtable_stack_depth = depth;
+      compiler.brtable_stack_depth = depth + 1;
       compiler.brtable_stack_pc    = 1;
       -- print("depth=", depth);
       -- print(compiler.push(compiler.open_stack, 1))

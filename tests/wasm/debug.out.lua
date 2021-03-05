@@ -51,17 +51,26 @@ function F(G)
   do ::HStart::
   do ::IStart::
   do ::JStart::
+	end -- brtable
+	end -- brtable
+	end -- brtable
 ::JFinish::
-  if (bit.band((G - 43), 255)) then goto HFinish end
-  end
-  if true then return 62 end
+	if checkCondition((bit.band((G - 43), 255))) then goto HFinish end
+  -- end
+    if true then return 62 end
+
 ::IFinish::
-    end
-  if true then return 63 end
+	  -- end
+    if true then return 63 end
+
 ::HFinish::
-    end
-if (((bit.band(G, 255)) == 61) and 1 or 0) then goto IFinish end
-  return 0
+	  -- end
+  if checkCondition((((bit.band(G, 255)) == 61) and 1 or 0)) then 
+		 --  0 
+	 else 
+		 goto IFinish 
+	end
+  return 64
 end
 exportTable.h = E
 exportTable.J = A
