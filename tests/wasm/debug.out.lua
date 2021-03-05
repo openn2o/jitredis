@@ -48,33 +48,50 @@ function E()
   return 0
 end
 function F(G)
-  do ::HStart::
+  local H = 0
   do ::IStart::
   do ::JStart::
+  do ::KStart::
+  do ::LStart::
 	end -- brtable
 	end -- brtable
 	end -- brtable
-::JFinish::
-	if checkCondition((bit.band((G - 43), 255))) then goto HFinish end
-  -- end
+	end -- brtable
+::LFinish::
+	if checkCondition((bit.band((G - 43), 255))) then goto IFinish end
+ 
     if true then return 62 end
 
-::IFinish::
-	  -- end
+::KFinish::
+	 
     if true then return 63 end
 
-::HFinish::
-	  -- end
-  if checkCondition((((bit.band(G, 255)) == 61) and 1 or 0)) then 
+::JFinish::
+	 
+    if true then return 64 end
+
+::IFinish::
+	 
+    if checkCondition((((bit.band((G + 208), 255)) < 10) and 1 or 0)) then ::MStart::
+  if true then return (G + 4) end
+
+::MFinish::
+	 
+    H = (G + 191)
+  if checkCondition((((bit.band((G + 191), 255)) < 26) and 1 or 0)) then ::NStart::
+  if true then return H end
+
+::NFinish::
+	 
+  if checkCondition((((bit.band((G + 159), 255)) < 26) and 1 or 0)) then 
 		 --  0 
 	 else 
-		 goto IFinish 
+		 goto KFinish 
 	end
-  return 64
 end
-exportTable.h = E
-exportTable.J = A
-exportTable.g = F
+exportTable.K = A
+exportTable.h = F
+exportTable.i = E
 if exportTable.main ~= nil then
   print(exportTable.main());
 end

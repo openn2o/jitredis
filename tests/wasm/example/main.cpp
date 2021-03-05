@@ -13,58 +13,43 @@ namespace client {
 using namespace client;
 
 
-[[cheerp::jsexport]]
-void get_module_version2 (uint8* BUFF, int n) {
-	for(int i = 0; i<= n; i++) {
-		client::print(BUFF[i]);
-		BUFF[i] = 1;
-	}
-}
 
-
-[[cheerp::jsexport]]
-int fib(int n)
-{
-    int y;
-    if(n==1||n==2)
-    {
-        y=1;
-    }
-    else
-    {
-        y=fib(n-1)+fib(n-2);
-    }
-    return y;
-}
+static uint8 b64_hash[255] ;
 
 // [[cheerp::jsexport]]
-// uint8 b64_int(uint8 ch) {
-// 	if (ch==43) {
-// 		return 62;
-// 	}
-	
-// 	if (ch==47) {
-// 		return 63;
-// 	}
-	
-// 	if (ch==61) {
-// 		return 64;
-// 	}
-	
-// 	// if ((ch>47) && (ch<58)) {
-// 	// 	return ch + 4;
-// 	// }
-	
-// 	// if ((ch>64) && (ch<91)) {
-// 	// 	return ch - 'A';
-// 	// }
-	
-// 	// if ((ch>96) && (ch<123)) {
-// 	// 	return (ch - 'a') + 26;
-// 	// }
-	
-// 	return 0;
+// uint8 b64_int2 (uint8 ch) {
+// 	return b64_hash[ch];
 // }
+
+[[cheerp::jsexport]]
+uint8 b64_int (uint8 ch) {
+
+	if (ch==43) {
+		return 62;
+	}
+	
+	if (ch==47) {
+		return 63;
+	}
+	
+	if (ch==61) {
+		return 64;
+	}
+	
+	// if ((ch>47) && (ch<58)) {
+	// 	return ch + 4;
+	// }
+	
+	// if ((ch>64) && (ch<91)) {
+	// 	return ch - 'A';
+	// }
+	
+	// if ((ch>96) && (ch<123)) {
+	// 	return (ch - 'a') + 26;
+	// }
+	
+	return 0;
+}
 
 // [[cheerp::jsexport]]
 // unsigned int b64e_size(unsigned int in_size) {
@@ -141,4 +126,7 @@ int fib(int n)
 // }
 //////int 
 int main() {
+	// b64_hash [43] = 62;
+	// b64_hash [47] = 63;
+	// b64_hash [61] = 64;
 }

@@ -236,12 +236,12 @@ generators = {
 
     if p1 == 0 then
       print("Select1")
-      push(stack, p1)
+      -- push(stack, p1)
       push(stack, p2)
       push(stack, p3)
     else
       print("Select2")
-      push(stack, p1)
+      -- push(stack, p1)
       push(stack, p3)
       push(stack, p2)
     end
@@ -553,7 +553,7 @@ generators = {
         compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
         compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
       end
-      return  ("\n::%sFinish::\n\t%s  -- end\n  "):format(block.label, effect)
+      return  ("\n::%sFinish::\n\t%s \n  "):format(block.label, effect)
     end
     print( "End stack =" , table.concat(stack, "\n"));
     -- return ("end\n::%sFinish::\n  %s  "):format(block.label, effect)
