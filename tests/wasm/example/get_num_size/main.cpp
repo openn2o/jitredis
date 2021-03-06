@@ -22,7 +22,7 @@ static uint8 b64_hash[255] ;
 // }
 
 [[cheerp::jsexport]]
-uint8 b64_int (uint8 ch) {
+int b64_int (int ch) {
 
 	if (ch==43) {
 		return 62;

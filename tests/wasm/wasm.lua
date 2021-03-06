@@ -580,10 +580,10 @@ local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
--- local handle = io.open("/tmp/bin.wasm", "rb")
+local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/bin.wasm", "rb")
+-- local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);

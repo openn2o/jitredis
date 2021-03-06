@@ -5,6 +5,16 @@ compiler.br_tables  = {}
 compiler.open_stack = {}
 local instructions
 
+local is_eq_exp = function (str) 
+  if str ~= nil then
+    if (string.find(str, "and 1 or 0") ~= nil) then 
+      return true;
+    end
+  end
+  return false;
+end
+
+
 local kinds = {
   Function = 0,
   Table = 1,
@@ -207,47 +217,62 @@ generators = {
     return table.concat(effect, "\n");
   end,
   Select   = function (stack, instr, argList, fnLocals)
+    -- b_select for debug point 
     print("Select stack1 =" , table.concat(stack, ","));
     local effect = "";
-    if compiler.brtable_stack_depth > 0 then
-      local br_pop = pop(stack);
-      print("select pop", br_pop);
-      if br_pop then
-        print("depth= ", compiler.brtable_stack_depth, ",br_tables=" , table.concat(compiler.brtable_stack) )
+    -- if compiler.brtable_stack_depth > 0 then
+    --   local br_pop = pop(stack);
+    --   print("select pop", br_pop);
+    --   if br_pop then
+    --     print("depth= ", compiler.brtable_stack_depth, ",br_tables=" , table.concat(compiler.brtable_stack) )
         
-        local br_depth = compiler.br_tables[compiler.brtable_stack_pc];
-        if br_depth == 0 then br_depth = 1 end
+    --     local br_depth = compiler.br_tables[compiler.brtable_stack_pc];
+    --     if br_depth == 0 then br_depth = 1 end
         
-        local br_name = compiler.brtable_stack[br_depth];
-        print("br_name=" , br_name);
-        local retVal = pop(stack);
+    --     local br_name = compiler.brtable_stack[br_depth];
+    --     print("br_name=" , br_name);
+    --     local retVal = pop(stack);
         
-        effect = ("if checkCondition(%s) then \n\t\t --  %s \n\t else \n\t\t goto %sFinish \n\tend\n") :format(br_pop,retVal, br_name) ;
-        if effect then
-          compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
-          compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
-        end
-      end
-    end
+    --     effect = ("if checkCondition(%s) then \n\t\t --  %s \n\t else \n\t\t goto %sFinish \n\tend\n") :format(br_pop,retVal, br_name) ;
+    --     if effect then
+    --       compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
+    --       compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
+    --     end
+    --   end
+    -- end
 
     local p1 = pop(stack);
     local p2 = pop(stack);
     local p3 = pop(stack);
-
-    if p1 == 0 then
-      print("Select1")
-      -- push(stack, p1)
-      push(stack, p2)
-      push(stack, p3)
+    -- p1 存在
+    print("p1=", type(p1), string.byte(p1,1));
+    if is_eq_exp(p1) then
+      push (stack, table.concat(
+        {
+          "(checkCondition(",
+          p1,
+          ") and ",
+          pop(stack),
+          ") or (",
+          pop(stack),
+          ")"
+        }
+      ));
     else
-      print("Select2")
-      -- push(stack, p1)
-      push(stack, p3)
-      push(stack, p2)
+      push (stack, table.concat(
+        {
+          "(checkCondition(",
+          p1 .. " == 0",
+          ") and ",
+          p2,
+          ") or (",
+          p3,
+          ")"
+        }
+      ));
     end
 
     print("Select stack2 =" , table.concat(stack, ","))
-    -- return 333;
     return effect;
   end,
   GetLocal = function(stack, instr, argList, fnLocals)

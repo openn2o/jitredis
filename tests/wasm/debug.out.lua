@@ -35,63 +35,59 @@ local function readMem(mem, memSize, addr, bytes)
   end
 end
 local exportTable = {}
-local A = ffi.new("uint8_t[1114112]")
-local ASize = 17
-exportTable.memory = A
-local B = 1048576
-local C = {  }
-local D, E, F
-function D()
-  error("Unreachable code reached..", 2)
+local A, B, C, D, E, F, G, H, I, J, K, L
+function A(M)
+  return (checkCondition(M == 0) and 2) or (1)
+end
+function B(N)
+  return (checkCondition(N == 0) and 2) or (1)
+end
+function C(O)
+  return (checkCondition(O == 0) and 2) or (1)
+end
+function D(P)
+  return (checkCondition(P == 0) and 2) or (1)
 end
 function E()
-  return 0
+  local Q = A(0)
+  return Q
 end
-function F(G)
-  local H = 0
-  do ::IStart::
-  do ::JStart::
-  do ::KStart::
-  do ::LStart::
-	end -- brtable
-	end -- brtable
-	end -- brtable
-	end -- brtable
-::LFinish::
-	if checkCondition((bit.band((G - 43), 255))) then goto IFinish end
- 
-    if true then return 62 end
-
-::KFinish::
-	 
-    if true then return 63 end
-
-::JFinish::
-	 
-    if true then return 64 end
-
-::IFinish::
-	 
-    if checkCondition((((bit.band((G + 208), 255)) < 10) and 1 or 0)) then ::MStart::
-  if true then return (G + 4) end
-
-::MFinish::
-	 
-    H = (G + 191)
-  if checkCondition((((bit.band((G + 191), 255)) < 26) and 1 or 0)) then ::NStart::
-  if true then return H end
-
-::NFinish::
-	 
-  if checkCondition((((bit.band((G + 159), 255)) < 26) and 1 or 0)) then 
-		 --  0 
-	 else 
-		 goto KFinish 
-	end
+function F()
+  local R = A(1)
+  return R
 end
-exportTable.K = A
-exportTable.h = F
-exportTable.i = E
+function G()
+  local S = B(0)
+  return S
+end
+function H()
+  local T = B(1)
+  return T
+end
+function I()
+  local U = C(0)
+  return U
+end
+function J()
+  local V = C(1)
+  return V
+end
+function K()
+  local W = D(0)
+  return W
+end
+function L()
+  local X = D(1)
+  return X
+end
+exportTable.test_f32_l = I
+exportTable.test_i64_r = H
+exportTable.test_f64_r = L
+exportTable.test_f32_r = J
+exportTable.test_f64_l = K
+exportTable.test_i32_r = F
+exportTable.test_i32_l = E
+exportTable.test_i64_l = G
 if exportTable.main ~= nil then
   print(exportTable.main());
 end
