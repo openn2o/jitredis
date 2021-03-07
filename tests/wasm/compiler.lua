@@ -5,6 +5,7 @@ compiler.br_tables  = {}
 compiler.open_stack = {}
 local instructions
 
+--确认是否为test语句
 local is_eq_exp = function (str) 
   if str ~= nil then
     if (string.find(str, "and 1 or 0") ~= nil) then 
