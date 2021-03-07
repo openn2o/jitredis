@@ -161,14 +161,13 @@ function  parseFloat(stream, bytes)
         compiler.br_tables[i] = ctl;
         i = i+1;
       end
+      print("br_tables =" , table.concat(compiler.br_tables), ",");
       depth, stream = parseLEBu(stream, 32); -- depth
       compiler.brtable_stack_depth = depth + 1;
-      compiler.brtable_stack_pc    = 1;
-      -- print("depth=", depth);
+      --compiler.brtable_stack_pc    = 1;
+      print("depth=", depth);
       -- print(compiler.push(compiler.open_stack, 1))
       -- print(compiler.push(compiler.open_stack, 1))
-      print("brtable=", table.concat(compiler.br_tables, ","))
-
       -- result, stream = parseLEBu(stream, 32); -- depth
       -- print("cc=", #stacks_imm, result)
       -- local didx = stacks_imm[#stacks_imm];

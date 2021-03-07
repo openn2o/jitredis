@@ -22,8 +22,6 @@ local kinds = {
   Global = 3
 }
 
-local dumps = "DUMPS=>"
-compiler.dumps = dumps;
 compiler.brtable_stack = {}
 compiler.brtable_stack_pc = 1;
  --- 解码 c++符号
@@ -185,8 +183,6 @@ local function push(stack, val)
   stack[#stack + 1] = val
 end
 
-compiler.push = push;
-
 local function jumpInstr(loopQ)
   if loopQ then
     return "Start"
@@ -202,49 +198,38 @@ generators = {
   CallIndirect = function (stack, instr, argList, fnLocals)
   end,
   BrTable      = function (stack, instr, argList, fnLocals, blockStack, instance)
+    --b_brtable
+    local br_tables = {}
     print("BRTable is run debug2");
     print(table.concat(stack),",");
-    -- tee(stack, 2)
-    -- tee(stack, 2);
-    -- local out = generators[instr.enum](valueStack, instr, argList, fnLocals, blockStack, t, k)
-    -- return (("  if %s then \n goto ::IFinish:: \nend \n"):format(pop(stack)));
-    local effect = {};
-    local depth_ = 1;
-    while depth_ <=  compiler.brtable_stack_depth do
-      effect [depth_] = "\tend -- brtable";
+    
+    local depth_ = 0;
+    local slength= compiler.brtable_stack_depth;
+   
+
+    br_tables[#br_tables + 1] = "\tlocal eax=" .. pop(stack);
+    br_tables[#br_tables + 1] = "\tlocal branch_tab = ffi.new('int[" ..  #compiler.br_tables .. "]', {" .. table.concat(compiler.br_tables, ",") .. "})"; 
+    br_tables[#br_tables + 1] = "\tif (eax < ".. #compiler.br_tables ..") then"
+    br_tables[#br_tables + 1] = "\teax=branch_tab[eax];"
+    while depth_ <  slength do
+      br_tables[#br_tables + 1] = "\t if eax == " .. (slength - depth_ - 1) .. " then"
+      br_tables[#br_tables + 1] = "\t\t goto " .. compiler.brtable_stack[depth_ + 1] .. "Finish"
+      br_tables[#br_tables + 1] = "\t end"
       depth_ = depth_ + 1;
     end
-    return table.concat(effect, "\n");
+    br_tables[#br_tables + 1] = "\telse";
+    br_tables[#br_tables + 1] = "\t\t goto " .. compiler.brtable_stack[slength] .. "Finish"
+    br_tables[#br_tables + 1] = "\tend\n";
+    return table.concat(br_tables, "\n");
   end,
   Select   = function (stack, instr, argList, fnLocals)
     -- b_select for debug point 
     print("Select stack1 =" , table.concat(stack, ","));
     local effect = "";
-    -- if compiler.brtable_stack_depth > 0 then
-    --   local br_pop = pop(stack);
-    --   print("select pop", br_pop);
-    --   if br_pop then
-    --     print("depth= ", compiler.brtable_stack_depth, ",br_tables=" , table.concat(compiler.brtable_stack) )
-        
-    --     local br_depth = compiler.br_tables[compiler.brtable_stack_pc];
-    --     if br_depth == 0 then br_depth = 1 end
-        
-    --     local br_name = compiler.brtable_stack[br_depth];
-    --     print("br_name=" , br_name);
-    --     local retVal = pop(stack);
-        
-    --     effect = ("if checkCondition(%s) then \n\t\t --  %s \n\t else \n\t\t goto %sFinish \n\tend\n") :format(br_pop,retVal, br_name) ;
-    --     if effect then
-    --       compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
-    --       compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
-    --     end
-    --   end
-    -- end
-
     local p1 = pop(stack);
     local p2 = pop(stack);
     local p3 = pop(stack);
-    -- p1 存在
+
     print("p1=", type(p1), string.byte(p1,1));
     if is_eq_exp(p1) then
       push (stack, table.concat(
@@ -561,25 +546,25 @@ generators = {
       effect = str
     end, true, true)
   
-    if compiler.brtable_stack_depth > 0 then
-      print(table.concat( compiler.brtable_stack ,","))
+    -- if compiler.brtable_stack_depth > 0 then
+    --   print(table.concat( compiler.brtable_stack ,","))
 
-      local br_pop = pop(stack);
+    --   local br_pop = pop(stack);
 
-      if br_pop then
-        local br_depth= compiler.br_tables[compiler.brtable_stack_pc];
-        if br_depth == 0 then
-          br_depth = 1;
-        end
-        local br_name = compiler.brtable_stack[br_depth];
+    --   if br_pop then
+    --     local br_depth= compiler.br_tables[compiler.brtable_stack_pc];
+    --     if br_depth == 0 then
+    --       br_depth = 1;
+    --     end
+    --     local br_name = compiler.brtable_stack[br_depth];
 
-        effect = effect .. ("if checkCondition(%s) then goto %sFinish end\n") :format(br_pop, br_name) ;
-        --print("%%%%" , compiler.brtable_stack_pc, compiler.brtable_stack[compiler.br_tables[compiler.brtable_stack_pc] + 1])
-        compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
-        compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
-      end
-      return  ("\n::%sFinish::\n\t%s \n  "):format(block.label, effect)
-    end
+    --     effect = effect .. ("if checkCondition(%s) then goto %sFinish end\n") :format(br_pop, br_name) ;
+    --     --print("%%%%" , compiler.brtable_stack_pc, compiler.brtable_stack[compiler.br_tables[compiler.brtable_stack_pc] + 1])
+    --     compiler.brtable_stack_depth = compiler.brtable_stack_depth - 1;
+    --     compiler.brtable_stack_pc    = compiler.brtable_stack_pc + 1;
+    --   end
+    --   return  ("\n::%sFinish::\n\t%s \n  "):format(block.label, effect)
+    --end
     print( "End stack =" , table.concat(stack, "\n"));
     -- return ("end\n::%sFinish::\n  %s  "):format(block.label, effect)
     return ("::%sFinish::\n %s end\n"):format(block.label, effect)
@@ -856,7 +841,6 @@ function compiler.newInstance(sectionData)
     -- Function stack, used only for generation, we can optimize away the stack using inlining
     local valueStack = {}
     local blockStack = {}
-    compiler.open_stack = valueStack;
     -- Generate function locals
     local fnLocals = {}
     for i = 1, #v.locals do
@@ -867,7 +851,7 @@ function compiler.newInstance(sectionData)
     -- Generate opcode instructions agent.zy1
     for i, instr in ipairs(v.instructions) do
       if generators[instr.enum] then
-        -- print(instr.enum)
+        print("opcode ====",instr.enum)
         local out = generators[instr.enum](valueStack, instr, argList, fnLocals, blockStack, t, k)
         if out then
           t.source = t.source .. out
