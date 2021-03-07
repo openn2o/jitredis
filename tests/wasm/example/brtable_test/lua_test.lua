@@ -115,3 +115,34 @@ print(F(65))
 print(F(66))
 print(F(97))
 print(F(98))
+
+function E(G)
+	local H = 0
+	local I = 0
+	local J = 0
+	I = (G + -1)
+   if checkCondition((((G + -1) < 2) and 1 or 0)) then 
+	  ::KStart::
+	if true then return 1 end
+	  ::KFinish::
+	end
+	J = 1
+	H = G
+   do 
+	  ::LStart::
+	local M = E(I)
+	J = (M + J)
+	I = (H + -3)
+   if checkCondition((((H + -3) < 2) and 1 or 0)) then 
+	  ::NStart::
+	if true then return J end
+	  ::NFinish::
+	end
+	H = (H + -2)
+   goto LStart
+	  ::LFinish::
+	end
+	return 0
+  end
+
+  print(E(40))

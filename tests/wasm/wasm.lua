@@ -156,15 +156,17 @@ function  parseFloat(stream, bytes)
       local i = 1;
       local ctl ;
       local depth;
+      local br_tables_local = {}
+      br_tables_local.br_tables = {}
       while  i <= count do
         ctl, stream = parseLEBu(stream, 32);
-        compiler.br_tables[i] = ctl;
+        br_tables_local.br_tables[i] = ctl;
         i = i+1;
       end
-      print("br_tables =" , table.concat(compiler.br_tables), ",");
+      print("br_tables =" , table.concat(br_tables_local.br_tables), ",");
       depth, stream = parseLEBu(stream, 32); -- depth
-      compiler.brtable_stack_depth = depth + 1;
-      --compiler.brtable_stack_pc    = 1;
+      br_tables_local.brtable_stack_depth = depth + 1;
+  
       print("depth=", depth);
       -- print(compiler.push(compiler.open_stack, 1))
       -- print(compiler.push(compiler.open_stack, 1))
@@ -179,7 +181,8 @@ function  parseFloat(stream, bytes)
       -- }
 
       -- stacks_imm
-      print("BRTB caught..", result)
+      print("BRTB caught..", br_tables_local)
+      return result, stream, br_tables_local
     elseif type == typeMap.CALI then
       print("CALI caught..")
       result, stream = parseLEBu(stream, 1)
@@ -211,23 +214,28 @@ function  parseFloat(stream, bytes)
       }
   
       local immediate = opcodeDef.immediate
-  
+      local brtableVals = {}
+      local brtableVal = nil;
       if immediate ~= typeMap.NONE then
-        instr.imVal, stream = decodeImmediate(immediate, stream, body)
+        instr.imVal, stream, brtableVal = decodeImmediate(immediate, stream, body)
+        
+        if brtableVal ~= nil then
+          print("..................")
+        end
       end
-  
+      print("decodeFunctionBody= " , tostring(brtableVal))
       body[#body + 1] = instr
     end
   
     if stream:byte() == nil then
-      print("caught..", compiler.dumps);
+      print('error')
     end
-    print(stream:byte(), opcodes.enum.End.opcode)
+    --print(stream:byte(), opcodes.enum.End.opcode)
     if stream:byte() ~= opcodes.enum.End.opcode then
       print("Function declaration did not end with 'End' opcode", 0)
     end
-  
-    return body
+    print("=======tostring" , tostring(brtableVal))
+    return body, brtableVal
   end
   local function parseInitializerExpr(stream)
     local opcode
@@ -238,8 +246,9 @@ function  parseFloat(stream, bytes)
     local def = opcodes.codes[opcode]
     local initType = def.immediate
     local initVal
-    initVal, stream = decodeImmediate(initType, stream)
-  
+    local brtables
+    initVal, stream, brtables = decodeImmediate(initType, stream)
+    print("decodeImmedidate" , tostring(brtables))
     local endByte
     endByte, stream = nibble(stream)
     if endByte:byte() ~= opcodes.enum.End.opcode then
@@ -247,7 +256,7 @@ function  parseFloat(stream, bytes)
       error("getGlobal initializer expression NYI", 0)
     end
   
-    return initVal, stream
+    return initVal, stream, brtables
   end
 
 
@@ -411,7 +420,11 @@ local sections = {
         mutability, stream = parseLEBu(stream, 1)
         
         local initVal
-        initVal, stream = parseInitializerExpr(stream)
+        initVal, stream , brtables= parseInitializerExpr(stream)
+        if brtables then
+          print("brtable globales .." , table.concat(brtables.brtables,","))
+        end
+        
         globals[i - 1] = {
           type = type,
           mutability = mutability,
@@ -492,6 +505,7 @@ local sections = {
   
           -- Capture locals
           func.locals = {}
+          
           for j = 1, localCount do
             local typeCount
             typeCount, workingStream =  parseLEBu(workingStream, 4)
@@ -506,7 +520,9 @@ local sections = {
           end
   
           -- Decode instructions
-          func.instructions = decodeFunctionBody(workingStream)
+          func.instructions, brtables = decodeFunctionBody(workingStream)
+          print('=====stack_depth2===' , tostring(brtables));
+          
         end
   
         bodies[i - 1] = func

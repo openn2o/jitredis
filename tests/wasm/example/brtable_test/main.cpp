@@ -25,34 +25,42 @@ int brtable_month_day_p(int m) {
 }
 
 
-[[cheerp::jsexport]]
-int b64_int (int ch) {
+// [[cheerp::jsexport]]
+// int b64_int (int ch) {
 
-	if (ch==43) {
-		return 62;
-	}
+// 	if (ch==43) {
+// 		return 62;
+// 	}
 	
-	if (ch==47) {
-		return 63;
-	}
+// 	if (ch==47) {
+// 		return 63;
+// 	}
 	
-	if (ch==61) {
-		return 64;
-	}
+// 	if (ch==61) {
+// 		return 64;
+// 	}
 	
-	if ((ch>47) && (ch<58)) {
-		return ch + 4;
-	}
+// 	if ((ch>47) && (ch<58)) {
+// 		return ch + 4;
+// 	}
 	
-	if ((ch>64) && (ch<91)) {
-		return ch - 'A';
-	}
+// 	if ((ch>64) && (ch<91)) {
+// 		return ch - 'A';
+// 	}
 	
-	if ((ch>96) && (ch<123)) {
-		return (ch - 'a') + 26;
-	}
+// 	if ((ch>96) && (ch<123)) {
+// 		return (ch - 'a') + 26;
+// 	}
 	
-	return 0;
+// 	return 0;
+// }
+
+[[cheerp::jsexport]]
+int fab (int n) {
+	if(n == 1||n ==2) {
+		return 1;
+	} 
+	return fab(n-1) + fab(n-2);
 }
 
 

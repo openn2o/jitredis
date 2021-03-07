@@ -44,71 +44,74 @@ local D, E, F, G
 function D()
   error("Unreachable code reached..", 2)
 end
-function E()
-  return 0
-end
-function F(H)
+function E(H)
   local I = 0
- if checkCondition((((bit.bor((H + -43), 4)) == 4) and 1 or 0)) then 
-	::JStart::
-  if true then return (checkCondition(((H == 43) and 1 or 0)) and 62) or (63) end
-	::JFinish::
-  end
- if checkCondition(((H == 61) and 1 or 0)) then 
-	::KStart::
-  if true then return 64 end
-	::KFinish::
-  end
- if checkCondition((((H + -48) < 10) and 1 or 0)) then 
+  local J = 0
+  local K = 0
+  J = (H + -1)
+ if checkCondition((((H + -1) < 2) and 1 or 0)) then 
 	::LStart::
-  if true then return (H + 4) end
+  if true then return 1 end
 	::LFinish::
   end
-  I = (H + -65)
- if checkCondition((((H + -65) < 26) and 1 or 0)) then 
+  K = 1
+  I = H
+ do 
 	::MStart::
-  if true then return I end
+  local N = E(J)
+  K = (N + K)
+  J = (I + -3)
+ if checkCondition((((I + -3) < 2) and 1 or 0)) then 
+	::OStart::
+  if true then return K end
+	::OFinish::
+  end
+  I = (I + -2)
+ goto MStart
 	::MFinish::
   end
-  return (checkCondition((((H + -97) < 26) and 1 or 0)) and (H + -71)) or (0)
+  return 0
 end
-function G(N)
- do 
-	::OStart::
- do 
-	::PStart::
+function F()
+  return 0
+end
+function G(P)
  do 
 	::QStart::
-	local eax=(N - 1)
+ do 
+	::RStart::
+ do 
+	::SStart::
+	local eax=(P - 1)
 	local branch_tab = ffi.new('int[12]', {0,2,0,1,0,1,0,0,1,0,1,0})
 	if (eax < 12) then
 	eax=branch_tab[eax];
 	 if eax == 2 then
-		 goto OFinish
+		 goto MFinish
 	 end
 	 if eax == 1 then
-		 goto PFinish
+		 goto QFinish
 	 end
 	 if eax == 0 then
-		 goto QFinish
+		 goto RFinish
 	 end
 	else
-		 goto QFinish
+		 goto RFinish
 	end
-	::QFinish::
+	::SFinish::
   end
   if true then return 31 end
-	::PFinish::
+	::RFinish::
   end
   if true then return 30 end
-	::OFinish::
+	::QFinish::
   end
   return 28
 end
-exportTable.k = E
-exportTable.M = A
-exportTable.j = G
-exportTable.i = F
+exportTable.m = G
+exportTable.O = A
+exportTable.j = E
+exportTable.n = F
 if exportTable.main ~= nil then
   print(exportTable.main());
 end

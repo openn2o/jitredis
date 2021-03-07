@@ -845,7 +845,9 @@ function compiler.newInstance(sectionData)
 
     local fnName = t.functions[importCount + k].name
     t.source = t.source .. ("function %s(%s)\n"):format(fnName, table.concat(argList, ", "))
-
+    
+    --b_function_c
+    --每个函数创建的时候清理分之table
     -- Function stack, used only for generation, we can optimize away the stack using inlining
     local valueStack = {}
     local blockStack = {}
