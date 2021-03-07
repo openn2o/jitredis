@@ -23,7 +23,6 @@ local kinds = {
 }
 
 compiler.brtable_stack = {}
-compiler.brtable_stack_pc = 1;
  --- 解码 c++符号
 local ccm1_cpp_ns_symblos_decode = function (v)
   local magic_tag = string.sub(v, 1,4);
@@ -505,13 +504,17 @@ generators = {
         -- We got popped by an 'End', but we have nothing to return
       end, loop = loopq})
       -- print( ("  %s ::%sStart::\n"):format(customDo, blockLabel) )
-      if compiler.brtable_stack_depth and compiler.brtable_stack_depth > 0 then
+      print("depth=" , compiler.brtable_stack_depth)
+      if (customDo == "do" )and compiler.brtable_stack_depth and compiler.brtable_stack_depth > 0 then
          compiler.brtable_stack [#compiler.brtable_stack+1] = blockLabel;
       end
 
-      return ("  %s ::%sStart::\n"):format(customDo, blockLabel);
-
-    
+      -- if customDo == "do" then
+      --   return ("  %s ::%sStart::\n"):format(customDo, blockLabel);
+      -- else
+      --   return customDo .. "\n";
+      -- end
+      return (" %s \n\t::%sStart::\n"):format(customDo, blockLabel);
     else
       -- Block returns something
       local blockResult = makeName()
@@ -544,13 +547,12 @@ generators = {
     return effect .. "  else\n"
   end,
   End = function(stack, _, _, _, blockStack)
-    --debug1
+    --b_end
     local effect = ""
     local block = pop(blockStack)
     block.exit(function(str)
       effect = str
     end, true, true)
-  
     -- if compiler.brtable_stack_depth > 0 then
     --   print(table.concat( compiler.brtable_stack ,","))
 
@@ -572,7 +574,7 @@ generators = {
     --end
     print( "End stack =" , table.concat(stack, "\n"));
     -- return ("end\n::%sFinish::\n  %s  "):format(block.label, effect)
-    return ("::%sFinish::\n %s end\n"):format(block.label, effect)
+    return ("\t::%sFinish::\n %s end\n"):format(block.label, effect)
   end,
   BrIf = function(stack, instr, a, b, blockStack, c, fn)
     local cond = pop(stack)

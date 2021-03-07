@@ -40,23 +40,58 @@ local ASize = 17
 exportTable.memory = A
 local B = 1048576
 local C = {  }
-local D, E, F
+local D, E, F, G
 function D()
   error("Unreachable code reached..", 2)
 end
 function E()
   return 0
 end
-function F(G)
-  if checkCondition((((bit.bor((G + -43), 4)) == 4) and 1 or 0)) then ::HStart::
-  if true then return (checkCondition(((G == 43) and 1 or 0)) and 62) or (63) end
-::HFinish::
+function F(H)
+ if checkCondition((((bit.bor((H + -43), 4)) == 4) and 1 or 0)) then 
+	::IStart::
+  if true then return (checkCondition(((H == 43) and 1 or 0)) and 62) or (63) end
+	::IFinish::
   end
-  return (checkCondition(((G == 61) and 1 or 0)) and 64) or (0)
+  return (checkCondition(((H == 61) and 1 or 0)) and 64) or (0)
 end
-exportTable.K = A
-exportTable.h = E
-exportTable.i = F
+function G(J)
+ do 
+	::KStart::
+ do 
+	::LStart::
+ do 
+	::MStart::
+	local eax=(J - 1)
+	local branch_tab = ffi.new('int[12]', {0,2,0,1,0,1,0,0,1,0,1,0})
+	if (eax < 12) then
+	eax=branch_tab[eax];
+	 if eax == 2 then
+		 goto KFinish
+	 end
+	 if eax == 1 then
+		 goto LFinish
+	 end
+	 if eax == 0 then
+		 goto MFinish
+	 end
+	else
+		 goto MFinish
+	end
+	::MFinish::
+  end
+  if true then return 31 end
+	::LFinish::
+  end
+  if true then return 30 end
+	::KFinish::
+  end
+  return 28
+end
+exportTable.i = G
+exportTable.h = F
+exportTable.L = A
+exportTable.j = E
 if exportTable.main ~= nil then
   print(exportTable.main());
 end
