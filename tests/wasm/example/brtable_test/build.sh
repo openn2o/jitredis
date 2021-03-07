@@ -8,7 +8,7 @@
   -cheerp-linear-heap-size=128 \
   -cheerp-linear-output=wasm \
   -cheerp-no-icf \
-  -o bin.js \
+  -o bin.js -O3\
   -cheerp-avoid-wasm-traps \
   main.cpp 
 

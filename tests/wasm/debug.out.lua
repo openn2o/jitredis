@@ -48,34 +48,11 @@ function E()
   return 0
 end
 function F(G)
-  do ::HStart::
-  do ::IStart::
-  do ::JStart::
-	local eax=(G - 1)
-	local branch_tab = ffi.new('int[12]', {0,2,0,1,0,1,0,0,1,0,1,0})
-	if (eax < 12) then
-	eax=branch_tab[eax];
-	 if eax == 2 then
-		 goto HFinish
-	 end
-	 if eax == 1 then
-		 goto IFinish
-	 end
-	 if eax == 0 then
-		 goto JFinish
-	 end
-	else
-		 goto JFinish
-	end
-::JFinish::
-  end
-  if true then return 31 end
-::IFinish::
-  end
-  if true then return 30 end
+  if checkCondition((((bit.bor((G + -43), 4)) == 4) and 1 or 0)) then ::HStart::
+  if true then return (checkCondition(((G == 43) and 1 or 0)) and 62) or (63) end
 ::HFinish::
   end
-  return 28
+  return (checkCondition(((G == 61) and 1 or 0)) and 64) or (0)
 end
 exportTable.K = A
 exportTable.h = E

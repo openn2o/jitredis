@@ -1,5 +1,9 @@
 local bit = require("bit");
 local ffi = require("ffi");
+local function checkCondition(cond)
+  return cond == true or (cond ~= false and cond ~= 0)
+end
+
 function F(G)
   do ::HStart::
   do ::IStart::
@@ -42,3 +46,15 @@ print(F(9))
 print(F(10))
 print(F(11))
 print(F(12))
+
+function F(G)
+  if checkCondition((((bit.bor((G + -43), 4)) == 4) and 1 or 0)) then ::HStart::
+  if true then return (checkCondition(((G == 43) and 1 or 0)) and 62) or (63) end
+::HFinish::
+  end
+  return (checkCondition(((G == 61) and 1 or 0)) and 64) or (0)
+end
+
+print(F(43))
+print(F(47))
+print(F(61))

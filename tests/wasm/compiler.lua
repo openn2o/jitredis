@@ -220,6 +220,9 @@ generators = {
     br_tables[#br_tables + 1] = "\telse";
     br_tables[#br_tables + 1] = "\t\t goto " .. compiler.brtable_stack[slength] .. "Finish"
     br_tables[#br_tables + 1] = "\tend\n";
+    compiler.brtable_stack_depth = 0;
+    compiler.br_tables = {};
+    compiler.brtable_stack  = {};
     return table.concat(br_tables, "\n");
   end,
   Select   = function (stack, instr, argList, fnLocals)
@@ -237,24 +240,26 @@ generators = {
           "(checkCondition(",
           p1,
           ") and ",
-          pop(stack),
+          p3,
           ") or (",
-          pop(stack),
+          p2,
           ")"
         }
       ));
     else
-      push (stack, table.concat(
-        {
-          "(checkCondition(",
-          p1 .. " == 0",
-          ") and ",
-          p2,
-          ") or (",
-          p3,
-          ")"
-        }
-      ));
+      if p2 ~= nil and p3 ~= nil then
+        push (stack, table.concat(
+          {
+            "(checkCondition(",
+            p1 .. " == 0",
+            ") and ",
+            p2,
+            ") or (",
+            p3,
+            ")"
+          }
+        ));
+      end
     end
 
     print("Select stack2 =" , table.concat(stack, ","))
@@ -500,7 +505,7 @@ generators = {
         -- We got popped by an 'End', but we have nothing to return
       end, loop = loopq})
       -- print( ("  %s ::%sStart::\n"):format(customDo, blockLabel) )
-      if compiler.brtable_stack_depth > 0 then
+      if compiler.brtable_stack_depth and compiler.brtable_stack_depth > 0 then
          compiler.brtable_stack [#compiler.brtable_stack+1] = blockLabel;
       end
 
