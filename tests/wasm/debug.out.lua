@@ -48,50 +48,67 @@ function E()
   return 0
 end
 function F(H)
+  local I = 0
  if checkCondition((((bit.bor((H + -43), 4)) == 4) and 1 or 0)) then 
-	::IStart::
+	::JStart::
   if true then return (checkCondition(((H == 43) and 1 or 0)) and 62) or (63) end
-	::IFinish::
+	::JFinish::
   end
-  return (checkCondition(((H == 61) and 1 or 0)) and 64) or (0)
-end
-function G(J)
- do 
+ if checkCondition(((H == 61) and 1 or 0)) then 
 	::KStart::
- do 
+  if true then return 64 end
+	::KFinish::
+  end
+ if checkCondition((((H + -48) < 10) and 1 or 0)) then 
 	::LStart::
- do 
+  if true then return (H + 4) end
+	::LFinish::
+  end
+  I = (H + -65)
+ if checkCondition((((H + -65) < 26) and 1 or 0)) then 
 	::MStart::
-	local eax=(J - 1)
+  if true then return I end
+	::MFinish::
+  end
+  return (checkCondition((((H + -97) < 26) and 1 or 0)) and (H + -71)) or (0)
+end
+function G(N)
+ do 
+	::OStart::
+ do 
+	::PStart::
+ do 
+	::QStart::
+	local eax=(N - 1)
 	local branch_tab = ffi.new('int[12]', {0,2,0,1,0,1,0,0,1,0,1,0})
 	if (eax < 12) then
 	eax=branch_tab[eax];
 	 if eax == 2 then
-		 goto KFinish
+		 goto OFinish
 	 end
 	 if eax == 1 then
-		 goto LFinish
+		 goto PFinish
 	 end
 	 if eax == 0 then
-		 goto MFinish
+		 goto QFinish
 	 end
 	else
-		 goto MFinish
+		 goto QFinish
 	end
-	::MFinish::
+	::QFinish::
   end
   if true then return 31 end
-	::LFinish::
+	::PFinish::
   end
   if true then return 30 end
-	::KFinish::
+	::OFinish::
   end
   return 28
 end
-exportTable.i = G
-exportTable.h = F
-exportTable.L = A
-exportTable.j = E
+exportTable.k = E
+exportTable.M = A
+exportTable.j = G
+exportTable.i = F
 if exportTable.main ~= nil then
   print(exportTable.main());
 end

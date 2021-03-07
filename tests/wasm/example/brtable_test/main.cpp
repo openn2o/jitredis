@@ -40,17 +40,17 @@ int b64_int (int ch) {
 		return 64;
 	}
 	
-	// if ((ch>47) && (ch<58)) {
-	// 	return ch + 4;
-	// }
+	if ((ch>47) && (ch<58)) {
+		return ch + 4;
+	}
 	
-	// if ((ch>64) && (ch<91)) {
-	// 	return ch - 'A';
-	// }
+	if ((ch>64) && (ch<91)) {
+		return ch - 'A';
+	}
 	
-	// if ((ch>96) && (ch<123)) {
-	// 	return (ch - 'a') + 26;
-	// }
+	if ((ch>96) && (ch<123)) {
+		return (ch - 'a') + 26;
+	}
 	
 	return 0;
 }
