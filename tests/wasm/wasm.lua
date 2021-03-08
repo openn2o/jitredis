@@ -221,8 +221,7 @@ function  parseFloat(stream, bytes)
     local opcode
     opcode, stream = nibble(stream)
     opcode = opcode:byte()
-  
-    
+
     local def = opcodes.codes[opcode]
     local initType = def.immediate
     local initVal
