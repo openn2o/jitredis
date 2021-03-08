@@ -190,9 +190,14 @@ end
 
 local generators
 generators = {
+  Try = function (stack, instr, argList, fnLocals)
+    print("::::::Try not implement");
+  end,
   ReturnCallIndirect = function (stack, instr, argList, fnLocals)
+    print("::::::ReturnCallIndirect not implement")
   end,
   CallIndirect = function (stack, instr, argList, fnLocals)
+    print("::::::CallIndirect not implement")
   end,
   BrTable      = function (stack, instr, argList, fnLocals, blockStack, instance)
     --b_brtable
@@ -600,6 +605,10 @@ generators = {
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
   end,
+  I32Load8S = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
+  end,
   I32Load16U = function(stack, _, _, _, _, instance)
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 16))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint16_t*", %s + %s)[0]
@@ -608,6 +617,11 @@ generators = {
     local value = pop(stack)
     local addr = pop(stack)
     return ([[  storeMem(%s, %sSize, %s, %s, 32)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint32_t*", %s + %s)[0] = %s%s
+  end,
+  I32StoreU = function(stack, _, _, _, _, instance)
+    local value = pop(stack)
+    local addr = pop(stack)
+    return ([[  storeMem(%s, %sSize, %s, %s, 8)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint8_t*", %s + %s)[0] = %s%s
   end,
   I32Store8 = function(stack, _, _, _, _, instance)
     local value = pop(stack)
@@ -641,14 +655,19 @@ generators = {
     push(stack, instance.memories[0] .. "Size")
   end,
   MemoryGrow = function(stack, _, _, _, _, instance)
-    local temp = makeName()
+    print("stack = " , table.concat(stack));
+    local temp  = makeName()
     local delta = pop(stack)
-
     if not delta then
       print("stack is empty and pop is null ptr")
       return;
     end
-    --push(stack, 2)
+
+    -- if tonumber(delta, base) == nil then
+    --   delta = 64 * 100;
+    -- end
+    -- push(stack, 2)
+    print("delta=" , delta);
 
     -- TODO: find a better way to do this
     local extraLogic = ""
@@ -832,6 +851,7 @@ function compiler.newInstance(sectionData)
 
     -- Generate opcode instructions agent.zy1
     for i, instr in ipairs(v.instructions) do
+      print(i, instr.enum)
       if generators[instr.enum] then
         if(v.brtables) then
           fnLocals [#fnLocals + 1] = 0x81; 
@@ -842,7 +862,7 @@ function compiler.newInstance(sectionData)
           t.source = t.source .. out
         end
       else
-        print("Source:\n" .. t.source)
+        print("Source\n" .. t.source)
         error("No generator for '" .. instr.enum .. "'")
       end
     end
