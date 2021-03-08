@@ -87,16 +87,16 @@ function G(P)
 	if (eax < 12) then
 	eax=branch_tab[eax];
 	 if eax == 2 then
-		 goto MFinish
-	 end
-	 if eax == 1 then
 		 goto QFinish
 	 end
-	 if eax == 0 then
+	 if eax == 1 then
 		 goto RFinish
 	 end
+	 if eax == 0 then
+		 goto SFinish
+	 end
 	else
-		 goto RFinish
+		 goto SFinish
 	end
 	::SFinish::
   end
@@ -108,10 +108,10 @@ function G(P)
   end
   return 28
 end
+exportTable.i = E
 exportTable.m = G
-exportTable.O = A
-exportTable.j = E
-exportTable.n = F
+exportTable.l = F
+exportTable.N = A
 if exportTable.main ~= nil then
   print(exportTable.main());
 end

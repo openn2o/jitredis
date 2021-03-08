@@ -45,7 +45,6 @@
     		  	biz_id = "sumanri";
     		  }
     		  
-    		  biz_id = ";";
     		  subtask.sock.send(subtask.pack_message({
 		    	 "command":"ws_suma_subtask_cluster_data",
 		    	 "data":{

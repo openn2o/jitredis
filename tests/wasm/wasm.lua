@@ -152,7 +152,6 @@ function  parseFloat(stream, bytes)
       _, stream = parseLEBu(stream, 1)
     elseif type == typeMap.BRTB then
       count, stream = parseLEBu(stream, 32);
-      -- result, stream =  parseLEBu(stream, 32);
       local i = 1;
       local ctl ;
       local depth;
@@ -163,25 +162,9 @@ function  parseFloat(stream, bytes)
         br_tables_local.br_tables[i] = ctl;
         i = i+1;
       end
-      print("br_tables =" , table.concat(br_tables_local.br_tables), ",");
       depth, stream = parseLEBu(stream, 32); -- depth
       br_tables_local.brtable_stack_depth = depth + 1;
-  
-      print("depth=", depth);
-      -- print(compiler.push(compiler.open_stack, 1))
-      -- print(compiler.push(compiler.open_stack, 1))
-      -- result, stream = parseLEBu(stream, 32); -- depth
-      -- print("cc=", #stacks_imm, result)
-      -- local didx = stacks_imm[#stacks_imm];
-      -- print("didx=" , didx.imVal);
-      
-      -- int32_t didx = stack[m->sp--].value.int32;
-      -- if (didx >= 0 && didx < (int32_t)count) {
-      --     depth = m->br_table[didx];
-      -- }
-
-      -- stacks_imm
-      print("BRTB caught..", br_tables_local)
+      br_tables_local.brtable_stack = {}
       return result, stream, br_tables_local
     elseif type == typeMap.CALI then
       print("CALI caught..")
@@ -193,40 +176,35 @@ function  parseFloat(stream, bytes)
     return result, stream
   end
   
-
   local function decodeFunctionBody(stream)
     local body = {}
-  
+    local hasTableV  = false;
     while #stream > 1 do
       local opcode
       opcode, stream = nibble(stream)
       opcode = opcode:byte()
-  
       local opcodeDef = opcodes.codes[opcode]
       if not opcodeDef then
         error(("Unsupported opcode: '%x'"):format(opcode), 0)
       end
-  
       local instr = {
         name = opcodeDef.textName,
         enum = opcodeDef.enumName,
         proto = opcodeDef
       }
-  
       local immediate = opcodeDef.immediate
-      local brtableVals = {}
       local brtableVal = nil;
       if immediate ~= typeMap.NONE then
         instr.imVal, stream, brtableVal = decodeImmediate(immediate, stream, body)
-        
         if brtableVal ~= nil then
-          print("..................")
+          instr.br_table = brtableVal;
+          hasTableV      = brtableVal;
+          -- print(".................." , instr.name)
         end
       end
-      print("decodeFunctionBody= " , tostring(brtableVal))
+      -- print("decodeFunctionBody= " , tostring(brtableVal))
       body[#body + 1] = instr
     end
-  
     if stream:byte() == nil then
       print('error')
     end
@@ -234,8 +212,10 @@ function  parseFloat(stream, bytes)
     if stream:byte() ~= opcodes.enum.End.opcode then
       print("Function declaration did not end with 'End' opcode", 0)
     end
-    print("=======tostring" , tostring(brtableVal))
-    return body, brtableVal
+    if hasTableV then
+      return body, hasTableV;
+    end
+    return body
   end
   local function parseInitializerExpr(stream)
     local opcode
@@ -248,11 +228,11 @@ function  parseFloat(stream, bytes)
     local initVal
     local brtables
     initVal, stream, brtables = decodeImmediate(initType, stream)
-    print("decodeImmedidate" , tostring(brtables))
+    -- print("decodeImmedidate" , tostring(brtables))
     local endByte
     endByte, stream = nibble(stream)
     if endByte:byte() ~= opcodes.enum.End.opcode then
-      print(endByte:byte(), opcodes.enum.End.opcode)
+      -- print(endByte:byte(), opcodes.enum.End.opcode)
       error("getGlobal initializer expression NYI", 0)
     end
   
@@ -521,13 +501,14 @@ local sections = {
   
           -- Decode instructions
           func.instructions, brtables = decodeFunctionBody(workingStream)
-          print('=====stack_depth2===' , tostring(brtables));
-          
+          if brtables then
+            func.brtables = brtables;
+          end
         end
   
         bodies[i - 1] = func
       end
-  
+       
       return bodies
     end,
     [11] = function(stream) -- Data Section
@@ -595,10 +576,10 @@ local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
-local handle = io.open("/tmp/bin.wasm", "rb")
+-- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
--- local handle = io.open("./tests/bin.wasm", "rb")
+local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);

@@ -116,33 +116,80 @@ print(F(66))
 print(F(97))
 print(F(98))
 
-function E(G)
-	local H = 0
+function E(H)
 	local I = 0
 	local J = 0
-	I = (G + -1)
-   if checkCondition((((G + -1) < 2) and 1 or 0)) then 
-	  ::KStart::
-	if true then return 1 end
-	  ::KFinish::
-	end
-	J = 1
-	H = G
-   do 
+	local K = 0
+	J = (H + -1)
+   if checkCondition((((H + -1) < 2) and 1 or 0)) then 
 	  ::LStart::
-	local M = E(I)
-	J = (M + J)
-	I = (H + -3)
-   if checkCondition((((H + -3) < 2) and 1 or 0)) then 
-	  ::NStart::
-	if true then return J end
-	  ::NFinish::
-	end
-	H = (H + -2)
-   goto LStart
+	if true then return 1 end
 	  ::LFinish::
+	end
+	K = 1
+	I = H
+   do 
+	  ::MStart::
+	local N = E(J)
+	K = (N + K)
+	J = (I + -3)
+   if checkCondition((((I + -3) < 2) and 1 or 0)) then 
+	  ::OStart::
+	if true then return K end
+	  ::OFinish::
+	end
+	I = (I + -2)
+   goto MStart
+	  ::MFinish::
 	end
 	return 0
   end
-
-  print(E(40))
+  function F()
+	return 0
+  end
+  function G(P)
+   do 
+	  ::QStart::
+   do 
+	  ::RStart::
+   do 
+	  ::SStart::
+	  local eax=(P - 1)
+	  local branch_tab = ffi.new('int[12]', {0,2,0,1,0,1,0,0,1,0,1,0})
+	  if (eax < 12) then
+	  eax=branch_tab[eax];
+	   if eax == 2 then
+		   goto QFinish
+	   end
+	   if eax == 1 then
+		   goto RFinish
+	   end
+	   if eax == 0 then
+		   goto SFinish
+	   end
+	  else
+		   goto SFinish
+	  end
+	  ::SFinish::
+	end
+	if true then return 31 end
+	  ::RFinish::
+	end
+	if true then return 30 end
+	  ::QFinish::
+	end
+	return 28
+  end
+print(E(40))
+print(G(1))
+print(G(2))
+print(G(3))
+print(G(4))
+print(G(5))
+print(G(6))
+print(G(7))
+print(F(8))
+print(G(9))
+print(G(10))
+print(G(11))
+print(G(12))

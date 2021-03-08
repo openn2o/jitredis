@@ -1,5 +1,5 @@
-rm -rf *.wasm
-rm -rf *.bc
+# rm -rf *.wasm
+# rm -rf *.bc
 
 
 clang++ \
@@ -20,3 +20,5 @@ clang++ \
   -cheerp-avoid-wasm-traps \
   main.cpp 
 
+[ -f /tmp/bin.wasm ] && rm -f /tmp/bin.wasm || echo "skip"
+[ -f bin.wasm ] && cp -f bin.wasm /tmp || echo "skip"
