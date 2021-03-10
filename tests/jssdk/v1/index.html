@@ -10,8 +10,27 @@
 			console.log(subtask);
 			
 			subtask.start({
-				master_ip:"10.254.12.26"
+				master_ip:"10.254.12.23"
+			}, function () {
+				
+				subtask.get_all_cluster_names(subtask, function (e) {
+					console.log("获取所有集群名称 =>" , e);
+				});
+				
+				subtask.get_subtask_biz_cluster_info_detail(subtask, "sumanri" , function (e) {
+					console.log("获取biz_id对应集群的活跃信息 =>" , e);
+				});
+				
+				subtask.get_subtask_all_cluster_info_detail(subtask, function (e) {
+					console.log("所有信息=>" , e);
+				});
+				
+				subtask.get_all_live_instance(subtask, function (e) {
+					console.log("在线活跃状态信息 =>" , e);
+				});
 			})
+			
+			
 		</script>
 	</body>
 </html>

@@ -142,7 +142,14 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     );
     REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
+    RedisModuleString *SumaClusterInfo = REDISMODULE_CREATE_STRING_EX(ctx, "SumaClusterInfo");
+       
+    if (SumaClusterInfo) {
+        REDISMODULE_JIT_CALL(ctx, "SADD", "ss", SumaClusterInfo, argv[1]);
+    }
+
     RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "!ss", argv[1], argv[2]);
+
     if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
         REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
         if(status != REIDSMODULE_REPLY_STAT_FAIL) {
@@ -465,6 +472,143 @@ int suma_try_leader_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
     return  REDISMODULE_OK;
 }
 
+////
+//V1.1 集群健康巡检
+///
+int suma_biz_id_cluster_online (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_AUTO_GCD(ctx);
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_STRING_T * check_all = REDISMODULE_CREATE_STRING_EX(ctx, "local biz_ids = redis.call ('sumavlib.suma_get_all_cluster_names', 0) ;\n"
+                                                                            "if biz_ids ~= nil then                                  \n"
+                                                                            "   for i, v in ipairs(biz_ids) do                       \n"
+                                                                            "       local match_v     = string.sub(v, 1, string.find(v, '.vip')) .. '*.vip'\n"
+                                                                            "       local biz_infos   = redis.call('scan', 0, 'MATCH', match_v, 'COUNT', '100'); \n"
+                                                                            "       local message = {}\n"
+                                                                            "       message.msgId= 'suma_biz_id_cluster_online'\n"
+                                                                            "       message.data = v\n"
+                                                                            "       message.time = redis.call('TIME')[1]\n"
+                                                                            "       message.offline = (#biz_infos[2] == 0)\n"
+                                                                            "       if (#biz_infos[2] == 0) then \n"
+                                                                            "           local m_str = cjson.encode(message) \n"
+                                                                            "           redis.call('lpush', 'subtask_operation_record', m_str)\n" /**操作记录*/
+                                                                            "           redis.call('publish', 'warn_report_channel',  m_str) ; \n"           /**告警*/
+                                                                            "       end\n "
+                                                                            "   end\n"
+                                                                            "end \n"
+                                                                            "return 0 \n"
+    );
+    RedisModuleCallReply *_status = REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, "sc", check_all, "0");
+    REDISMODULE_NOT_USED(_status);
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+    return REDISMODULE_OK;
+}
+
+
+
+////
+// V1.1 获取所有集群注册的实例
+////
+int suma_get_all_register_instance (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_AUTO_GCD(ctx);
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    REDISMODULE_STRING_T * all_instance = REDISMODULE_CREATE_STRING_EX(ctx, "local biz_ids = redis.call ('sumavlib.suma_get_all_cluster_names', 0) ;\n"
+                                                                            "local result ={} \n"
+                                                                            "if biz_ids ~= nil then                                  \n"
+                                                                            "   for i, v in ipairs(biz_ids) do                       \n"
+                                                                            "       local biz_infos   = redis.call('sscan', tostring(v), 0); \n"
+                                                                            "       if biz_infos ~= nil then\n "
+                                                                            "           result[#result+1] = table.concat(biz_infos[2], ',');\n"
+                                                                            "       end\n"
+                                                                            "   end\n"
+                                                                            "end                                                     \n"
+                                                                            "return result                                           \n"
+    );
+    RedisModuleCallReply *_status = REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, "sc", all_instance, "0");
+    if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(_status)) {
+            int vip_list_len = REIDSMODULE_ARRAY_LENGTH(_status);
+            if (vip_list_len == 0) {
+              REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+              return REDISMODULE_OK;
+            }
+            REDISMODULE_ARRAY_ALLOC(ctx, vip_list_len);
+            int i  = 0;
+            while(i < vip_list_len) {
+              RedisModuleCallReply * vip_ele = REDISMODULE_ARRAY_GET(_status, i);
+              REDISMODULE_ARRAY_PUSH_STR (ctx, REDISMODULE_ELE_TO_STRING(vip_ele));
+              i++;
+            }
+            return REDISMODULE_OK;
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+    return REDISMODULE_OK;
+}
+
+////
+// V1.1 获取所有集群存活的实例
+////
+int suma_get_all_live_instance (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_AUTO_GCD(ctx);
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+    RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SCAN", "ccccc", "0", "MATCH", "*.vip", "COUNT", "100000");
+    if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(resp)) {
+        RedisModuleCallReply *vip_list = REDISMODULE_ARRAY_GET(resp, 1);
+        
+        if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
+            int vip_list_len = REIDSMODULE_ARRAY_LENGTH(vip_list);
+            if (vip_list_len == 0) {
+              REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+              return REDISMODULE_OK;
+            }
+            REDISMODULE_ARRAY_ALLOC(ctx, vip_list_len);
+            int i  = 0;
+            while(i < vip_list_len) {
+              RedisModuleCallReply * vip_ele = REDISMODULE_ARRAY_GET(vip_list, i);
+              REDISMODULE_ARRAY_PUSH_STR (ctx, REDISMODULE_ELE_TO_STRING(vip_ele));
+              i++;
+            }
+            return REDISMODULE_OK;
+        }
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+    return REDISMODULE_OK;
+}
+
+////
+// V1.1 获取所有集群biz_id
+///
+
+int suma_get_all_cluster_names (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
+    REDISMODULE_AUTO_GCD(ctx);
+    REDISMODULE_NOT_USED(argv);
+    REDISMODULE_NOT_USED(argc);
+
+    RedisModuleCallReply *resp = REDISMODULE_JIT_CALL(ctx, "SSCAN", "cc", "SumaClusterInfo", "0");
+    if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(resp)) {
+        RedisModuleCallReply *vip_list = REDISMODULE_ARRAY_GET(resp, 1);
+        
+        if (REDISMODULE_REPLY_ARRAY == REDISMODULE_TYPE_OF_ELEMENT(vip_list)) {
+            int vip_list_len = REIDSMODULE_ARRAY_LENGTH(vip_list);
+            if (vip_list_len == 0) {
+              REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK); 
+              return REDISMODULE_OK;
+            }
+            REDISMODULE_ARRAY_ALLOC(ctx, vip_list_len);
+            int i  = 0;
+            while(i < vip_list_len) {
+              RedisModuleCallReply * vip_ele = REDISMODULE_ARRAY_GET(vip_list, i);
+              REDISMODULE_ARRAY_PUSH_STR (ctx, REDISMODULE_ELE_TO_STRING(vip_ele));
+              i++;
+            }
+            return REDISMODULE_OK;
+        }
+    }
+    REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
+    return REDISMODULE_OK;
+}
+
 /***
 *  获取活跃主机状态  V1
 */
@@ -648,5 +792,11 @@ int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, 
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_publish", suma_diamond_publish,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_list"   , suma_diamond_list,        "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    //V1.1
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_get_all_cluster_names", suma_get_all_cluster_names, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_get_all_live_instance", suma_get_all_live_instance, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_get_all_register_instance", suma_get_all_register_instance, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    if (RedisModule_CreateCommand(ctx, "sumavlib.suma_biz_id_cluster_online", suma_biz_id_cluster_online, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     return REDISMODULE_OK;
 }
+
