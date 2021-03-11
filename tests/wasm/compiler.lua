@@ -388,6 +388,11 @@ generators = {
     local a = pop(stack)
     push(stack, ("(bit.band(%s, %s))"):format(a, b))
   end,
+  I32Xor= function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.bxor(%s, %s))"):format(a, b))
+  end,
   I32Or = function(stack)
     local b = pop(stack)
     local a = pop(stack)
@@ -851,7 +856,7 @@ function compiler.newInstance(sectionData)
 
     -- Generate opcode instructions agent.zy1
     for i, instr in ipairs(v.instructions) do
-      print(i, instr.enum)
+      -- print(i, instr.enum)
       if generators[instr.enum] then
         if(v.brtables) then
           fnLocals [#fnLocals + 1] = 0x81; 
