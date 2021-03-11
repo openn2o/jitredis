@@ -96,8 +96,11 @@
 		    	 "command":"ws_suma_get_all_cluster_names",
 		    	 "data":{}
 		      }));
+    	},
+    	"ws_subscribe":function (subtask, func) {
     	}
     }
+    
 	subtask.cache = {};
 	subtask.handle = {
 		"ws_suma_subtask_cluster_data": function (subtask, e) {
@@ -163,17 +166,29 @@
 		 	subtask.cache["ws_suma_get_all_cluster_names"] = [];
 		 	var tmp = [];
 		 	for(var i = 0; i < retVal.length ; i++) {
-		 		var fristName = e[i].substring(4, e[i].indexOf("vip."));
+		 		var fristName = e[i].substring(4, e[i].indexOf("vip.list"));
 		 		
 		 		if(fristName == "Drm") {
 		 			continue;
 		 		}
-		 		console.log(fristName);
 		 		tmp.push(fristName);
 		 	}
 		 	
 		 	if(subtask.user_handle ["ws_suma_get_all_cluster_names"] != null) {
 				subtask.user_handle ["ws_suma_get_all_cluster_names"](tmp);
+			}
+		 },
+		 "ws_subscribe" : function (subtask,  e) {
+		 	var cjson_r = JSON.parse(e);
+		 	var i = -1;
+		 	if ((i =cjson_r.data.indexOf(".list")) != -1) {
+		 		cjson_r.data = cjson_r.data.substring(4,i);
+		 	}
+		 	
+		 	cjson_r.time = Number(cjson_r.time);
+		 	
+		 	if(subtask.user_handle ["ws_subscribe"] != null) {
+				subtask.user_handle ["ws_subscribe"](cjson_r);
 			}
 		 }
     }
@@ -185,6 +200,8 @@
         if (subtask.on_start!=null) {
         	subtask.on_start ();
         }
+    		  
+		subtask.sock.send(subtask.pack_message({"command":"subscribe"}));
     }
 
     subtask.disconnected_subtask_loadavg = function () {
@@ -258,6 +275,10 @@
         time_at(subtask.keep_alive, 15000, subtask);
     }
 
+	subtask.subscribe = function (func) {
+		subtask.user_handle ["ws_subscribe"] = func;
+	}
+	
     subtask.start = function (config , func) {
         if(!config.master_ip) {
             ERROR("NOT_FIND_CONFIG_MASTER_IP");
@@ -266,6 +287,7 @@
         subtask.on_start  = func;
         subtask.master_ip = config.master_ip;
         subtask.try_connect();
+        return subtask;
     }
 
 	for(var k in subtask.cmds) {

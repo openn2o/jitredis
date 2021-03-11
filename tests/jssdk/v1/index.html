@@ -12,22 +12,41 @@
 			subtask.start({
 				master_ip:"10.254.12.23"
 			}, function () {
-				
+				/////
+				///  推送
+				////
 				subtask.get_all_cluster_names(subtask, function (e) {
 					console.log("获取所有集群名称 =>" , e);
 				});
 				
+				//// 参数biz_id 
 				subtask.get_subtask_biz_cluster_info_detail(subtask, "sumanri" , function (e) {
 					console.log("获取biz_id对应集群的活跃信息 =>" , e);
 				});
 				
+				subtask.get_subtask_biz_cluster_info_detail(subtask, "basecomponet" , function (e) {
+					console.log("获取biz_id对应集群的活跃信息 =>" , e);
+				});
+				
+				subtask.get_subtask_biz_cluster_info_detail(subtask, "keygateway" , function (e) {
+					console.log("获取biz_id对应集群的活跃信息 =>" , e);
+				});
+				
 				subtask.get_subtask_all_cluster_info_detail(subtask, function (e) {
-					console.log("所有信息=>" , e);
+					console.log("所有集群详细信息 =>" , e);
 				});
 				
 				subtask.get_all_live_instance(subtask, function (e) {
 					console.log("在线活跃状态信息 =>" , e);
 				});
+			}).subscribe(function (e) {
+				/***
+				 * 订阅
+				 * suma_biz_id_cluster_online 集群级别巡检告警
+				 * suma_webservices_online    服务级别巡检告警
+				 * suma_redisserver_online    redis server巡检告警
+				 */
+				console.log("订阅内容推送 <= " , e);
 			})
 			
 			

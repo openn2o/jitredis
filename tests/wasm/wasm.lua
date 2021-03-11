@@ -1,8 +1,7 @@
 
 ----
----- 通用计算模块(CCM) VM
+---- 通用计算模块(CCM) v1.0
 ----
-local COMMON_COMPUTE_MODULE_VERSION="v1.0"
 local WASM_VERSION_MAGIC     = "\x00\x61\x73\x6D\x01\x00\x00\x00"
 local WASM_VERSION_MAGIC_LEN = #WASM_VERSION_MAGIC
 
@@ -574,23 +573,28 @@ local wasm_loader_decode = function (bytes)
       ccm1_string.string_from_cstr
     );
     
-    -- local size = 5000000;
-    -- -- local size =20;
-    -- for i=1,size,1 do
-    --   ccm1_string.string_from_cstr2(1048584);
-    -- end
-    -- print(ccm1_string.string_from_cstr2(1048584))
-    -- return instance.chunk.exports;
+    -- local size = 50000000;
+    local size =20;
+    -- local i = 1;
+    for i=1,size,1 do
+      if i % 2 == 0 then
+       print( ccm1_string.string_from_cstr2(1048584))
+      else
+       print( ccm1_string.string_from_cstr2(1048591))
+      end
+    end
+    print(ccm1_string.string_from_cstr2(1048584))
+    return instance.chunk.exports;
 end
 
 local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
-local handle = io.open("/tmp/bin.wasm", "rb")
+-- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
--- local handle = io.open("./tests/bin.wasm", "rb")
+local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
