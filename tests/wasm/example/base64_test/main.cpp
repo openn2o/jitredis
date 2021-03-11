@@ -84,38 +84,36 @@ unsigned char b64_chr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0
 	
 // 	return k;
 // }
-[[cheerp::jsexport]]
-unsigned int b64_decode(char* in, unsigned int in_len, char* out) {
-	unsigned char b64_chr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	unsigned int i=0, j=0, k=0, s[4];
+
+// [[cheerp::jsexport]]
+// unsigned int b64_decode(char* in, unsigned int in_len, char* out) {
+// 	unsigned char b64_chr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+// 	unsigned int i=0, j=0, k=0, s[4];
 	
-	for (i=0;i<in_len;i++) {
-		s[j++]=b64_int(*(in+i));
-		if (j==4) {
-			out[k+0] = ((s[0]&255)<<2)+((s[1]&0x30)>>4);
-			if (s[2]!=64) {
-				out[k+1] = ((s[1]&0x0F)<<4)+((s[2]&0x3C)>>2);
-				if ((s[3]!=64)) {
-					out[k+2] = ((s[2]&0x03)<<6)+(s[3]); k+=3;
-				} else {
-					k+=2;
-				}
-			} else {
-				k+=1;
-			}
-			j=0;
-		}
-	}
+// 	for (i=0;i<in_len;i++) {
+// 		s[j++]=b64_int(*(in+i));
+// 		if (j==4) {
+// 			out[k+0] = ((s[0]&255)<<2)+((s[1]&0x30)>>4);
+// 			if (s[2]!=64) {
+// 				out[k+1] = ((s[1]&0x0F)<<4)+((s[2]&0x3C)>>2);
+// 				if ((s[3]!=64)) {
+// 					out[k+2] = ((s[2]&0x03)<<6)+(s[3]); k+=3;
+// 				} else {
+// 					k+=2;
+// 				}
+// 			} else {
+// 				k+=1;
+// 			}
+// 			j=0;
+// 		}
+// 	}
 	
-	return k;
-}
+// 	return k;
+// }
 
 
 
 //////int 
 int main() {
-	char *in  = "dGhpcyBpcyBhIGV4YW1wbGU=";
-	char * out ;
-	return b64_decode(in, 25 , out);
-	// return 0;
+	return 0;
 }

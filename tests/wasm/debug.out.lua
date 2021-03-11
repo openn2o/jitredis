@@ -1,3 +1,11 @@
+local imports = {__g = 0,}
+for k, v in pairs(imports) do
+  if not imports[k] then
+    imports[k] = function(...)
+      print("Unlinked Method " .. k);
+    end
+  end
+end
 local bit = require("bit");
 local ffi = require("ffi");
 local function checkCondition(cond)
@@ -40,137 +48,38 @@ local ASize = 17
 exportTable.memory = A
 local B = 1048576
 local C = {  }
-local D, E, F
+A[1048584] = 104
+A[1048585] = 101
+A[1048586] = 108
+A[1048587] = 108
+A[1048588] = 111
+A[1048589] = 50
+A[1048590] = 0
+A[1048591] = 104
+A[1048592] = 101
+A[1048593] = 108
+A[1048594] = 108
+A[1048595] = 111
+A[1048596] = 49
+local D, E, F, G
 function D()
   error("Unreachable code reached..", 2)
 end
 function E()
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
+  return 0
 end
-function F(G, H, I)
-  local J = 0
-  local K = 0
-  local L = 0
-  local M = 0
-  local N = 0
-  local O = 0
-  local P = 0
-  local Q = 0
-  local R = 0
-  J = B
-  M = (B + -16)
-  B = (B + -16)
-  M = M
-  K = M
- if checkCondition(((H == 0) and 1 or 0)) then 
-	::SStart::
-  B = J
-  if true then return 0 end
-	::SFinish::
-  end
-  N = 0
-  O = 0
-  P = 0
- do 
-	::TStart::
-  L = (readMem(A, ASize, (P + G), 8))
- do 
-	::UStart::
- do 
-	::VStart::
- do 
-	::WStart::
- do 
-	::XStart::
- do 
-	::YStart::
-	local eax=(L - 43)
-	local branch_tab = ffi.new('int[19]', {0,3,3,3,1,3,3,3,3,3,3,3,3,3,3,3,3,3,2})
-	if (eax < 19) then
-	eax=branch_tab[eax];
-	 if eax == 3 then
-		 goto TFinish
-	 end
-	 if eax == 2 then
-		 goto UFinish
-	 end
-	 if eax == 1 then
-		 goto VFinish
-	 end
-	 if eax == 0 then
-		 goto WFinish
-	 end
-	else
-		 goto WFinish
-	end
-	::YFinish::
-  end
-  R = 62
- goto UFinish
-	::XFinish::
-  end
-  R = 63
- goto UFinish
-	::WFinish::
-  end
-  R = 64
- goto UFinish
-	::VFinish::
-  end
- if checkCondition((((L + -48) < 10) and 1 or 0)) then 
-	::ZStart::
-  R = (L + 4)
-  else
-  R = (L + -65)
- if checkCondition((((L + -65) >= 26) and 1 or 0)) then 
-	::BAStart::
-  R = (checkCondition((((L + -97) < 26) and 1 or 0)) and (L + -71)) or (0)
-	::BAFinish::
-  end
-	::ZFinish::
-  end
-	::UFinish::
-  end
-  storeMem(A, ASize, ((bit.lshift(O, 2)) + M), R, 32)
-  O = (O + 1)
- if checkCondition((((O + 1) == 4) and 1 or 0)) then 
-	::BBStart::
-  O = (readMem(A, ASize, M, 32))
-  storeMem(A, ASize, (N + I), ((bit.band((bit.rshift(O, 4)), 3)) + (bit.lshift((readMem(A, ASize, K, 32)), 2))), 8)
-  Q = (readMem(A, ASize, M, 32))
- if checkCondition((((readMem(A, ASize, M, 32)) == 64) and 1 or 0)) then 
-	::BCStart::
-  O = 1
-  else
-  storeMem(A, ASize, (N + I), ((bit.band((bit.rshift(Q, 2)), 15)) + (bit.lshift(O, 4))), 8)
-  O = (readMem(A, ASize, M, 32))
- if checkCondition((((readMem(A, ASize, M, 32)) == 64) and 1 or 0)) then 
-	::BDStart::
-  O = 2
-  else
-  storeMem(A, ASize, (N + I), (O + (bit.lshift(Q, 6))), 8)
-  O = 3
-	::BDFinish::
-  end
-	::BCFinish::
-  end
-  N = (O + N)
-  O = 0
-	::BBFinish::
-  end
-  P = (P + 1)
-  if checkCondition((((P + 1) ~= H) and 1 or 0)) then
-      goto TStart
-  end
-	::TFinish::
-  end
-  B = J
-  return N
+function F()
+  local H = imports.__g(1048584)
+  return H
 end
-exportTable.b64_decode = F
-exportTable.memory = A
-exportTable.main = E
+function G()
+  local I = imports.__g(1048591)
+  return I
+end
+exportTable.k = F
+exportTable.m = E
+exportTable.l = G
+exportTable.N = A
 if exportTable.main ~= nil then
   print(exportTable.main());
 end
@@ -203,4 +112,4 @@ exportTable.read_uint8_array = function (i, len)
   return tmp;
 end
 
-return { exports = exportTable, }
+return { exports = exportTable, importTable = imports, }

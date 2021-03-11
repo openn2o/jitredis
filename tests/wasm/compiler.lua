@@ -199,7 +199,7 @@ generators = {
   CallIndirect = function (stack, instr, argList, fnLocals)
     print("::::::CallIndirect not implement")
   end,
-  BrTable      = function (stack, instr, argList, fnLocals, blockStack, instance)
+  BrTable = function (stack, instr, argList, fnLocals, blockStack, instance)
     --b_brtable
     local br_tables = {}
     print("BRTable is run debug2");

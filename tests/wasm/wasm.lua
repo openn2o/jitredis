@@ -221,8 +221,7 @@ function  parseFloat(stream, bytes)
     local opcode
     opcode, stream = nibble(stream)
     opcode = opcode:byte()
-  
-    
+
     local def = opcodes.codes[opcode]
     local initType = def.immediate
     local initVal
@@ -567,19 +566,31 @@ local wasm_loader_decode = function (bytes)
         end
     end
     local instance = compiler.newInstance(sectionData);
-
-    -- instance:link("env", "print_n", print);
-    return instance.chunk.exports;
+    local ccm1_string = require("ccm1_string");
+    ccm1_string.bytes = instance.chunk.exports.memory;
+    instance:link (
+      "ccm1",
+      "string_from_cstr",
+      ccm1_string.string_from_cstr
+    );
+    
+    -- local size = 5000000;
+    -- -- local size =20;
+    -- for i=1,size,1 do
+    --   ccm1_string.string_from_cstr2(1048584);
+    -- end
+    -- print(ccm1_string.string_from_cstr2(1048584))
+    -- return instance.chunk.exports;
 end
 
 local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
--- local handle = io.open("/tmp/bin.wasm", "rb")
+local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/bin.wasm", "rb")
+-- local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
