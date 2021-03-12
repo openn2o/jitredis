@@ -1,16 +1,20 @@
-#rm -rf *.wasm
-#rm -rf *.bc
-
-
+#
+# mac os is not allow 
+# build wat.
+#
 
 /Applications/cheerp/bin/clang++ \
   -target cheerp-wasm \
-  -cheerp-linear-heap-size=128 \
   -cheerp-linear-output=wasm \
   -cheerp-no-icf \
   -o bin.js -O3\
   -cheerp-avoid-wasm-traps \
   -cheerp-pretty-code \
+  -cheerp-bounds-check \
+  -cheerp-cfg-legacy \
+  -cheerp-no-credits \
+  -cheerp-no-icf \
+  -cheerp-no-lto \
   main.cpp 
 
 [ -f /tmp/bin.wasm ] && rm -f /tmp/bin.wasm || echo "skip"

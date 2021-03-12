@@ -1,6 +1,8 @@
 local ccm1 = require("ccm1_string");
-local imports = {ccm1__string_from_cstr_to_value = ccm1.ccm1__string_from_cstr_to_value
+local imports = {ccm1__string_new = ccm1.ccm1__string_new
 ,ccm1__log = ccm1.ccm1__log
+,ccm1__dynamic_string_new = ccm1.ccm1__dynamic_string_new
+,ccm1__string_from_cstr_to_value = ccm1.ccm1__string_from_cstr_to_value
 ,}
 for k, v in pairs(imports) do
   if not imports[k] then
@@ -53,18 +55,45 @@ local ASize = 17
 exportTable.memory = A
 local B = 1048576
 local C = {  }
-A[1048584] = 104
-A[1048585] = 101
-A[1048586] = 108
-A[1048587] = 108
-A[1048588] = 111
+A[1048584] = 105
+A[1048585] = 32
+A[1048586] = 97
+A[1048587] = 109
+A[1048588] = 0
+A[1048589] = 104
+A[1048590] = 101
+A[1048591] = 108
+A[1048592] = 108
+A[1048593] = 111
 local D, E
 function D()
   error("Unreachable code reached..", 2)
 end
 function E()
-  local F = imports.ccm1__string_from_cstr_to_value(1048584)
+  local F = 0
+  local G = 0
+  local H = imports.ccm1__string_new(1048584)
+  F = H
+  G = 0
+ do 
+	::IStart::
+ do 
+	::JStart::
+  local K = imports.ccm1__string_from_cstr_to_value(1048589)
+  imports.ccm1__log(K)
+  G = (G + 1)
+ if checkCondition((((G + 1) == 1000) and 1 or 0)) then 
+	::LStart::
+ goto JFinish
+	::LFinish::
+  end
+ goto IStart
+	::JFinish::
+  end
+	::IFinish::
+  end
   imports.ccm1__log(F)
+  local M = imports.ccm1__dynamic_string_new()
   return 0
 end
 exportTable.main = E

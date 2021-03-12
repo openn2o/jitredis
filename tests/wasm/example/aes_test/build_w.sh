@@ -1,7 +1,7 @@
-# rm -rf *.wasm
-# rm -rf *.bc
-
-
+#
+#  windows 
+#
+#
 clang++ \
   -target cheerp-wasm \
   -cheerp-linear-heap-size=8 \
