@@ -537,6 +537,7 @@ local wasm_loader_decode = function (bytes)
     if bytes:sub(1, WASM_VERSION_MAGIC_LEN) ~= WASM_VERSION_MAGIC then
         print("Not a valid wasm 1.0 binary");
     end
+   
     bytes = bytes:sub(WASM_VERSION_MAGIC_LEN + 1);
     local sectionData = {[0] = {}}
     while #bytes > 0 do
@@ -577,10 +578,10 @@ local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
--- local handle = io.open("/tmp/bin.wasm", "rb")
+local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/bin.wasm", "rb")
+-- local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);

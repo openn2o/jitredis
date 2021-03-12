@@ -10,6 +10,7 @@
   -cheerp-no-icf \
   -o bin.js -O3\
   -cheerp-avoid-wasm-traps \
+  -cheerp-pretty-code \
   main.cpp 
 
 [ -f /tmp/bin.wasm ] && rm -f /tmp/bin.wasm || echo "skip"

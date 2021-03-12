@@ -67,8 +67,8 @@ function E()
   imports.ccm1__log(F)
   return 0
 end
-exportTable.memory = A
 exportTable.main = E
+exportTable.memory = A
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 

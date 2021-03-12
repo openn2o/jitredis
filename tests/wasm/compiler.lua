@@ -786,11 +786,17 @@ function compiler.newInstance(sectionData)
   end
   t.source   = t.source .. [[imports.requires = {}]] .. "\n"  
   for k, v in pairs(require_hash) do
+      if k == nil then
+        break;
+      end
       t.source   = t.source .."imports.requires[\'" .. k .. "\']=" .. k .. ";\n"
   end
   
   ----link
   for k, v in pairs (require_hash) do
+      if  dynamic_lib[k] == nil then
+        break;
+      end
       t.source = ([[local %s = require("%s");]]):format(
         k, 
         dynamic_lib[k]
