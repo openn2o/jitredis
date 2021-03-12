@@ -565,20 +565,11 @@ local wasm_loader_decode = function (bytes)
         end
     end
     local instance = compiler.newInstance(sectionData);
-    local ccm1_string = require("ccm1_string");
-    ccm1_string.bytes = instance.chunk.exports.memory;
-    instance:link (
-      "ccm1",
-      "string_from_cstr_to_value",
-      ccm1_string.string_from_cstr
-    );
 
-    instance:link (
-      "ccm1",
-      "string_from_value_to_cstr",
-      ccm1_string.string_from_value_to_cstr
-    );
-    
+    ---装载内存
+    for k, v in pairs(instance.chunk.importTable.requires) do
+        v.bytes = instance.chunk.exports.memory;
+    end
     return instance.chunk.exports;
 end
 
@@ -586,65 +577,51 @@ local wasm_compile = compiler.newInstance;
 local wasm_link    = compiler.link;
 ---------------------------test
 local data   = nil;
-local handle = io.open("/tmp/bin.wasm", "rb")
+-- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
--- local handle = io.open("./tests/bin.wasm", "rb")
+local handle = io.open("./tests/bin.wasm", "rb")
 data   = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
+exports.main();
+-- local addr,size  = exports.write_uint8_array({
+--   string.byte('h'),
+--   string.byte('e'),
+--   string.byte('l'),
+--   string.byte('l'),
+--   string.byte('o')
+-- });
+
+-- local addr2,size2  = exports.write_uint8_array({
+--   string.byte('h'),
+--   string.byte('e'),
+--   string.byte('l'),
+--   string.byte('l'),
+--   string.byte('o'),
+--   string.byte('2')
+-- });
+-- --https://blog.csdn.net/yangguanghaozi/article/details/52100501
+
+-- print(addr, size)
+-- local step = 1;
+-- local size_w = 100;
+
+-- while step <  size_w do
+--   if step % 2 == 0 then
+--     exports.murmur_hash2(addr , size);
+--   else
+--     exports.djb_hash(addr2 , size2);
+--   end
+--   step = step + 1;
+-- end
 
 
-local addr,size  = exports.write_uint8_array({
-  string.byte('h'),
-  string.byte('e'),
-  string.byte('l'),
-  string.byte('l'),
-  string.byte('o')
-});
-
-local addr2,size2  = exports.write_uint8_array({
-  string.byte('h'),
-  string.byte('e'),
-  string.byte('l'),
-  string.byte('l'),
-  string.byte('o'),
-  string.byte('2')
-});
---https://blog.csdn.net/yangguanghaozi/article/details/52100501
-
-print(addr, size)
-local step = 1;
-local size_w = 10000000;
-
-while step <  size_w do
-  if step % 2 == 0 then
-    exports.murmur_hash2(addr , size);
-  else
-    exports.djb_hash(addr2 , size2);
-  end
-  step = step + 1;
-end
-print('murmur_hash2=>', exports.murmur_hash2(addr , size));
-print('murmur_hash2=>', exports.murmur_hash2(addr , size));
-print('murmur_hash2=>', exports.murmur_hash2(addr2 , size2));
-print('djbhash_=>', exports.djb_hash(addr , size));
-print('djbhash_=>', exports.djb_hash(addr , size));
-print('djbhash_=>', exports.djb_hash(addr2 , size2));
--- exports.get_module_version2(addr, 5)
--- local t =  exports.read_uint8_array(addr, size)
--- print(table.concat(t, ","))
-
--- local addr,size  =  exports.write_uint8_array({2,0,0,8,7});
-
--- exports.get_module_version2(addr, 5)
--- local t =  exports.read_uint8_array(addr, size)
--- print(table.concat(t, ","))
-
-
-
--- local addr1,size1  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
--- local addr2,size2  =  exports.write_uint8_array({1,8,2,1,0,5,1,4,7,0,4,0,0,0,0,0});
--- local addr3 = exports.aes_encode(addr1, addr2);
+-- print('murmur_hash2=>', exports.murmur_hash2(addr , size));
+-- print('murmur_hash2=>', exports.murmur_hash2(addr , size));
+-- print('murmur_hash2=>', exports.murmur_hash2(addr2 , size2));
+-- print('djbhash_=>', exports.djb_hash(addr , size));
+-- print('djbhash_=>', exports.djb_hash(addr , size));
+-- print('djbhash_=>', exports.djb_hash(addr2 , size2));
 
 

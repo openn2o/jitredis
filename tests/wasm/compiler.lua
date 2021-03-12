@@ -25,7 +25,12 @@ local kinds = {
 local ccm1_cpp_ns_symblos_decode = function (v)
   local magic_tag = string.sub(v, 1,4);
   if magic_tag ~= "__ZN" then
-    return "", v;
+    local magic_idx = string.find(v, "__ZN");
+    if magic_idx ~= nil then
+      v = string.sub(v, magic_idx);
+    else
+      return "", v;
+    end
   end
   local name_size_t = {};
   local is_long_name = 0;
@@ -313,6 +318,8 @@ generators = {
       fnKind = instance.sectionData[2][instr.imVal].typeIndex
       local import = instance.sectionData[2][instr.imVal]
       local ns_name , method_name = ccm1_cpp_ns_symblos_decode(import.field);
+
+      -- print(ns_name, method_name)
       -- import.module = ns_name ;
       -- import.field  = method_name;
       fnName = ("imports.%s"):format(mangleImport(ns_name, method_name))
@@ -755,23 +762,39 @@ function compiler.newInstance(sectionData)
   t.functions = {}
   t.functionImportCount = 0
   local importCount = 0
+  local require_hash = {}
+  local dynamic_lib = require("dynamic_link");
   if sectionData[2] then
     -- TODO other imports
     t.source = t.source .. "local imports = {"
     for k, v in pairs(sectionData[2]) do
       importCount = importCount + 1
       t.functionImportCount = t.functionImportCount + 1
-      local ns_name , method_name = ccm1_cpp_ns_symblos_decode(v.field);
+      local ns_name , method_name = ccm1_cpp_ns_symblos_decode(v.field);  
       if (static_link[ns_name .. "__" .. method_name]) then
         t.source = t.source .. ("%s = %s\n,"):format(mangleImport(ns_name, method_name),
           static_link[ns_name .. "__" .. method_name]
         );
       else
-        t.source = t.source .. ("%s = 0,"):format(mangleImport(ns_name, method_name))
+        if require_hash [ns_name] == nil then
+           require_hash [ns_name] = 1;         
+        end
+        t.source = t.source ..  ("%s = %s.%s\n,"):format(mangleImport(ns_name, method_name),ns_name, "ccm1__" .. method_name);
       end
-     
     end
     t.source = t.source .. "}\n" .. prefabs.unlinked
+  end
+  t.source   = t.source .. [[imports.requires = {}]] .. "\n"  
+  for k, v in pairs(require_hash) do
+      t.source   = t.source .."imports.requires[\'" .. k .. "\']=" .. k .. ";\n"
+  end
+  
+  ----link
+  for k, v in pairs (require_hash) do
+      t.source = ([[local %s = require("%s");]]):format(
+        k, 
+        dynamic_lib[k]
+      ) .."\n".. t.source;
   end
 
   t.source = t.source .. prefabs.cache
@@ -887,6 +910,7 @@ function compiler.newInstance(sectionData)
     end
     local magic_tag = string.sub(v, 1,3);
     if magic_tag ~= "__Z" then
+      print('error::');
       return v;
     end
 
@@ -928,9 +952,6 @@ function compiler.newInstance(sectionData)
   end
 
   t.source =  t.source .. [[
-if exportTable.main ~= nil then
-  print(exportTable.main());
-end
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 
@@ -1002,6 +1023,7 @@ end
 end
 
 function compiler:link(module, field, value)
+  print(field, value, module);
   if self.chunk.importTable then
     local ref = self.chunk.importTable[mangleImport(module, field)]
     if ref then
