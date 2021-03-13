@@ -80,12 +80,13 @@ A[1048603] = 110
 A[1048604] = 115
 A[1048605] = 116
 A[1048606] = 50
-A[1048607] = 0
-A[1048608] = 104
-A[1048609] = 101
-A[1048610] = 108
+A[1048607] = 44
+A[1048608] = 0
+A[1048609] = 104
+A[1048610] = 101
 A[1048611] = 108
-A[1048612] = 111
+A[1048612] = 108
+A[1048613] = 111
 local D, E
 function D()
   error("Unreachable code reached..", 2)
@@ -98,7 +99,7 @@ function E()
   G = 0
  do 
 	::IStart::
-  local J = imports.ccm1__string_from_cstr_to_value(1048608)
+  local J = imports.ccm1__string_from_cstr_to_value(1048609)
   imports.ccm1__string_log(J)
   G = (G + 1)
   if checkCondition((((G + 1) ~= 1000) and 1 or 0)) then

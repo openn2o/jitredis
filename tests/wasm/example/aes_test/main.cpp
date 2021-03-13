@@ -1,6 +1,6 @@
-#include <cheerp/client.h>
-#include <cheerp/clientlib.h>
-#include <cheerp/types.h>
+//#include <cheerp/client.h>
+// #include <cheerp/clientlib.h>
+// #include <cheerp/types.h>
 
 #define Value int
 namespace ccm1 {
@@ -12,15 +12,14 @@ namespace ccm1 {
 	Value dynamic_string_new();
 	Value dynamic_string_append(Value, Value);
 	void  dynamic_string_log(Value);
+	Value dynamic_string_join(Value);
 };
 
 using namespace ccm1;
 
-
 [[cheerp::jsexport]]
 int main() {
-	
-	
+	////const str
 	Value my_str = ccm1::string_new("i am const1");
 	for(int i =0; i < 1000; i++) {
 		ccm1::string_log(string_from_cstr_to_value("hello"));

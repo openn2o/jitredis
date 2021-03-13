@@ -60,9 +60,15 @@ _M.ccm1__dynamic_string_log = function (ptr)
     if (nil == refs) then
         return  print("null");
     end
-
-   
     print(table.concat(refs));
+end
+
+_M.ccm1__dynamic_string_join = function (ptr) 
+local refs = _M.string_buff[ptr];
+    if (nil == refs) then
+        return  print("null");
+    end
+    return (table.concat(refs));
 end
 
 
