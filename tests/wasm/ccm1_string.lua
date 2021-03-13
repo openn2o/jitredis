@@ -4,6 +4,8 @@ local _M = {bytes=0}
 
 _M.caches = {}
 _M.string_buff = {}
+
+
 local const_char_ptr_value = function (ptr)
     local eax = ptr..""
     if _M.caches [eax] ~= nil then
@@ -56,17 +58,21 @@ _M.ccm1__dynamic_string_append = function (self,  ptr)
 end
 
 _M.ccm1__dynamic_string_log = function (ptr)
+    -- print(type(ptr));
+    if type(ptr) == "string" then
+        return print(ptr);
+    end
     local refs = _M.string_buff[ptr];
     if (nil == refs) then
-        return  print("null");
+        return  print("ccm1__dynamic_string_log null");
     end
     print(table.concat(refs));
 end
 
 _M.ccm1__dynamic_string_join = function (ptr) 
-local refs = _M.string_buff[ptr];
+    local refs = _M.string_buff[ptr];
     if (nil == refs) then
-        return  print("null");
+        return  print("ccm1__dynamic_string_join null");
     end
     return (table.concat(refs));
 end

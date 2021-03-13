@@ -32,6 +32,7 @@ WebAssembly.instantiate(tmp0,
 		__ZN4ccm125string_from_cstr_to_valueEPKc:__dummy,
 		__ZN4ccm121dynamic_string_appendEii:__dummy,
 		__ZN4ccm118dynamic_string_logEi:__dummy,
+		__ZN4ccm119dynamic_string_joinEi:__dummy,
 	}})
 ).then(tmp0=>{
 	__asm=tmp0.instance.exports;

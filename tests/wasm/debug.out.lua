@@ -5,6 +5,7 @@ local imports = {ccm1__string_new = ccm1.ccm1__string_new
 ,ccm1__string_from_cstr_to_value = ccm1.ccm1__string_from_cstr_to_value
 ,ccm1__dynamic_string_append = ccm1.ccm1__dynamic_string_append
 ,ccm1__dynamic_string_log = ccm1.ccm1__dynamic_string_log
+,ccm1__dynamic_string_join = ccm1.ccm1__dynamic_string_join
 ,}
 for k, v in pairs(imports) do
   if not imports[k] then
@@ -114,6 +115,8 @@ function E()
   local M = imports.ccm1__dynamic_string_append(K, L)
   local N = imports.ccm1__dynamic_string_append(G, F)
   imports.ccm1__dynamic_string_log(G)
+  local O = imports.ccm1__dynamic_string_join(G)
+  imports.ccm1__dynamic_string_log(O)
   return 0
 end
 exportTable.main = E

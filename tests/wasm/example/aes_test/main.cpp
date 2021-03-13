@@ -1,8 +1,7 @@
-//#include <cheerp/client.h>
-// #include <cheerp/clientlib.h>
-// #include <cheerp/types.h>
+#include <cheerp/types.h>
 
 #define Value int
+
 namespace ccm1 {
 	Value  string_new (const char *);
 	Value  string_from_cstr_to_value(const char *);
@@ -32,6 +31,6 @@ int main() {
 	ccm1::dynamic_string_append(string_buff,my_str);
 	ccm1::dynamic_string_log(string_buff);
 	/////
-	
+	ccm1::dynamic_string_log(ccm1::dynamic_string_join(string_buff));
 	return 0;
 }
