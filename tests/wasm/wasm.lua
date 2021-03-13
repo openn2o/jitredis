@@ -582,10 +582,14 @@ local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
 -- local handle = io.open("./tests/bin.wasm", "rb")
-data   = handle:read("*a");
+data  = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
-exports.main();
+print(exports.main());
+
+
+
+
 -- local addr,size  = exports.write_uint8_array({
 --   string.byte('h'),
 --   string.byte('e'),

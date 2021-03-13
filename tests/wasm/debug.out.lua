@@ -6,6 +6,8 @@ local imports = {ccm1__string_new = ccm1.ccm1__string_new
 ,ccm1__dynamic_string_append = ccm1.ccm1__dynamic_string_append
 ,ccm1__dynamic_string_log = ccm1.ccm1__dynamic_string_log
 ,ccm1__dynamic_string_join = ccm1.ccm1__dynamic_string_join
+,ccm1__warp_from_uint8ptr_to_value = ccm1.ccm1__warp_from_uint8ptr_to_value
+,ccm1__warp_from_value_to_uint8ptr = ccm1.ccm1__warp_from_value_to_uint8ptr
 ,}
 for k, v in pairs(imports) do
   if not imports[k] then
@@ -83,43 +85,191 @@ A[1048605] = 116
 A[1048606] = 50
 A[1048607] = 44
 A[1048608] = 0
-A[1048609] = 104
-A[1048610] = 101
-A[1048611] = 108
-A[1048612] = 108
-A[1048613] = 111
-local D, E
+A[1048609] = 7
+A[1048610] = 8
+A[1048611] = 9
+A[1048612] = 10
+A[1048613] = 11
+A[1048614] = 12
+A[1048615] = 13
+A[1048865] = 104
+A[1048866] = 101
+A[1048867] = 108
+A[1048868] = 108
+A[1048869] = 111
+local D, E, F, G
 function D()
   error("Unreachable code reached..", 2)
 end
 function E()
-  local F = 0
-  local G = 0
-  local H = imports.ccm1__string_new(1048584)
-  F = H
-  G = 0
+  local H = 0
+  local I = 0
+  local J = 0
+  local K = 0
+  H = B
+  J = (-256 + H)
+  B = (-256 + H)
+  local L = imports.ccm1__string_new(1048584)
+  I = L
+  J = J
+  K = 0
  do 
-	::IStart::
-  local J = imports.ccm1__string_from_cstr_to_value(1048609)
-  imports.ccm1__string_log(J)
-  G = (G + 1)
-  if checkCondition((((G + 1) ~= 1000) and 1 or 0)) then
-      goto IStart
+	::MStart::
+  local N = imports.ccm1__string_from_cstr_to_value(1048865)
+  imports.ccm1__string_log(N)
+  K = (K + 1)
+  if checkCondition((((K + 1) ~= 1000) and 1 or 0)) then
+      goto MStart
   end
-	::IFinish::
+	::MFinish::
   end
-  imports.ccm1__string_log(H)
-  local K = imports.ccm1__dynamic_string_new()
-  G = K
-  local L = imports.ccm1__string_from_cstr_to_value(1048596)
-  local M = imports.ccm1__dynamic_string_append(K, L)
-  local N = imports.ccm1__dynamic_string_append(G, F)
-  imports.ccm1__dynamic_string_log(G)
-  local O = imports.ccm1__dynamic_string_join(G)
-  imports.ccm1__dynamic_string_log(O)
+  imports.ccm1__string_log(L)
+  local O = imports.ccm1__dynamic_string_new()
+  K = O
+  local P = imports.ccm1__string_from_cstr_to_value(1048596)
+  local Q = imports.ccm1__dynamic_string_append(O, P)
+  local R = imports.ccm1__dynamic_string_append(K, I)
+  imports.ccm1__dynamic_string_log(K)
+  local S = imports.ccm1__dynamic_string_join(K)
+  imports.ccm1__dynamic_string_log(S)
+  K = J
+  local T = F(J, 1048609, 256)
+  storeMem(A, ASize, J, 32, 16)
+  storeMem(A, ASize, J, 808460336, 32)
+  storeMem(A, ASize, K, 808464432, 64)
+  storeMem(A, ASize, J, 808464432, 64)
+  local U = imports.ccm1__warp_from_uint8ptr_to_value(K)
+  imports.ccm1__dynamic_string_log(U)
+  B = B
   return 0
 end
+function F(V, W, X)
+  local Y = 0
+  local Z = 0
+  local BA = 0
+  local BB = 0
+  local BC = 0
+  Y = (X + W)
+ do 
+	::BDStart::
+ if checkCondition((bit.band(V, 3))) then 
+	::BEStart::
+  BA = W
+  Z = V
+ do 
+	::BFStart::
+  if checkCondition(((BA == Y) and 1 or 0)) then
+      goto BDFinish
+  end
+  storeMem(A, ASize, Z, (readMem(A, ASize, BA, 8)), 8)
+  BA = (1 + BA)
+  Z = (1 + Z)
+  if checkCondition((bit.band((1 + Z), 3))) then
+      goto BFStart
+  end
+	::BFFinish::
+  end
+  else
+  Z = V
+  BA = W
+	::BEFinish::
+  end
+  BB = BA
+  BC = (-64 + Y)
+ if checkCondition(((BA <= (-64 + Y)) and 1 or 0)) then 
+	::BGStart::
+ do 
+	::BHStart::
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  BA = (64 + BA)
+  Z = (64 + Z)
+  if checkCondition((((64 + BA) <= BC) and 1 or 0)) then
+      goto BHStart
+  end
+	::BHFinish::
+  end
+  BB = BA
+	::BGFinish::
+  end
+  BC = (-8 + Y)
+ if checkCondition(((BB <= BC) and 1 or 0)) then 
+	::BIStart::
+ do 
+	::BJStart::
+  storeMem(A, ASize, Z, (ffi.cast("uint64_t*", A + BA)[0]), 64)
+  BA = (8 + BA)
+  Z = (8 + Z)
+  if checkCondition((((8 + BA) <= BC) and 1 or 0)) then
+      goto BJStart
+  end
+	::BJFinish::
+  end
+	::BIFinish::
+  end
+  if checkCondition(((BA == Y) and 1 or 0)) then
+      goto BDFinish
+  end
+ do 
+	::BKStart::
+  storeMem(A, ASize, Z, (readMem(A, ASize, BA, 8)), 8)
+  BA = (1 + BA)
+  if checkCondition((((1 + BA) == Y) and 1 or 0)) then
+      goto BDFinish
+  end
+  Z = (1 + Z)
+ goto BKStart
+	::BKFinish::
+  end
+	::BDFinish::
+  end
+  return V
+end
+function G(BL, BM, BN)
+  local BO = 0
+  local BP = 0
+  local BQ = 0
+  local BR = 0
+  local BS = 0
+  local BT = 0
+  local BU = 0
+  local BV = 0
+  local BW = imports.ccm1__warp_from_value_to_uint8ptr(BL)
+  BO = BW
+  local BX = imports.ccm1__warp_from_value_to_uint8ptr(BM)
+  BP = BX
+ if checkCondition(((BN > 0) and 1 or 0)) then 
+	::BYStart::
+  BU = 0
+ do 
+	::BZStart::
+  BV = (readMem(A, ASize, (BU + BP), 8))
+  BT = (BU * 3)
+  BQ = (bit.rshift(BV, 4))
+  BR = (BQ + 48)
+  storeMem(A, ASize, ((BU * 3) + BO), (checkCondition((((bit.band(BR, 255)) > 57) and 1 or 0)) and ((bit.rshift(BV, 4)) + 55)) or ((BQ + 48)), 8)
+  BV = (bit.band(BV, 15))
+  BS = (BV + 48)
+  storeMem(A, ASize, (BT + BO), (checkCondition((((bit.band(BS, 255)) > 57) and 1 or 0)) and ((bit.band(BV, 15)) + 55)) or ((BV + 48)), 8)
+  storeMem(A, ASize, (BT + BO), 32, 8)
+  BU = (BU + 1)
+  if checkCondition((((BU + 1) ~= BN) and 1 or 0)) then
+      goto BZStart
+  end
+	::BZFinish::
+  end
+	::BYFinish::
+  end
+  storeMem(A, ASize, ((BN * 3) + BO), 0, 8)
+end
 exportTable.main = E
+exportTable.TA_HexToStr = G
 exportTable.memory = A
 exportTable.grow_ip = 0;
 

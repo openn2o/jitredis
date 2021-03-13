@@ -380,6 +380,11 @@ generators = {
     local a = pop(stack)
     push(stack, ("(bit.lshift(%s, %s))"):format(a, b))
   end,
+  I64Shl = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.lshift(%s, %s))"):format(a, b))
+  end,
   I32ShrU = function(stack)
     local b = pop(stack)
     local a = pop(stack)
@@ -399,6 +404,11 @@ generators = {
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("(bit.bxor(%s, %s))"):format(a, b))
+  end,
+  I64Or = function (stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.bor(%s, %s))"):format(a, b))
   end,
   I32Or = function(stack)
     local b = pop(stack)
@@ -464,9 +474,13 @@ generators = {
     local a = pop(stack)
     push(stack, ("math.abs(%s)"):format(a))
   end,
+  I64ExtendUI32= function (stack)
+    local a = pop(stack)
+    push(stack, ("math.abs(%s)"):format(a))
+  end,
   I32TruncUF64 = function(stack)
     local a = pop(stack)
-    push(stack, ("math.floor(math.abs(%s))"):format(a))
+    push(stack, ("math.floor(%s)"):format(a))
   end,
   I32TruncSF64 = function(stack)
     local a = pop(stack)

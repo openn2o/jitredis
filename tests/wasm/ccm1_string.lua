@@ -31,6 +31,10 @@ _M.ccm1__string_from_cstr_to_value = function(ptr)
     return ptr;
 end
 
+_M.ccm1__warp_from_uint8ptr_to_value= _M.ccm1__string_from_cstr_to_value;
+_M.ccm1__warp_from_value_to_uint8ptr= _M.ccm1__string_from_value_to_cstr;
+
+
 _M.ccm1__string_new = function (ptr) 
     return ptr;
 end
