@@ -6,11 +6,12 @@
 namespace ccm1 {
 	Value  string_new (const char *);
 	Value  string_from_cstr_to_value(const char *);
-	char * string_from_value_to_cstr(Value , int len);
-
+	char * string_from_value_to_cstr(Value, int);
+	void   string_log(Value);
 	////dynamic string
 	Value dynamic_string_new();
-	void log(Value);
+	Value dynamic_string_append(Value, Value);
+	void  dynamic_string_log(Value);
 };
 
 using namespace ccm1;
@@ -20,17 +21,18 @@ using namespace ccm1;
 int main() {
 	
 	
-	Value my_str = ccm1::string_new("i am");
-
+	Value my_str = ccm1::string_new("i am const1");
 	for(int i =0; i < 1000; i++) {
-		ccm1::log(string_from_cstr_to_value("hello"));
+		ccm1::string_log(string_from_cstr_to_value("hello"));
 	}
+	ccm1::string_log(my_str);
 	
-	ccm1::log(my_str);
-
-	////stringbuffer
+	////string buffer
 	Value string_buff = ccm1::dynamic_string_new();
-	
+	ccm1::dynamic_string_append(string_buff,string_from_cstr_to_value("i am const2,"));
+	ccm1::dynamic_string_append(string_buff,my_str);
+	ccm1::dynamic_string_log(string_buff);
 	/////
+	
 	return 0;
 }

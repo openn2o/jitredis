@@ -32,7 +32,7 @@ end
 _M.ccm1__string_new = function (ptr) 
     return ptr;
 end
-_M.ccm1__log = function (str , ...) 
+_M.ccm1__string_log = function (str , ...) 
     str = const_char_ptr_value(str);
     print(str);
 end
@@ -40,11 +40,30 @@ end
 
 _M.ccm1__dynamic_string_new = function ()
     local ptr = table.getn(_M.string_buff);
-    _M.string_buff [ptr] = {
-        length = 0,
-        value  = {}
-    }
+    _M.string_buff [ptr] = {}
     return ptr;
 end
+
+_M.ccm1__dynamic_string_append = function (self,  ptr) 
+    if (nil == _M.string_buff[self]) then
+        error("null ptr");
+        return;
+    end
+    local val = _M.string_buff[self]; 
+    val [#val + 1] = const_char_ptr_value(ptr);
+    _M.string_buff[self] = val;
+    return self;
+end
+
+_M.ccm1__dynamic_string_log = function (ptr)
+    local refs = _M.string_buff[ptr];
+    if (nil == refs) then
+        return  print("null");
+    end
+
+   
+    print(table.concat(refs));
+end
+
 
 return _M;

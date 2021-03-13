@@ -1,8 +1,10 @@
 local ccm1 = require("ccm1_string");
 local imports = {ccm1__string_new = ccm1.ccm1__string_new
-,ccm1__log = ccm1.ccm1__log
+,ccm1__string_log = ccm1.ccm1__string_log
 ,ccm1__dynamic_string_new = ccm1.ccm1__dynamic_string_new
 ,ccm1__string_from_cstr_to_value = ccm1.ccm1__string_from_cstr_to_value
+,ccm1__dynamic_string_append = ccm1.ccm1__dynamic_string_append
+,ccm1__dynamic_string_log = ccm1.ccm1__dynamic_string_log
 ,}
 for k, v in pairs(imports) do
   if not imports[k] then
@@ -59,12 +61,31 @@ A[1048584] = 105
 A[1048585] = 32
 A[1048586] = 97
 A[1048587] = 109
-A[1048588] = 0
-A[1048589] = 104
-A[1048590] = 101
-A[1048591] = 108
-A[1048592] = 108
-A[1048593] = 111
+A[1048588] = 32
+A[1048589] = 99
+A[1048590] = 111
+A[1048591] = 110
+A[1048592] = 115
+A[1048593] = 116
+A[1048594] = 49
+A[1048595] = 0
+A[1048596] = 105
+A[1048597] = 32
+A[1048598] = 97
+A[1048599] = 109
+A[1048600] = 32
+A[1048601] = 99
+A[1048602] = 111
+A[1048603] = 110
+A[1048604] = 115
+A[1048605] = 116
+A[1048606] = 50
+A[1048607] = 0
+A[1048608] = 104
+A[1048609] = 101
+A[1048610] = 108
+A[1048611] = 108
+A[1048612] = 111
 local D, E
 function D()
   error("Unreachable code reached..", 2)
@@ -77,23 +98,21 @@ function E()
   G = 0
  do 
 	::IStart::
- do 
-	::JStart::
-  local K = imports.ccm1__string_from_cstr_to_value(1048589)
-  imports.ccm1__log(K)
+  local J = imports.ccm1__string_from_cstr_to_value(1048608)
+  imports.ccm1__string_log(J)
   G = (G + 1)
- if checkCondition((((G + 1) == 1000) and 1 or 0)) then 
-	::LStart::
- goto JFinish
-	::LFinish::
-  end
- goto IStart
-	::JFinish::
+  if checkCondition((((G + 1) ~= 1000) and 1 or 0)) then
+      goto IStart
   end
 	::IFinish::
   end
-  imports.ccm1__log(F)
-  local M = imports.ccm1__dynamic_string_new()
+  imports.ccm1__string_log(H)
+  local K = imports.ccm1__dynamic_string_new()
+  G = K
+  local L = imports.ccm1__string_from_cstr_to_value(1048596)
+  local M = imports.ccm1__dynamic_string_append(K, L)
+  local N = imports.ccm1__dynamic_string_append(G, F)
+  imports.ccm1__dynamic_string_log(G)
   return 0
 end
 exportTable.main = E
