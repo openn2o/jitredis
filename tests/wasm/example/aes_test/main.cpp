@@ -20,20 +20,7 @@ namespace ccm1 {
 
 using namespace ccm1;
 
-/// strcut 
-class MyValue {
-public:
-	MyValue();
-	int incr (int i) {
-		return count ++;
-	}
 
-	int get_val() {
-		return count;
-	}
-private:
-	int count = 0;
-};
 
 [[cheerp::jsexport]]
 int main() {
@@ -54,11 +41,8 @@ int main() {
 	/////
 	ccm1::dynamic_string_log(ccm1::dynamic_string_join(string_buff));
 
-	MyValue * m = new MyValue();
-	m->incr(10);
-	m->incr(10);
-	m->incr(10);
-	return m->get_val();
+
+	return 0;
 }
 
 
