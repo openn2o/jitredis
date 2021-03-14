@@ -790,39 +790,45 @@ function compiler.newInstance(sectionData)
           static_link[ns_name .. "__" .. method_name]
         );
       else
-        if require_hash [ns_name] == nil then
+        if (string.len(ns_name) > 1) and (dynamic_lib[ns_name] ~= nil) then
            require_hash [ns_name] = 1;         
         end
-        t.source = t.source ..  ("%s = %s.%s\n,"):format(mangleImport(ns_name, method_name),ns_name, "ccm1__" .. method_name);
+        if ((string.len(ns_name) > 1) and method_name) then
+             if ns_name == "ccm1" then
+                t.source = t.source ..  ("%s = %s.%s\n,"):format(mangleImport(ns_name, method_name),ns_name, "ccm1__" .. method_name); 
+             else
+                t.source = t.source ..  ("%s = function () error('not link %s module') end\n,"):format(mangleImport(ns_name, method_name, ns_name), 
+                mangleImport(ns_name, method_name, ns_name)
+              );
+             end
+        end
       end
     end
     t.source = t.source .. "}\n" .. prefabs.unlinked
   end
-  t.source   = t.source .. [[
-    if not imports then
-       imports = {
-       }
-    end
-  ]]
+  t.source   = t.source .. [[if not imports then imports = {} end ]] .. "\n"
   t.source   = t.source .. [[imports.requires = {}]] .. "\n"  
   for k, v in pairs(require_hash) do
-      if k == nil then
-        break;
+      if (string.len(k) > 0) and (k ~= nil) then
+          t.source   = t.source .."imports.requires[\'" .. k .. "\']=" .. k .. ";\n"
       end
-      t.source   = t.source .."imports.requires[\'" .. k .. "\']=" .. k .. ";\n"
   end
   
   ----link
   for k, v in pairs (require_hash) do
-      if  dynamic_lib[k] == nil then
+    
+      if  not dynamic_lib[k] then
         break;
       end
+
+     
       t.source = ([[local %s = require("%s");]]):format(
         k, 
         dynamic_lib[k]
       ) .."\n".. t.source;
-  end
 
+  end
+  t.source = t.source .. "\n---link\n"
   t.source = t.source .. prefabs.cache
   t.source = t.source .. prefabs.ifTrue
   t.source = t.source .. prefabs.memory

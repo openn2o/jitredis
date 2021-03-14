@@ -19,18 +19,35 @@ function fetchBuffer(p){
 	});
 	return b;
 }
+function growLinearMemory(bytes){
+	var pages=(bytes+65535)>>16;
+	try{
+		__asm.memory.grow(pages);
+		assignHeaps(__asm.memory.buffer);
+		return pages<<16;
+	}catch(e){
+		return -1;
+	}
+}
 var __asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
 var _main=null;
 var main=__dummy;
 __dummy.promise=
-fetchBuffer('bin.wasm').then(tmp2=>
-WebAssembly.instantiate(tmp2,
+fetchBuffer('bin.wasm').then(tmp0=>
+WebAssembly.instantiate(tmp0,
 {i:{
-		__ZN4ccm127warp_from_uint8ptr_to_valueEPh:__dummy,
+		__ZN4ccm110string_newEPKc:__dummy,
+		__ZN4ccm125string_from_cstr_to_valueEPKc:__dummy,
+		__ZN4ccm110string_logEi:__dummy,
+		__ZN4ccm118dynamic_string_newEv:__dummy,
+		__ZN4ccm121dynamic_string_appendEii:__dummy,
 		__ZN4ccm118dynamic_string_logEi:__dummy,
+		__ZN4ccm119dynamic_string_joinEi:__dummy,
+		__ZN7MyValueC1Ev:__dummy,
+		growLinearMemory:growLinearMemory,
 	}})
-).then(tmp2=>{
-	__asm=tmp2.instance.exports;
+).then(tmp0=>{
+	__asm=tmp0.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
 	_main=__asm._main;
@@ -39,5 +56,5 @@ WebAssembly.instantiate(tmp2,
 	Promise.resolve();
 	__asm._main();
 });
-function assignHeaps(tmp2){
+function assignHeaps(tmp0){
 }
