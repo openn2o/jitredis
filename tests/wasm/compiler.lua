@@ -798,6 +798,12 @@ function compiler.newInstance(sectionData)
     end
     t.source = t.source .. "}\n" .. prefabs.unlinked
   end
+  t.source   = t.source .. [[
+    if not imports then
+       imports = {
+       }
+    end
+  ]]
   t.source   = t.source .. [[imports.requires = {}]] .. "\n"  
   for k, v in pairs(require_hash) do
       if k == nil then
@@ -1019,7 +1025,7 @@ end
   end
 
   t.source = t.source .. "}\n"
-  -----------------debug
+  -----------------b_debug
   do 
      local handle = io.open("debug.out.lua", "w")
      handle:write(t.source)
@@ -1044,6 +1050,9 @@ end
 
 function compiler:link(module, field, value)
   print(field, value, module);
+  if(self.chunk.importTable == nil) then
+      return;
+  end
   if self.chunk.importTable then
     local ref = self.chunk.importTable[mangleImport(module, field)]
     if ref then

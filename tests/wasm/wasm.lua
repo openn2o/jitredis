@@ -568,8 +568,10 @@ local wasm_loader_decode = function (bytes)
     local instance = compiler.newInstance(sectionData);
 
     ---装载内存
-    for k, v in pairs(instance.chunk.importTable.requires) do
-        v.bytes = instance.chunk.exports.memory;
+    if instance.chunk.importTable then
+      for k, v in pairs(instance.chunk.importTable.requires) do
+          v.bytes = instance.chunk.exports.memory;
+      end
     end
     return instance.chunk.exports;
 end

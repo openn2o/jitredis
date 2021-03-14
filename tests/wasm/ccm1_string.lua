@@ -62,15 +62,19 @@ _M.ccm1__dynamic_string_append = function (self,  ptr)
 end
 
 _M.ccm1__dynamic_string_log = function (ptr)
-    -- print(type(ptr));
-    if type(ptr) == "string" then
+   
+    local ptr_t = type(ptr);
+    if ptr_t == "string" then
         return print(ptr);
     end
-    local refs = _M.string_buff[ptr];
-    if (nil == refs) then
-        return  print("ccm1__dynamic_string_log null");
+
+    if ptr_t == "number" then
+        local refs = _M.string_buff[ptr];
+        if (nil == refs) then
+            return  print("ccm1__dynamic_string_log null");
+        end
+        print(table.concat(refs));
     end
-    print(table.concat(refs));
 end
 
 _M.ccm1__dynamic_string_join = function (ptr) 
