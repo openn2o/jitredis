@@ -11,3 +11,4 @@ clang++ \
   -cheerp-pretty-code \
   -cheerp-avoid-wasm-traps \
   main.cpp 
+
