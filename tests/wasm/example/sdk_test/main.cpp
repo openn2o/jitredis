@@ -1,3 +1,5 @@
+#include <cheerp/client.h>
+#include <cheerp/clientlib.h>
 #include <cheerp/types.h>
 
 #define Value int
@@ -21,19 +23,6 @@ namespace ccm1 {
 using namespace ccm1;
 
 /// strcut 
-class MyValue {
-public:
-	MyValue();
-	int incr (int i) {
-		return count ++;
-	}
-
-	int get_val() {
-		return count;
-	}
-private:
-	int count = 0;
-};
 
 [[cheerp::jsexport]]
 int main() {
@@ -44,7 +33,7 @@ int main() {
 	}
 	ccm1::string_log(my_str);
 	
-	////string buffer
+	// ////string buffer
 	Value string_buff = ccm1::dynamic_string_new();
 	ccm1::dynamic_string_append(string_buff, 
 								string_from_cstr_to_value("i am const2,"));
@@ -54,11 +43,7 @@ int main() {
 	/////
 	ccm1::dynamic_string_log(ccm1::dynamic_string_join(string_buff));
 
-	MyValue * m = new MyValue();
-	m->incr(10);
-	m->incr(10);
-	m->incr(10);
-	return m->get_val();
+	return 0;
 }
 
 

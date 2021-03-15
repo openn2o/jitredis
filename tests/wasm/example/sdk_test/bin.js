@@ -19,34 +19,37 @@ function fetchBuffer(p){
 	});
 	return b;
 }
-function growLinearMemory(bytes){
-	var pages=(bytes+65535)>>16;
-	try{
-		__asm.memory.grow(pages);
-		assignHeaps(__asm.memory.buffer);
-		return pages<<16;
-	}catch(e){
-		return -1;
-	}
+function ___wrapper___ZN4ccm110string_newEPKc(Larg0){
+	Larg0=Larg0|0;
+	return __ZN4ccm110string_newEPKc()|0|0;
 }
-var __asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
+function ___wrapper___ZN4ccm125string_from_cstr_to_valueEPKc(Larg0){
+	Larg0=Larg0|0;
+	return __ZN4ccm125string_from_cstr_to_valueEPKc()|0|0;
+}
+function assignHeaps(tmp0){
+	HEAP8=new Uint8Array(tmp0);
+	HEAP16=new Uint16Array(tmp0);
+	HEAP32=new Int32Array(tmp0);
+	HEAPF32=new Float32Array(tmp0);
+	HEAPF64=new Float64Array(tmp0);
+}
+var HEAP8=null,HEAP16=null,HEAP32=null,HEAPF32=null,HEAPF64=null,__asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
 var _main=null;
-var main=__dummy;
-__dummy.promise=
+var main={};
+main.promise=
 fetchBuffer('bin.wasm').then(tmp0=>
 WebAssembly.instantiate(tmp0,
 {i:{
-		__ZN4ccm110string_newEPKc:__dummy,
-		__ZN4ccm125string_from_cstr_to_valueEPKc:__dummy,
+		___wrapper___ZN4ccm110string_newEPKc:___wrapper___ZN4ccm110string_newEPKc,
+		___wrapper___ZN4ccm125string_from_cstr_to_valueEPKc:___wrapper___ZN4ccm125string_from_cstr_to_valueEPKc,
 		__ZN4ccm110string_logEi:__dummy,
 		__ZN4ccm118dynamic_string_newEv:__dummy,
 		__ZN4ccm121dynamic_string_appendEii:__dummy,
 		__ZN4ccm118dynamic_string_logEi:__dummy,
 		__ZN4ccm119dynamic_string_joinEi:__dummy,
-		__ZN7MyValueC1Ev:__dummy,
-		growLinearMemory:growLinearMemory,
 	}})
-).then(tmp0=>{
+,console.log).then(tmp0=>{
 	__asm=tmp0.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
@@ -55,6 +58,4 @@ WebAssembly.instantiate(tmp0,
 	main.promise=
 	Promise.resolve();
 	__asm._main();
-});
-function assignHeaps(tmp0){
-}
+},console.log,console.log);
