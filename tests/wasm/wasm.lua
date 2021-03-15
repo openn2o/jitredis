@@ -583,11 +583,14 @@ local data   = nil;
 -- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/bin.wasm", "rb")
+local handle = io.open("./tests/base.wasm", "rb")
 data  = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
-print(exports.main());
+
+if exports.main ~= nil then
+  print(exports.main());
+end
 
 
 

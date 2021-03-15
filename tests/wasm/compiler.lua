@@ -349,10 +349,40 @@ generators = {
     local a = pop(stack)
     push(stack, ("(%s + %s)"):format(a, b))
   end,
+  I64Add = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(%s + %s)"):format(a, b))
+  end,
+  F32Add = function (stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(%s + %s)"):format(a, b))
+  end,
+  I64Sub = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(%s - %s)"):format(a, b))
+  end,
+  F32Sub = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(%s - %s)"):format(a, b))
+  end,
   I32Sub = function(stack)
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("(%s - %s)"):format(a, b))
+  end,
+  I64Mul = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(%s * %s)"):format(a, b))
+  end,
+  F32Mul = function (stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(%s * %s)"):format(a, b))
   end,
   I32Mul = function(stack)
     local b = pop(stack)
@@ -364,13 +394,46 @@ generators = {
     local a = pop(stack)
     push(stack, ("(math.abs(math.floor(%s / %s)))"):format(a, b))
   end,
+  F32Div = function(stack)
+    -- This is wrong
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(math.floor(%s / %s))"):format(a, b))
+  end,
   I32DivS = function(stack)
     -- This is wrong
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("(math.floor(%s / %s))"):format(a, b))
   end,
+  I64DivS = function(stack)
+    -- This is wrong
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(math.floor(%s / %s))"):format(a, b))
+  end,
+
+  I64DivU = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(math.abs(math.floor(%s / %s)))"):format(a, b))
+  end,
   I32RemU = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(math.floor(%s %% %s))"):format(a, b))
+  end,
+  I32RemS = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(math.floor(%s %% %s))"):format(a, b))
+  end,
+  I64RemU = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(math.floor(%s %% %s))"):format(a, b))
+  end,
+  I64RemS = function(stack)
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("(math.floor(%s %% %s))"):format(a, b))
@@ -385,6 +448,16 @@ generators = {
     local a = pop(stack)
     push(stack, ("(bit.lshift(%s, %s))"):format(a, b))
   end,
+  I64ShrU = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.rshift(%s, %s))"):format(a, b))
+  end,
+  I64ShrS = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.rshift(%s, %s))"):format(a, b))
+  end,
   I32ShrU = function(stack)
     local b = pop(stack)
     local a = pop(stack)
@@ -395,10 +468,20 @@ generators = {
     local a = pop(stack)
     push(stack, ("(bit.arshift(%s, %s))"):format(a, b))
   end,
+  I64And = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.band(%s, %s))"):format(a, b))
+  end,
   I32And = function(stack)
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("(bit.band(%s, %s))"):format(a, b))
+  end,
+  I64Xor= function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.bxor(%s, %s))"):format(a, b))
   end,
   I32Xor= function(stack)
     local b = pop(stack)
@@ -419,6 +502,16 @@ generators = {
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("(bit.ror(%s, %s))"):format(a, b))
+  end,
+  I64Rotl = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.rol(%s, %s))"):format(a, b))
+  end,
+  I64Rotr = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("(bit.rol(%s, %s))"):format(a, b))
   end,
   I32Rotl = function(stack)
     local b = pop(stack)
@@ -511,7 +604,17 @@ generators = {
     local a = pop(stack)
     push(stack, ("math.sqrt(%s)"):format(a))
   end,
+  F32Min = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("math.min(%s, %s)"):format(a, b))
+  end,
   F64Min = function(stack)
+    local b = pop(stack)
+    local a = pop(stack)
+    push(stack, ("math.min(%s, %s)"):format(a, b))
+  end,
+  F32Max = function(stack)
     local b = pop(stack)
     local a = pop(stack)
     push(stack, ("math.min(%s, %s)"):format(a, b))
@@ -521,7 +624,6 @@ generators = {
     local a = pop(stack)
     push(stack, ("math.max(%s, %s)"):format(a, b))
   end,
-
   Block = function(stack, instr, argList, fnLocals, blockStack, instance, fn, customDo, loopq)
     loopq = loopq or false
     customDo = customDo or "do"
@@ -758,6 +860,9 @@ do -- Redundant Generators
   g.I32TruncSF32 = g.I32TruncSF64
 
   g.F64ConvertSI32 = g.Nop
+  g.F32Copysign    = g.Nop
+  g.F64Copysign    = g.Nop
+  
 end
 local static_link = {
   ["client__print"] = [[print]]
@@ -942,7 +1047,6 @@ function compiler.newInstance(sectionData)
     end
     local magic_tag = string.sub(v, 1,3);
     if magic_tag ~= "__Z" then
-      print('error::');
       return v;
     end
 
