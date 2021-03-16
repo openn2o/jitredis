@@ -1,15 +1,29 @@
 
 /***
- * suma 分布式模块 
+ * CCM1(Common Compute Module V1)  X86/X64 Linux 
+ * 数码视讯 版权所有
  */
 
+
 #define REDISMODULE_EXPERIMENTAL_API 1
+
+#include <stdlib.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "redismodule.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+#include "luajit.h"
+#include "lj_arch.h"
+
+#if LUAJIT_TARGET == LUAJIT_ARCH_X86 
+#elif LUAJIT_TARGET == LUAJIT_ARCH_X64
+#endif 
+
 #define VERSION 1001
 #define TIME_OUT_NUM 3000
 #define REDISMODULE_REPLY_INTEGER_T long long
@@ -61,6 +75,34 @@
 #define REDISMODULE_MESSAGE_RESET_VIP "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"reset_vip\"}"
 #define REDISMODULE_MESSAGE_KILL_VIP  "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}"
 #define REDISMODULE_MESSAGE_DIAMOND_PUBLISH   "{\"path\":\"%s\", \"type\":1, \"cmd\":\"diamond_config\"}"
+
+
+static void stackDump(lua_State* L, REDISMODULE_CONTEXT_T *ctx){
+    int i = 0;
+    int top = lua_gettop(L);
+    for (i = 1; i <= top; ++i) {
+        int t = lua_type(L, i);
+        switch (t) {
+            case LUA_TSTRING: {
+                REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, lua_tostring(L, i));
+            }
+            break;
+            case LUA_TBOOLEAN: {
+                REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, lua_toboolean(L, i) ? "true " : "false ");
+            }
+            break;
+            case LUA_TNUMBER: {
+                REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, lua_typename(L, t));
+            }
+            break;
+            default: {
+                REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, lua_typename(L, t));
+            }
+            break;
+        }
+    }
+}
+
 
 ///获取所有vip列表 V1
 int suma_ci_task (RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
@@ -774,10 +816,13 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
     return  REDISMODULE_OK;
 }
 
+
+
 ////程序入口 V1
 int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
     REDISMODULE_NOT_USED(argc);
+    
     if (RedisModule_Init         (ctx, "sumavlib"                     , 1 ,REDISMODULE_APIVER_1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.epoll"               , TimerCommand_RedisCommand,"write deny-oom", 0, 0, 0) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.biz_script_register" , suma_biz_script_register, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
@@ -792,11 +837,70 @@ int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, 
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_publish", suma_diamond_publish,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_diamond_list"   , suma_diamond_list,        "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_vip_server_list", suma_vip_server_list,     "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
-    //V1.1
+    //V1.1实时分析模块
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_get_all_cluster_names", suma_get_all_cluster_names, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_get_all_live_instance", suma_get_all_live_instance, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_get_all_register_instance", suma_get_all_register_instance, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
     if (RedisModule_CreateCommand(ctx, "sumavlib.suma_biz_id_cluster_online", suma_biz_id_cluster_online, "write deny-oom", 1, 1, 1) == REDISMODULE_ERR) return REDISMODULE_ERR;
+    
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "SumaDrm Common Compute Module V1\n");
+
+    lua_State *L = lua_open();  
+    if (L == NULL) {
+        REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "ccm1 engine is not create.");
+        return REDISMODULE_OK;
+    } 
+    LUAJIT_VERSION_SYM(); 
+    lua_gc(L, LUA_GCSTOP, 0);
+    luaL_openlibs(L); 
+    lua_gc(L, LUA_GCRESTART, -1);
+    int n;
+    lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+    lua_getfield(L, -1, "jit");  /* Get jit.* module table. */
+    lua_remove  (L, -2);
+    lua_getfield(L, -1, "status");
+    lua_remove  (L, -2);
+    n = lua_gettop(L);
+    lua_call(L, 0, LUA_MULTRET);
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, 
+    (lua_toboolean(L, n) ? "ccm1 JIT status : ON" : "ccm1 JIT status : OFF"));
+   
+    ///V1.2 ccm1 通用计算模块
+   {
+        /*** 
+        * jit版本 读取2进制文件
+        */
+        char *read_binary_file =    "function read_binary_file (f)\n"
+                                        "local file  = io.open(f, \"rb\")\n"
+                                        "if not file then\n"
+                                            "return 'file open error' \n"
+                                        "end\n"
+                                        "local bytes = file:read('*a');\n"
+                                        "file:close();\n"
+                                        "return bytes\n"
+                                    "end"; 
+        luaL_loadbuffer(L,read_binary_file, strlen(read_binary_file), "@read_binary_file_def");
+        lua_pcall(L,0,0,0);
+    }
+
+   {
+        /*** 
+        * jit版本 启动入口
+        */
+        char *require_s =  "function require_s ()\n"
+                           "package.path         = package.path .. ';/home/admin/ccm1/?.lua;'"
+                           "local ccm1_engine    = require('wasm')\n"
+                           "if tmp ~= nil then return 'OK' end \n"
+                           "return 'FAILED'\n"
+                           "end"; 
+        luaL_loadbuffer(L,require_s, strlen(require_s), "@require_s_def");
+        lua_pcall(L,0,0,0);
+    }
+
+    lua_getglobal(L, "require_s");
+    lua_pcall(L,0,1,0);
+    stackDump(L, ctx);
+    // REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, lua_tostring(L, -1));
     return REDISMODULE_OK;
 }
 

@@ -1,7 +1,10 @@
 
+
+_M = {}
 ----
 ---- 通用计算模块(CCM) v1.0
 ----
+
 local WASM_VERSION_MAGIC     = "\x00\x61\x73\x6D\x01\x00\x00\x00"
 local WASM_VERSION_MAGIC_LEN = #WASM_VERSION_MAGIC
 
@@ -576,8 +579,7 @@ local wasm_loader_decode = function (bytes)
     return instance.chunk.exports;
 end
 
-local wasm_compile = compiler.newInstance;
-local wasm_link    = compiler.link;
+
 ---------------------------test
 local data   = nil;
 -- local handle = io.open("/tmp/bin.wasm", "rb")
@@ -635,3 +637,4 @@ end
 -- print('djbhash_=>', exports.djb_hash(addr2 , size2));
 
 
+return _M;
