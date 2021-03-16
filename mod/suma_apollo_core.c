@@ -75,6 +75,7 @@
 #define REDISMODULE_MESSAGE_RESET_VIP "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"reset_vip\"}"
 #define REDISMODULE_MESSAGE_KILL_VIP  "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}"
 #define REDISMODULE_MESSAGE_DIAMOND_PUBLISH   "{\"path\":\"%s\", \"type\":1, \"cmd\":\"diamond_config\"}"
+void set_read_obnly_copy_lua_state (lua_State *lua) ;
 
 
 static void stackDump(lua_State* L, REDISMODULE_CONTEXT_T *ctx){
@@ -817,7 +818,7 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
 }
 
 
-
+void scriptingInit(int setup);
 ////程序入口 V1
 int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -865,6 +866,10 @@ int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, 
     REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, 
     (lua_toboolean(L, n) ? "ccm1 JIT status : ON" : "ccm1 JIT status : OFF"));
    
+
+    ///注册redis的公开方法
+    set_read_obnly_copy_lua_state(L);
+    scriptingInit(0);
     ///V1.2 ccm1 通用计算模块
    {
         /*** 
@@ -890,8 +895,9 @@ int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, 
         char *require_s =  "function require_s ()\n"
                            "package.path         = package.path .. ';/home/admin/ccm1/?.lua;'"
                            "local ccm1_engine    = require('wasm')\n"
-                           "if tmp ~= nil then return 'OK' end \n"
-                           "return 'FAILED'\n"
+                           "redis.log(redis.LOG_WARNING ,'hello redis')\n"
+                           "if redis ~= ccm1_engine then return 'OK' end \n"
+                           "return 'NO'\n"
                            "end"; 
         luaL_loadbuffer(L,require_s, strlen(require_s), "@require_s_def");
         lua_pcall(L,0,0,0);

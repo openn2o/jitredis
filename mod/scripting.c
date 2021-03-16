@@ -917,7 +917,131 @@ void scriptingEnableGlobalsProtection(lua_State *lua) {
  * in order to reset the Lua scripting environment.
  *
  * However it is simpler to just call scriptingReset() that does just that. */
+
+static lua_State * readOnly = NULL;
+
+void set_read_obnly_copy_lua_state (lua_State *lua) {
+    readOnly = lua;
+}
+
 void scriptingInit(int setup) {
+    if ( readOnly != NULL ) {
+            lua_newtable(readOnly);
+
+            /* redis.call */
+            lua_pushstring(readOnly,"call");
+            lua_pushcfunction(readOnly,luaRedisCallCommand);
+            lua_settable(readOnly,-3);
+
+            /* redis.pcall */
+            lua_pushstring(readOnly,"pcall");
+            lua_pushcfunction(readOnly,luaRedisPCallCommand);
+            lua_settable(readOnly,-3);
+
+            /* redis.log and log levels. */
+            lua_pushstring(readOnly,"log");
+            lua_pushcfunction(readOnly,luaLogCommand);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"LOG_DEBUG");
+            lua_pushnumber(readOnly,LL_DEBUG);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"LOG_VERBOSE");
+            lua_pushnumber(readOnly,LL_VERBOSE);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"LOG_NOTICE");
+            lua_pushnumber(readOnly,LL_NOTICE);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"LOG_WARNING");
+            lua_pushnumber(readOnly,LL_WARNING);
+            lua_settable(readOnly,-3);
+
+            /* redis.sha1hex */
+            lua_pushstring(readOnly, "sha1hex");
+            lua_pushcfunction(readOnly, luaRedisSha1hexCommand);
+            lua_settable(readOnly, -3);
+
+            /* redis.error_reply and redis.status_reply */
+            lua_pushstring(readOnly, "error_reply");
+            lua_pushcfunction(readOnly, luaRedisErrorReplyCommand);
+            lua_settable(readOnly, -3);
+            lua_pushstring(readOnly, "status_reply");
+            lua_pushcfunction(readOnly, luaRedisStatusReplyCommand);
+            lua_settable(readOnly, -3);
+
+            /* redis.replicate_commands */
+            lua_pushstring(readOnly, "replicate_commands");
+            lua_pushcfunction(readOnly, luaRedisReplicateCommandsCommand);
+            lua_settable(readOnly, -3);
+
+            /* redis.set_repl and associated flags. */
+            lua_pushstring(readOnly,"set_repl");
+            lua_pushcfunction(readOnly,luaRedisSetReplCommand);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"REPL_NONE");
+            lua_pushnumber(readOnly,PROPAGATE_NONE);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"REPL_AOF");
+            lua_pushnumber(readOnly,PROPAGATE_AOF);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"REPL_SLAVE");
+            lua_pushnumber(readOnly,PROPAGATE_REPL);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"REPL_REPLICA");
+            lua_pushnumber(readOnly,PROPAGATE_REPL);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"REPL_ALL");
+            lua_pushnumber(readOnly,PROPAGATE_AOF|PROPAGATE_REPL);
+            lua_settable(readOnly,-3);
+
+            /* redis.breakpoint */
+            lua_pushstring(readOnly,"breakpoint");
+            lua_pushcfunction(readOnly,luaRedisBreakpointCommand);
+            lua_settable(readOnly,-3);
+
+            /* redis.debug */
+            lua_pushstring(readOnly,"debug");
+            lua_pushcfunction(readOnly,luaRedisDebugCommand);
+            lua_settable(readOnly,-3);
+
+            /* Finally set the table as 'redis' global var. */
+
+
+            lua_pushstring(readOnly,"BIZ_DATA");
+            lua_pushstring(readOnly,"biz_info.snapshot");
+            lua_settable(readOnly,-3);
+            
+            lua_setglobal(readOnly,"redis");
+
+            /* Replace math.random and math.randomseed with our implementations. */
+            lua_getglobal(readOnly,"math");
+
+            lua_pushstring(readOnly,"random");
+            lua_pushcfunction(readOnly,redis_math_random);
+            lua_settable(readOnly,-3);
+
+            lua_pushstring(readOnly,"randomseed");
+            lua_pushcfunction(readOnly,redis_math_randomseed);
+            lua_settable(readOnly,-3);
+
+            lua_setglobal(readOnly,"math");
+
+            lua_newtable(readOnly);
+            lua_pushstring(readOnly,"version");
+            lua_pushstring(readOnly,"1.0");
+            lua_settable(readOnly,-3);
+            lua_setglobal(readOnly,"func_hash");
+            return;
+    }
+
     lua_State *lua = lua_open();
 
     if (setup) {
@@ -927,17 +1051,18 @@ void scriptingInit(int setup) {
         ldbInit();
     }
 
+
     luaLoadLibraries(lua);
     luaRemoveUnsupportedFunctions(lua);
 
-
+    
     /* Initialize a dictionary we use to map SHAs to scripts.
      * This is useful for replication, as we need to replicate EVALSHA
      * as EVAL, so we need to remember the associated script. */
     server.lua_scripts = dictCreate(&shaScriptObjectDictType,NULL);
     server.lua_scripts_mem = 0;
-
-    /* Register the redis commands table and fields */
+   
+    /* Regi ster the redis commands table and fields */
     lua_newtable(lua);
 
     /* redis.call */
@@ -1053,6 +1178,7 @@ void scriptingInit(int setup) {
     lua_setglobal(lua,"func_hash");
 
 
+    
     /* Add a helper function that we use to sort the multi bulk output of non
      * deterministic commands, when containing 'false' elements. */
     {
