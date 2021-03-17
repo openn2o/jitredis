@@ -547,6 +547,7 @@ local wasm_loader_decode = function (bytes)
         local sectionID, sectionLength;
         sectionID, bytes = nibble(bytes);
         sectionID        = sectionID:byte();
+        print("section id =" , sectionID)
         sectionLength, bytes = parseLEBu(bytes, 4);
         if sectionID == 0 then
             local sectionName  
@@ -557,14 +558,17 @@ local wasm_loader_decode = function (bytes)
               data = sectionStream
             }
         else
+            if sectionID > 20 then
+              sectionID = sectionID / 10;
+            end
             if sections[sectionID] then
                 local sectionStream
                 sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
                 sectionData[sectionID] = sections[sectionID](sectionStream, sectionData)
             else
                 print("Invalid section id '" .. sectionID .. "'.. skipping..")
-                local sectionStream
-                sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
+                --local sectionStream
+                --sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
             end
         end
     end
@@ -582,10 +586,10 @@ end
 
 ---------------------------test
 local data   = nil;
--- local handle = io.open("/tmp/bin.wasm", "rb")
+local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/base.wasm", "rb")
+-- local handle = io.open("./tests/base.wasm", "rb")
 data  = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);

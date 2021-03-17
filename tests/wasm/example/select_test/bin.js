@@ -24,27 +24,40 @@ var __Z9test_max1ii=null;
 var __Z9test_max2ii=null;
 var __Z9test_max3ii=null;
 var __Z9test_max4ii=null;
+var __Z3fabi=null;
+var __Z13base64_encodeiii=null;
+var base64_encode=__dummy;
+var fab=__dummy;
 var test_max1=__dummy;
 var test_max2=__dummy;
 var test_max3=__dummy;
 var test_max4=__dummy;
 __dummy.promise=
-fetchBuffer('bin.wasm').then(Larg0=>
-WebAssembly.instantiate(Larg0,
+fetchBuffer('bin.wasm').then(tmp0=>
+WebAssembly.instantiate(tmp0,
 {i:{
+		__ZN4ccm13logEi:__dummy,
+		__ZN4ccm127warp_from_value_to_uint8ptrEi:__dummy,
+		__ZN4ccm127warp_from_uint8ptr_to_valueEPh:__dummy,
 	}})
-).then(Larg0=>{
-	__asm=Larg0.instance.exports;
+).then(tmp0=>{
+	__asm=tmp0.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
 	__Z9test_max1ii=__asm.__Z9test_max1ii;
 	__Z9test_max2ii=__asm.__Z9test_max2ii;
 	__Z9test_max3ii=__asm.__Z9test_max3ii;
 	__Z9test_max4ii=__asm.__Z9test_max4ii;
+	__Z3fabi=__asm.__Z3fabi;
+	__Z13base64_encodeiii=__asm.__Z13base64_encodeiii;
+	base64_encode=__Z13base64_encodeiii;
+	fab=__Z3fabi;
 	test_max1=__Z9test_max1ii;
 	test_max2=__Z9test_max2ii;
 	test_max3=__Z9test_max3ii;
 	test_max4=__Z9test_max4ii;
+	base64_encode.promise=
+	fab.promise=
 	test_max1.promise=
 	test_max2.promise=
 	test_max3.promise=
@@ -52,5 +65,5 @@ WebAssembly.instantiate(Larg0,
 	Promise.resolve();
 	__asm._main();
 });
-function assignHeaps(Larg0){
+function assignHeaps(tmp0){
 }

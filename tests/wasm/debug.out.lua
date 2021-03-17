@@ -1,5 +1,17 @@
+local ccm1 = require("ccm1_string");
+local imports = {ccm1__log = ccm1.ccm1__log
+,ccm1__warp_from_value_to_uint8ptr = ccm1.ccm1__warp_from_value_to_uint8ptr
+,}
+for k, v in pairs(imports) do
+  if not imports[k] then
+    imports[k] = function(...)
+      print("Unlinked Method " .. k);
+    end
+  end
+end
 if not imports then imports = {} end 
 imports.requires = {}
+imports.requires['ccm1']=ccm1;
 
 ---link
 local bit = require("bit");
@@ -39,183 +51,73 @@ local function readMem(mem, memSize, addr, bytes)
   end
 end
 local exportTable = {}
-local A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, BA, BB, BC, BD, BE, BF, BG, BH, BI, BJ, BK, BL, BM, BN, BO, BP, BQ, BR
-function A()
-  return (1 + 2)
-end
-function B()
-  return (20 - 4)
-end
-function C()
-  return (3 * 7)
-end
+local A = ffi.new("uint8_t[1114112]")
+local ASize = 17
+exportTable.memory = A
+local B = 1048576
+local C = {  }
+local D, E, F, G, H, I, J, K
 function D()
-  return (math.floor(-4 / 2))
+  error("Unreachable code reached..", 2)
 end
-function E()
-  return (math.abs(math.floor(-4 / 2)))
+function E(L)
+  local M = 0
+  local N = 0
+  local O = 0
+  N = (L + -1)
+ if checkCondition((((L + -1) < 2) and 1 or 0)) then 
+	::PStart::
+  if true then return 1 end
+	::PFinish::
+  end
+  O = 1
+  M = L
+ do 
+	::QStart::
+  local R = E(N)
+  O = (R + O)
+  N = (M + -3)
+ if checkCondition((((M + -3) < 2) and 1 or 0)) then 
+	::SStart::
+  if true then return O end
+	::SFinish::
+  end
+  M = (M + -2)
+ goto QStart
+	::QFinish::
+  end
+  return 0
 end
 function F()
-  return (math.floor(-5 % 2))
+  local T = E(40)
+  imports.ccm1__log(T)
+  return 0
 end
-function G()
-  return (math.floor(-5 % 2))
+function G(U, V)
+  local W = imports.ccm1__warp_from_value_to_uint8ptr(U)
+  error("Unreachable code reached..", 2)
+  error("Unreachable code reached..", 2)
 end
-function H()
-  return (bit.band(11, 5))
+function H(X, Y)
+  return ((checkCondition(((X > Y) and 1 or 0)) and X) or (Y) * 100)
 end
-function I()
-  return (bit.bor(11, 5))
+function I(Z, BA)
+  return (checkCondition(((Z > BA) and 1 or 0)) and Z) or (BA)
 end
-function J()
-  return (bit.bxor(11, 5))
+function J(BB, BC)
+  return (checkCondition(((BB > BC) and 1 or 0)) and BB) or (BC)
 end
-function K()
-  return (bit.lshift(-100, 3))
+function K(BD, BE)
+  return (checkCondition(((BD > BE) and 1 or 0)) and BD) or (BE)
 end
-function L()
-  return (bit.rshift(-100, 3))
-end
-function M()
-  return (bit.arshift(-100, 3))
-end
-function N()
-  return (bit.rol(-100, 3))
-end
-function O()
-  return (bit.ror(-100, 3))
-end
-function P()
-  return (1 + 2)
-end
-function Q()
-  return (20 - 4)
-end
-function R()
-  return (3 * 7)
-end
-function S()
-  return (math.floor(-4 / 2))
-end
-function T()
-  return (math.abs(math.floor(-4 / 2)))
-end
-function U()
-  return (math.floor(-5 % 2))
-end
-function V()
-  return (math.floor(-5 % 2))
-end
-function W()
-  return (bit.band(11, 5))
-end
-function X()
-  return (bit.bor(11, 5))
-end
-function Y()
-  return (bit.bxor(11, 5))
-end
-function Z()
-  return (bit.lshift(-100, 3))
-end
-function BA()
-  return (bit.rshift(-100, 3))
-end
-function BB()
-  return (bit.rshift(-100, 3))
-end
-function BC()
-  return (bit.rol(-100, 3))
-end
-function BD()
-  return (bit.rol(-100, 3))
-end
-function BE()
-  return (1.25 + 3.75)
-end
-function BF()
-  return (4.5 - 10000)
-end
-function BG()
-  return (1234.5 * -6.875)
-end
-function BH()
-  return (math.floor(1.0000000037683e+14 / -200000))
-end
-function BI()
-  return math.min(0, 0)
-end
-function BJ()
-  return math.min(0, 0)
-end
-function BK()
-  return 0, 0
-end
-function BL()
-  return (987654321 + 123456789)
-end
-function BM()
-  return (1.234e+59 - 5.5e+23)
-end
-function BN()
-  return (-1230000 * 12341234)
-end
-function BO()
-  return (1e+200 / 1e+50)
-end
-function BP()
-  return math.min(0, 0)
-end
-function BQ()
-  return math.max(0, 0)
-end
-function BR()
-  return 0, 0
-end
-exportTable.i32_rotl = N
-exportTable.i64_mul = R
-exportTable.f64_copysign = BR
-exportTable.i64_sub = Q
-exportTable.i64_rem_u = V
-exportTable.i64_div_u = T
-exportTable.i32_shr_s = M
-exportTable.f64_max = BQ
-exportTable.i32_or = I
-exportTable.i32_rotr = O
-exportTable.i64_shr_s = BB
-exportTable.i32_div_u = E
-exportTable.f32_copysign = BK
-exportTable.i32_sub = B
-exportTable.f32_add = BE
-exportTable.i32_add = A
-exportTable.i32_xor = J
-exportTable.i64_div_s = S
-exportTable.f32_min = BI
-exportTable.f32_sub = BF
-exportTable.i32_div_s = D
-exportTable.f64_div = BO
-exportTable.i32_shl = K
-exportTable.f32_mul = BG
-exportTable.i64_or = X
-exportTable.i64_and = W
-exportTable.f64_add = BL
-exportTable.i64_rotr = BD
-exportTable.f32_max = BJ
-exportTable.i64_add = P
-exportTable.i64_xor = Y
-exportTable.f32_div = BH
-exportTable.f64_min = BP
-exportTable.i32_rem_u = G
-exportTable.i32_and = H
-exportTable.f64_sub = BM
-exportTable.i64_rem_s = U
-exportTable.i32_rem_s = F
-exportTable.f64_mul = BN
-exportTable.i32_mul = C
-exportTable.i64_shr_u = BA
-exportTable.i64_rotl = BC
-exportTable.i64_shl = Z
-exportTable.i32_shr_u = L
+exportTable.base64_encode = G
+exportTable.test_max2 = J
+exportTable.test_max1 = K
+exportTable.fab = E
+exportTable.main = F
+exportTable.test_max3 = I
+exportTable.test_max4 = H
+exportTable.memory = A
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 
@@ -245,4 +147,4 @@ exportTable.read_uint8_array = function (i, len)
   return tmp;
 end
 
-return { exports = exportTable, }
+return { exports = exportTable, importTable = imports, }

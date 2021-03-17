@@ -77,6 +77,11 @@ _M.ccm1__dynamic_string_log = function (ptr)
     end
 end
 
+
+_M.ccm1__log = function (ptr) 
+    print((ptr));
+end
+
 _M.ccm1__dynamic_string_join = function (ptr) 
     local refs = _M.string_buff[ptr];
     if (nil == refs) then
