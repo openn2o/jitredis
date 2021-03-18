@@ -200,12 +200,14 @@ function  parseFloat(stream, bytes)
       if immediate ~= typeMap.NONE then
         instr.imVal, stream, brtableVal = decodeImmediate(immediate, stream, body)
         if brtableVal ~= nil then
-          instr.br_table = brtableVal;
-          hasTableV      = brtableVal;
-          -- print(".................." , instr.name)
+          -- instr.br_table = brtableVal;
+          if not hasTableV then
+            hasTableV = {}
+          end
+          hasTableV [#hasTableV + 1]    = brtableVal;
+          -- print(".................." , instr.br_table.brtable_stack_depth)
         end
       end
-      -- print("decodeFunctionBody= " , tostring(brtableVal))
       body[#body + 1] = instr
     end
     if stream:byte() == nil then

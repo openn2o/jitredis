@@ -53,7 +53,6 @@ end
 local exportTable = {}
 local A = ffi.new("uint8_t[2097152]")
 local ASize = 32
-exportTable.memory = A
 local B = 1048576
 local C = {  }
 A[1048584] = 65
@@ -165,17 +164,17 @@ function F(G, H, I)
  do 
 	::ZStart::
 	local eax=O
-	local branch_tab = ffi.new('int[2]', {0,1})
-	if (eax < 2) then
+	local branch_tab = ffi.new('int[3]', {0,1,2})
+	if (eax < 3) then
 	eax=branch_tab[eax];
 	 if eax == 2 then
-		 goto UFinish
-	 end
-	 if eax == 1 then
 		 goto VFinish
 	 end
-	 if eax == 0 then
+	 if eax == 1 then
 		 goto WFinish
+	 end
+	 if eax == 0 then
+		 goto XFinish
 	 end
 	else
 		 goto UFinish
@@ -248,17 +247,14 @@ function F(G, H, I)
 	local branch_tab = ffi.new('int[2]', {0,1})
 	if (eax < 2) then
 	eax=branch_tab[eax];
-	 if eax == 2 then
-		 goto UFinish
-	 end
 	 if eax == 1 then
-		 goto VFinish
+		 goto BGFinish
 	 end
 	 if eax == 0 then
-		 goto WFinish
+		 goto BHFinish
 	 end
 	else
-		 goto UFinish
+		 goto BFFinish
 	end
 	::BHFinish::
   end
@@ -291,7 +287,7 @@ function F(G, H, I)
   if true then return BL end
 	::BFFinish::
   end
-  storeMem(A, ASize, N, 0, 8)
+  storeMem(A, ASize, 2, 0, 8)
   local BM = imports.ccm1__warp_from_uint8ptr_to_value(K)
   if true then return BM end
 	::BEFinish::
@@ -300,11 +296,12 @@ function F(G, H, I)
  goto UStart
 	::UFinish::
   end
-  return (M + K), (M + K), (M + K), (M + K), (M + K), N, 0
+  return (M + K), 2, (M + K), 2, (M + K), 2, (M + K), 2, (M + K), N, 2, N, 0
 end
 exportTable.base64_encode = F
 exportTable.memory = A
 exportTable.main = E
+--exportTable.memory = A;
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 

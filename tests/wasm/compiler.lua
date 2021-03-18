@@ -2,7 +2,7 @@ local memoryManager = require("memory")
 
 local compiler = {}
 local instructions
-
+compiler.brtable_index = 0;
 --确认是否为test语句
 local is_eq_exp = function (str) 
   if str ~= nil then
@@ -79,12 +79,10 @@ local function makeMemory(name, size)
   return ([[
 local %s = ffi.new("uint8_t[%d]")
 local %sSize = %d
-exportTable.memory = A
 ]]):format(name, size*pageSize, name, size)
 end
 
 local function constMemoryStore(memoryName, addr, segment)
-  print(const)
   local src = ""
   for i = 1, #segment do
     src = src .. ([[%s[%d] = %d
@@ -208,12 +206,14 @@ generators = {
   BrTable = function (stack, instr, argList, fnLocals, blockStack, instance)
     --b_brtable
     local br_tables = {}
-    print("BRTable is run debug2");
-    local loc_br_tables       = fnLocals[#fnLocals].br_tables;
-    local loc_br_tables_depth = fnLocals[#fnLocals].brtable_stack_depth;
-    local loc_br_table_stack  = fnLocals[#fnLocals].brtable_stack;
+    local br_idx    = compiler.brtable_index;
+    print("BRTable is run debug" , br_idx);
 
-    local depth_ = 0;
+    local loc_br_tables       = fnLocals[#fnLocals][br_idx].br_tables;
+    local loc_br_tables_depth = fnLocals[#fnLocals][br_idx].brtable_stack_depth;
+    local loc_br_table_stack  = fnLocals[#fnLocals][br_idx].brtable_stack;
+
+    local depth_ = 1;
     local slength= loc_br_tables_depth;
 
     br_tables[#br_tables + 1] = "\tlocal eax=" .. pop(stack);
@@ -229,6 +229,9 @@ generators = {
     br_tables[#br_tables + 1] = "\telse";
     br_tables[#br_tables + 1] = "\t\t goto " .. loc_br_table_stack[1] .. "Finish"
     br_tables[#br_tables + 1] = "\tend\n";
+
+    ------pop
+    compiler.brtable_index =  compiler.brtable_index + 1;
     return table.concat(br_tables, "\n");
   end,
   Select   = function (stack, instr, argList, fnLocals)
@@ -650,9 +653,12 @@ generators = {
         -- We got popped by an 'End', but we have nothing to return
       end, loop = loopq})
       ---brtables
-      if(fnLocals[#fnLocals - 1] and( fnLocals[#fnLocals - 1] == 0x81)) then
+      if(fnLocals[#fnLocals - 1] and (fnLocals[#fnLocals - 1] == 0x81)) then
         if (customDo == "do" ) then
-          local loc_p = fnLocals[#fnLocals];
+          local next_br = compiler.brtable_index;
+          -- print("next_br", next_br);
+          local loc_p = fnLocals[#fnLocals][next_br];
+          --print("locp= ",table.getn(loc_p));
           loc_p.brtable_stack [#loc_p.brtable_stack+1] = blockLabel;
         end
       end
@@ -801,6 +807,8 @@ generators = {
     print("stack = " , table.concat(stack));
     local temp  = makeName()
     local delta = pop(stack)
+    push(stack, 2)
+
     if not delta then
       print("stack is empty and pop is null ptr")
       return;
@@ -1025,8 +1033,9 @@ function compiler.newInstance(sectionData)
   end
   for k, v in pairs(sectionData[10]) do
     -- Generate function body
+    compiler.brtable_index = 1;
     local argList = {}
-
+   
     local fnKind = t.sectionData[3][k]
     local sig = t.sectionData[1][fnKind]
     for i = 1, #sig.params do
@@ -1121,6 +1130,7 @@ function compiler.newInstance(sectionData)
   end
 
   t.source =  t.source .. [[
+--exportTable.memory = A;
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 
