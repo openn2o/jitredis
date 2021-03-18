@@ -90,11 +90,9 @@ function F(G, H)
   if true then return 2 end
 	::IFinish::
   end
-  print("========", checkCondition((G == 1) and 1 or 0))
 	if checkCondition(((G == 1) and 1 or 0)) then 
 	return 2
-  end
-
+	end
   return (checkCondition(((G == 2) and 1 or 0)) and 3) or (5)
 end
 

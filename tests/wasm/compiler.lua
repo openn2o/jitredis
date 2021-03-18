@@ -227,7 +227,7 @@ generators = {
       depth_ = depth_ + 1;
     end
     br_tables[#br_tables + 1] = "\telse";
-    br_tables[#br_tables + 1] = "\t\t goto " .. loc_br_table_stack[slength] .. "Finish"
+    br_tables[#br_tables + 1] = "\t\t goto " .. loc_br_table_stack[1] .. "Finish"
     br_tables[#br_tables + 1] = "\tend\n";
     return table.concat(br_tables, "\n");
   end,
@@ -239,9 +239,10 @@ generators = {
     local p2 = pop(stack);
     local p3 = pop(stack);
 
-    print("p1=", type(p1), string.byte(p1,1), #stack);
+    print("p1=", type(p1), string.byte(p1,1));
     if is_eq_exp(p1) then
         if (not is_eq_exp(p2)) and (not is_eq_exp(p3)) then
+          ------只有栈顶是条件时
           push (stack, table.concat(
             {
               "(checkCondition(",
@@ -266,7 +267,6 @@ generators = {
           }
          )
          push(stack, p2);
-
         end
     else
       if p2 ~= nil and p3 ~= nil then
