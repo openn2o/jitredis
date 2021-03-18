@@ -47,82 +47,54 @@ local function readMem(mem, memSize, addr, bytes)
   end
 end
 local exportTable = {}
-local A = ffi.new("uint8_t[1114112]")
-local ASize = 17
+local A = ffi.new("uint8_t[2097152]")
+local ASize = 32
 exportTable.memory = A
-A[0] = 65
-A[1] = 43
-A[2] = 47
-A[3] = 0
-A[10] = 66
-A[11] = 43
-A[12] = 47
-A[13] = 0
-A[1048584] = 65
-A[1048585] = 66
-A[1048586] = 67
-A[1048587] = 68
-A[1048588] = 69
-A[1048589] = 70
-A[1048590] = 71
-A[1048591] = 72
-A[1048592] = 73
-A[1048593] = 74
-A[1048594] = 75
-A[1048595] = 76
-A[1048596] = 77
-A[1048597] = 78
-A[1048598] = 79
-A[1048599] = 80
-A[1048600] = 81
-A[1048601] = 82
-A[1048602] = 83
-A[1048603] = 84
-A[1048604] = 85
-A[1048605] = 86
-A[1048606] = 87
-A[1048607] = 88
-A[1048608] = 89
-A[1048609] = 90
-A[1048610] = 97
-A[1048611] = 98
-A[1048612] = 99
-A[1048613] = 100
-A[1048614] = 101
-A[1048615] = 102
-A[1048616] = 103
-A[1048617] = 104
-A[1048618] = 105
-A[1048619] = 106
-A[1048620] = 107
-A[1048621] = 108
-A[1048622] = 109
-A[1048623] = 110
-A[1048624] = 111
-A[1048625] = 112
-A[1048626] = 113
-A[1048627] = 114
-A[1048628] = 115
-A[1048629] = 116
-A[1048630] = 117
-A[1048631] = 118
-A[1048632] = 119
-A[1048633] = 120
-A[1048634] = 121
-A[1048635] = 122
-A[1048636] = 48
-A[1048637] = 49
-A[1048638] = 50
-A[1048639] = 51
-A[1048640] = 52
-A[1048641] = 53
-A[1048642] = 54
-A[1048643] = 55
-A[1048644] = 56
-A[1048645] = 57
-A[1048646] = 43
-A[1048647] = 47
-A[1048648] = 0
+local B = 1048576
+local C = {  }
+local D, E, F
+function D()
+  error("Unreachable code reached..", 2)
+end
+function E()
+  return 0
+end
+function F(G, H)
+ do 
+	::IStart::
+ do 
+	::JStart::
+ do 
+	::KStart::
+	local eax=(H - 5)
+	local branch_tab = ffi.new('int[8]', {0,2,2,2,2,2,2,1})
+	if (eax < 8) then
+	eax=branch_tab[eax];
+	 if eax == 2 then
+		 goto IFinish
+	 end
+	 if eax == 1 then
+		 goto JFinish
+	 end
+	 if eax == 0 then
+		 goto KFinish
+	 end
+	else
+		 goto KFinish
+	end
+	::KFinish::
+  end
+  if true then return 1 end
+	::JFinish::
+  end
+  if true then return 2 end
+	::IFinish::
+  end
+  return (checkCondition(((G == 1) and 1 or 0)) and 2) or ((checkCondition(((G == 2) and 1 or 0)) and 3) or (5))
+end
+exportTable.br_table_muli = F
+exportTable.memory = A
+exportTable.main = E
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 

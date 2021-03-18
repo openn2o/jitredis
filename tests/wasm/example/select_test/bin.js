@@ -19,65 +19,28 @@ function fetchBuffer(p){
 	});
 	return b;
 }
-function ___wrapper___ZN4ccm127warp_from_uint8ptr_to_valueEPh(Larg0){
-	Larg0=Larg0|0;
-	return __ZN4ccm127warp_from_uint8ptr_to_valueEPh()|0|0;
-}
-function assignHeaps(tmp0){
-	HEAP8=new Uint8Array(tmp0);
-	HEAP16=new Uint16Array(tmp0);
-	HEAP32=new Int32Array(tmp0);
-	HEAPF32=new Float32Array(tmp0);
-	HEAPF64=new Float64Array(tmp0);
+function assignHeaps(Larg0){
+	HEAP8=new Uint8Array(Larg0);
+	HEAP16=new Uint16Array(Larg0);
+	HEAP32=new Int32Array(Larg0);
+	HEAPF32=new Float32Array(Larg0);
+	HEAPF64=new Float64Array(Larg0);
 }
 var HEAP8=null,HEAP16=null,HEAP32=null,HEAPF32=null,HEAPF64=null,__asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
-var __Z9test_max1ii=null;
-var __Z9test_max2ii=null;
-var __Z9test_max3ii=null;
-var __Z9test_max4ii=null;
-var __Z3fabi=null;
-var __Z13base64_encodeiii=null;
-var _Z9test_max1ii={};
-var _Z9test_max2ii={};
-var _Z9test_max3ii={};
-var _Z9test_max4ii={};
-var _Z3fabi={};
-var _Z13base64_encodeiii={};
-_Z9test_max1ii.promise=
-_Z9test_max2ii.promise=
-_Z9test_max3ii.promise=
-_Z9test_max4ii.promise=
-_Z3fabi.promise=
-_Z13base64_encodeiii.promise=
-fetchBuffer('bin.wasm').then(tmp0=>
-WebAssembly.instantiate(tmp0,
+var __Z13br_table_muliii=null;
+var _Z13br_table_muliii={};
+_Z13br_table_muliii.promise=
+fetchBuffer('bin.wasm').then(Larg0=>
+WebAssembly.instantiate(Larg0,
 {i:{
-		__ZN4ccm13logEi:__dummy,
-		__ZN4ccm127warp_from_value_to_uint8ptrEi:__dummy,
-		___wrapper___ZN4ccm127warp_from_uint8ptr_to_valueEPh:___wrapper___ZN4ccm127warp_from_uint8ptr_to_valueEPh,
 	}})
-,console.log).then(tmp0=>{
-	__asm=tmp0.instance.exports;
+,console.log).then(Larg0=>{
+	__asm=Larg0.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
-	__Z9test_max1ii=__asm.__Z9test_max1ii;
-	__Z9test_max2ii=__asm.__Z9test_max2ii;
-	__Z9test_max3ii=__asm.__Z9test_max3ii;
-	__Z9test_max4ii=__asm.__Z9test_max4ii;
-	__Z3fabi=__asm.__Z3fabi;
-	__Z13base64_encodeiii=__asm.__Z13base64_encodeiii;
-	_Z9test_max1ii=__Z9test_max1ii;
-	_Z9test_max2ii=__Z9test_max2ii;
-	_Z9test_max3ii=__Z9test_max3ii;
-	_Z9test_max4ii=__Z9test_max4ii;
-	_Z3fabi=__Z3fabi;
-	_Z13base64_encodeiii=__Z13base64_encodeiii;
-	_Z9test_max1ii.promise=
-	_Z9test_max2ii.promise=
-	_Z9test_max3ii.promise=
-	_Z9test_max4ii.promise=
-	_Z3fabi.promise=
-	_Z13base64_encodeiii.promise=
+	__Z13br_table_muliii=__asm.__Z13br_table_muliii;
+	_Z13br_table_muliii=__Z13br_table_muliii;
+	_Z13br_table_muliii.promise=
 	Promise.resolve();
 	__asm._main();
 },console.log,console.log);

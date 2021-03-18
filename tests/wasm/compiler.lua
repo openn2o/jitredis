@@ -209,8 +209,6 @@ generators = {
     --b_brtable
     local br_tables = {}
     print("BRTable is run debug2");
-    -- print(table.concat(stack),",");
-    -- print("222....................", fnLocals[#fnLocals]);
     local loc_br_tables       = fnLocals[#fnLocals].br_tables;
     local loc_br_tables_depth = fnLocals[#fnLocals].brtable_stack_depth;
     local loc_br_table_stack  = fnLocals[#fnLocals].brtable_stack;
@@ -754,7 +752,7 @@ generators = {
   end,
   I32Store8 = function(stack, _, _, _, _, instance)
     local value = pop(stack)
-    local addr = pop(stack)
+    local addr  = pop(stack)
     return ([[  storeMem(%s, %sSize, %s, %s, 8)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint8_t*", %s + %s)[0] = %s%s
   end,
   I32Store16 = function(stack, _, _, _, _, instance)
@@ -811,6 +809,10 @@ generators = {
       end
     end
 
+    if type(delta) == "string" then
+      extraLogic = extraLogic .. "--debug\n\n"
+      delta = 100;
+    end
     return ([[  local %s = ffi.new("uint8_t[" .. (%sSize + %d)*%d .. "]")
   ffi.copy(%s, %s, %sSize*%d)
   %s, %sSize = %s, (%sSize + %d)

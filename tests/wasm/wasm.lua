@@ -165,6 +165,7 @@ function  parseFloat(stream, bytes)
         i = i+1;
       end
       depth, stream = parseLEBu(stream, 32); -- depth
+      print("depth=", depth)
       br_tables_local.brtable_stack_depth = depth + 1;
       br_tables_local.brtable_stack = {}
       return result, stream, br_tables_local
@@ -577,6 +578,16 @@ local wasm_loader_decode = function (bytes)
             name = sectionName,
             data = sectionStream
           }
+          -- print("name=", sectionName)
+          -- local sectionName
+          -- sectionName = parsers.parseVLString(stream)
+    
+          -- local sectionStream
+          -- sectionStream, stream = stream:sub(1, sectionLength), stream:sub(sectionLength + 1)
+          -- sectionData[0][#sectionData[0] + 1] = {
+          --   name = sectionName,
+          --   data = sectionStream
+          -- }
         else
             if sections[sectionID] then
                 local sectionStream
@@ -606,7 +617,7 @@ local data   = nil;
 -- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/data_section3.wasm", "rb")
+local handle = io.open("./tests/bin.wasm", "rb")
 data  = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);

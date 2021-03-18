@@ -10,7 +10,7 @@
   -cheerp-no-icf \
   -cheerp-pretty-code \
   -o bin.js -O3\
-  -cheerp-wasm-disable=sharedmem,growmem,returncalls\
+  -cheerp-wasm-disable=sharedmem,growmem,returncalls \
   -cheerp-avoid-wasm-traps \
   main.cpp 
 
