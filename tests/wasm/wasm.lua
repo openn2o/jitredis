@@ -515,22 +515,42 @@ local sections = {
     [11] = function(stream) -- Data Section
       local count
       count, stream = parseLEBu(stream, 4)
-  
+      -- print("num=" , count);
       local segments = {}
-  
+      local flag
+
       for i = 1, count do
-        local memoryIndex
-        memoryIndex, stream =  parseLEBu(stream, 4)
-  
-        local offsetVal
-        offsetVal, stream = parseInitializerExpr(stream)
-  
-        local data
-        data, stream = parseVLString(stream)
-  
-        segments[i] = {index = memoryIndex, addr = offsetVal, data = data}
+        flag,stream= parseLEBu(stream, 4);
+
+        if 0 == flag then
+          -- print("header begin");
+          flag,stream = parseLEBu(stream, 4);
+          if 0x41 == flag then
+            -- print("i32 const" , flag)
+          end
+          
+          offsetVal,stream = parseLEBu(stream, 4);
+          -- print("mem offset", offsetVal)
+          flag,stream = parseLEBu(stream, 4);
+         
+          -- if 0x0b == flag then
+          --   print("header end");
+          -- end
+          
+          flag,stream = parseLEBu(stream, 4);
+          data_size = flag;
+          -- print("data size=", data_size);
+          local ram_s = {}
+          for i = 1, data_size do
+            flag,stream =  parseLEBu(stream, 1);
+            ram_s [i] = string.char(flag);
+          end 
+          ram_s [#ram_s + 1] = '\0';
+          segments[i] = {index = offsetVal, addr = offsetVal, data = table.concat(ram_s)}
+        else
+          print("uncaght error");
+        end
       end
-  
       return segments
     end
   }
@@ -550,25 +570,22 @@ local wasm_loader_decode = function (bytes)
         print("section id =" , sectionID)
         sectionLength, bytes = parseLEBu(bytes, 4);
         if sectionID == 0 then
-            local sectionName  
-            sectionName = parseVLString(bytes)
-            local sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1);
-            sectionData[0][#sectionData[0] + 1] = {
-              name = sectionName,
-              data = sectionStream
-            }
+          local str_len =  parseLEBu(bytes, 4);
+          sectionName   =  parseVLString(bytes);
+          local sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1);
+          sectionData[0][#sectionData[0] + 1] = {
+            name = sectionName,
+            data = sectionStream
+          }
         else
-            if sectionID > 20 then
-              sectionID = sectionID / 10;
-            end
             if sections[sectionID] then
                 local sectionStream
                 sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
                 sectionData[sectionID] = sections[sectionID](sectionStream, sectionData)
             else
                 print("Invalid section id '" .. sectionID .. "'.. skipping..")
-                --local sectionStream
-                --sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
+                local sectionStream
+                sectionStream, bytes = bytes:sub(1, sectionLength), bytes:sub(sectionLength + 1)
             end
         end
     end
@@ -586,10 +603,10 @@ end
 
 ---------------------------test
 local data   = nil;
-local handle = io.open("/tmp/bin.wasm", "rb")
+-- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
--- local handle = io.open("./tests/base.wasm", "rb")
+local handle = io.open("./tests/data_section3.wasm", "rb")
 data  = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);

@@ -1,7 +1,4 @@
-local ccm1 = require("ccm1_string");
-local imports = {ccm1__log = ccm1.ccm1__log
-,ccm1__warp_from_value_to_uint8ptr = ccm1.ccm1__warp_from_value_to_uint8ptr
-,}
+local imports = {}
 for k, v in pairs(imports) do
   if not imports[k] then
     imports[k] = function(...)
@@ -11,7 +8,6 @@ for k, v in pairs(imports) do
 end
 if not imports then imports = {} end 
 imports.requires = {}
-imports.requires['ccm1']=ccm1;
 
 ---link
 local bit = require("bit");
@@ -54,70 +50,79 @@ local exportTable = {}
 local A = ffi.new("uint8_t[1114112]")
 local ASize = 17
 exportTable.memory = A
-local B = 1048576
-local C = {  }
-local D, E, F, G, H, I, J, K
-function D()
-  error("Unreachable code reached..", 2)
-end
-function E(L)
-  local M = 0
-  local N = 0
-  local O = 0
-  N = (L + -1)
- if checkCondition((((L + -1) < 2) and 1 or 0)) then 
-	::PStart::
-  if true then return 1 end
-	::PFinish::
-  end
-  O = 1
-  M = L
- do 
-	::QStart::
-  local R = E(N)
-  O = (R + O)
-  N = (M + -3)
- if checkCondition((((M + -3) < 2) and 1 or 0)) then 
-	::SStart::
-  if true then return O end
-	::SFinish::
-  end
-  M = (M + -2)
- goto QStart
-	::QFinish::
-  end
-  return 0
-end
-function F()
-  local T = E(40)
-  imports.ccm1__log(T)
-  return 0
-end
-function G(U, V)
-  local W = imports.ccm1__warp_from_value_to_uint8ptr(U)
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
-end
-function H(X, Y)
-  return ((checkCondition(((X > Y) and 1 or 0)) and X) or (Y) * 100)
-end
-function I(Z, BA)
-  return (checkCondition(((Z > BA) and 1 or 0)) and Z) or (BA)
-end
-function J(BB, BC)
-  return (checkCondition(((BB > BC) and 1 or 0)) and BB) or (BC)
-end
-function K(BD, BE)
-  return (checkCondition(((BD > BE) and 1 or 0)) and BD) or (BE)
-end
-exportTable.base64_encode = G
-exportTable.test_max2 = J
-exportTable.test_max1 = K
-exportTable.fab = E
-exportTable.main = F
-exportTable.test_max3 = I
-exportTable.test_max4 = H
-exportTable.memory = A
+A[0] = 65
+A[1] = 43
+A[2] = 47
+A[3] = 0
+A[10] = 66
+A[11] = 43
+A[12] = 47
+A[13] = 0
+A[1048584] = 65
+A[1048585] = 66
+A[1048586] = 67
+A[1048587] = 68
+A[1048588] = 69
+A[1048589] = 70
+A[1048590] = 71
+A[1048591] = 72
+A[1048592] = 73
+A[1048593] = 74
+A[1048594] = 75
+A[1048595] = 76
+A[1048596] = 77
+A[1048597] = 78
+A[1048598] = 79
+A[1048599] = 80
+A[1048600] = 81
+A[1048601] = 82
+A[1048602] = 83
+A[1048603] = 84
+A[1048604] = 85
+A[1048605] = 86
+A[1048606] = 87
+A[1048607] = 88
+A[1048608] = 89
+A[1048609] = 90
+A[1048610] = 97
+A[1048611] = 98
+A[1048612] = 99
+A[1048613] = 100
+A[1048614] = 101
+A[1048615] = 102
+A[1048616] = 103
+A[1048617] = 104
+A[1048618] = 105
+A[1048619] = 106
+A[1048620] = 107
+A[1048621] = 108
+A[1048622] = 109
+A[1048623] = 110
+A[1048624] = 111
+A[1048625] = 112
+A[1048626] = 113
+A[1048627] = 114
+A[1048628] = 115
+A[1048629] = 116
+A[1048630] = 117
+A[1048631] = 118
+A[1048632] = 119
+A[1048633] = 120
+A[1048634] = 121
+A[1048635] = 122
+A[1048636] = 48
+A[1048637] = 49
+A[1048638] = 50
+A[1048639] = 51
+A[1048640] = 52
+A[1048641] = 53
+A[1048642] = 54
+A[1048643] = 55
+A[1048644] = 56
+A[1048645] = 57
+A[1048646] = 43
+A[1048647] = 47
+A[1048648] = 0
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 

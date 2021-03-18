@@ -84,10 +84,11 @@ exportTable.memory = A
 end
 
 local function constMemoryStore(memoryName, addr, segment)
+  print(const)
   local src = ""
   for i = 1, #segment do
     src = src .. ([[%s[%d] = %d
-]]):format(memoryName, addr + i - 1, segment:sub(i, i):byte())
+]]):format("A", addr + i - 1, segment:sub(i, i):byte())
   end
 
   return src
@@ -883,6 +884,18 @@ function compiler.newInstance(sectionData)
   local importCount = 0
   local require_hash = {}
   local dynamic_lib = require("dynamic_link");
+  if not sectionData[2] then
+    for i = 1, 11 do
+      if sectionData[i] == nil then
+        sectionData[i] = {}
+      end
+    end
+  end
+
+  if #sectionData <= 11 then
+    sectionData[#sectionData+1] = {}
+  end
+
   if sectionData[2] then
     -- TODO other imports
     t.source = t.source .. "local imports = {"
@@ -989,6 +1002,9 @@ function compiler.newInstance(sectionData)
     end
   end
 
+  if nil == sectionData[10] then
+    sectionData[10] = {}
+  end
   for k, v in pairs(sectionData[10]) do
     -- Generate function body
     local argList = {}
@@ -1013,7 +1029,6 @@ function compiler.newInstance(sectionData)
       fnLocals[i] = makeName()
       t.source = t.source .. ("  local %s = 0\n"):format(fnLocals[i])
     end
-
     -- Generate opcode instructions agent.zy1
     for i, instr in ipairs(v.instructions) do
       -- print(i, instr.enum)
@@ -1130,8 +1145,10 @@ end
   end
 
   if sectionData[8] then
-    t.source = t.source .. "start = "
-      .. ("%s "):format(t.functions[sectionData[8]].name)
+    if t.functions[sectionData[8]] ~= nil then
+     t.source = t.source .. "start = "
+        .. ("%s "):format(t.functions[sectionData[8]].name)
+    end
   end
 
   t.source = t.source .. "}\n"

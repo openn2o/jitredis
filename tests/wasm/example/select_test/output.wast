@@ -1,195 +1,295 @@
 (module
+(type $vt_vi (func (param i32)))
+(type $vt_ii (func (param i32)(result i32)))
 (type $vt_v (func ))
 (type $vt_i (func (result i32)))
 (type $vt_iiii (func (param i32 i32 i32)(result i32)))
+(type $vt_iii (func (param i32 i32)(result i32)))
+(func (import "i" "p")(param i32))
+(func (import "i" "m")(param i32)(result i32))
+(func (import "i" "k")(param i32)(result i32))
 (table anyfunc (elem $__wasm_nullptr))
-(memory (export "Z") 17 128)
+(memory (export "ab") 17 128)
 (global (mut i32) (i32.const 1048576))
 (func $__wasm_nullptr (export "___wasm_nullptr")
 (local)
 unreachable
 )
+(func $_Z3fabi (export "__Z3fabi")(param i32)(result i32)
+(local i32 i32 i32)
+get_local 0
+i32.const -1
+i32.add
+tee_local 2
+i32.const 2
+i32.lt_u
+if
+i32.const 1
+return
+end
+get_local 0
+i32.const 1
+set_local 3
+set_local 1
+loop
+get_local 1
+i32.const -3
+i32.add
+get_local 2
+call 4
+get_local 3
+i32.add
+set_local 3
+tee_local 2
+i32.const 2
+i32.lt_u
+  if
+get_local 3
+return
+  end
+get_local 1
+i32.const -2
+i32.add
+set_local 1
+br 0
+end
+i32.const 0
+)
 (func $main (export "_main")(result i32)
 (local)
-unreachable
-unreachable
+i32.const 40
+call 4
+call 0
+i32.const 0
 )
-(func $_Z10b64_decodePcjS_ (export "__Z10b64_decodePcjS_")(param i32 i32 i32)(result i32)
-(local i32 i32 i32 i32 i32 i32 i32 i32 i32)
-get_global 0
-tee_local 3
-i32.const -16
-i32.add
-tee_local 6
-set_global 0
-get_local 6
-tee_local 6
-set_local 4
+(func $_Z13base64_encodeiii (export "__Z13base64_encodeiii")(param i32 i32 i32)(result i32)
+(local i32 i32 i32 i32 i32 i32 i32)
+get_local 0
+call 1
+set_local 3
 get_local 1
+call 1
+set_local 4
+get_local 2
 i32.eqz
 if
-get_local 3
-set_global 0
+get_local 4
 i32.const 0
+i32.store8
+get_local 4
+call 2
 return
 end
 i32.const 0
+tee_local 5
+tee_local 6
 tee_local 7
-tee_local 8
-set_local 9
+set_local 8
 loop
-get_local 8
-i32.const 2
-i32.shl
-get_local 6
+get_local 7
+get_local 3
 i32.add
-tee_local 10
-get_local 9
-get_local 0
-i32.add
-i32.load8_s
-set_local 5
+i32.load8_u
+set_local 9
   block
     block
       block
         block
           block
-get_local 5
-i32.const 43
-i32.sub
-br_table 0 3 3 3 1 3 3 3 3 3 3 3 3 3 3 3 3 3 2 3
-          end
-i32.const 62
-set_local 11
-br 3
-        end
-i32.const 63
-set_local 11
-br 2
-      end
-i32.const 64
-set_local 11
-br 1
-    end
-get_local 5
-i32.const -48
-i32.add
-i32.const 10
-i32.lt_u
-    if
-get_local 5
-i32.const 4
-i32.add
-set_local 11
-      else
-get_local 5
-i32.const -65
-i32.add
-tee_local 11
-i32.const 26
-i32.ge_u
-      if
-get_local 5
-i32.const -71
-i32.add
-i32.const 0
-get_local 5
-i32.const -97
-i32.add
-i32.const 26
-i32.lt_u
-select
-set_local 11
-      end
-    end
-  end
-get_local 11
-i32.store align=4
 get_local 8
+br_table 0 1 2 3
+          end
+get_local 6
+get_local 4
+i32.add
+get_local 9
+tee_local 9
+i32.const 2
+i32.shr_u
+i32.load8_u offset=1048584
+i32.store8
+get_local 6
 i32.const 1
 i32.add
-tee_local 8
+set_local 6
+i32.const 1
+set_local 8
+br 3
+        end
+get_local 6
+get_local 4
+i32.add
+get_local 9
+tee_local 9
 i32.const 4
+i32.shr_u
+get_local 5
+i32.const 4
+i32.shl
+i32.const 48
+i32.and
+i32.or
+i32.load8_u offset=1048584
+i32.store8
+get_local 6
+i32.const 1
+i32.add
+set_local 6
+i32.const 2
+set_local 8
+br 2
+      end
+get_local 6
+get_local 4
+i32.add
+get_local 9
+tee_local 9
+i32.const 6
+i32.shr_u
+get_local 5
+i32.const 2
+i32.shl
+i32.const 60
+i32.and
+i32.or
+i32.load8_u offset=1048584
+i32.store8
+get_local 6
+get_local 4
+i32.add
+get_local 9
+i32.const 63
+i32.and
+i32.load8_u offset=1048584
+i32.store8 offset=1
+get_local 6
+i32.const 2
+i32.add
+set_local 6
+i32.const 0
+set_local 8
+br 1
+    end
+get_local 9
+set_local 9
+  end
+get_local 7
+i32.const 1
+i32.add
+tee_local 7
+get_local 2
 i32.eq
   if
 get_local 6
-i32.load offset=4 align=4
-set_local 8
-get_local 7
-get_local 2
-i32.add
-get_local 8
-i32.const 4
-i32.shr_u
-i32.const 3
-i32.and
 get_local 4
-i32.load align=4
-i32.const 2
-i32.shl
 i32.add
+tee_local 7
+    block
+      block
+        block
+get_local 8
+i32.const 1
+i32.sub
+br_table 0 1 2
+        end
+get_local 7
+get_local 9
+i32.const 4
+i32.shl
+i32.const 48
+i32.and
+i32.load8_u offset=1048584
 i32.store8
 get_local 6
-i32.load offset=8 align=4
-tee_local 10
-i32.const 64
-i32.eq
-    if
-i32.const 1
-set_local 8
-      else
-get_local 7
-get_local 2
+get_local 4
 i32.add
-get_local 10
-i32.const 2
-i32.shr_u
-i32.const 15
-i32.and
-get_local 8
-i32.const 4
-i32.shl
-i32.add
+i32.const 61
 i32.store8 offset=1
 get_local 6
-i32.load offset=12 align=4
-tee_local 8
-i32.const 64
-i32.eq
-      if
-i32.const 2
-set_local 8
-        else
-get_local 7
-get_local 2
+get_local 4
 i32.add
-get_local 8
-get_local 10
-i32.const 6
-i32.shl
-i32.add
+i32.const 61
 i32.store8 offset=2
-i32.const 3
-set_local 8
-      end
-    end
-get_local 8
-get_local 7
+get_local 6
+get_local 4
 i32.add
-set_local 7
 i32.const 0
-set_local 8
+i32.store8 offset=3
+get_local 4
+call 2
+return
+      end
+get_local 7
+get_local 9
+i32.const 2
+i32.shl
+i32.const 60
+i32.and
+i32.load8_u offset=1048584
+i32.store8
+get_local 6
+get_local 4
+i32.add
+i32.const 61
+i32.store8 offset=1
+get_local 6
+get_local 4
+i32.add
+i32.const 0
+i32.store8 offset=2
+get_local 4
+call 2
+return
+    end
+i32.const 0
+i32.store8
+get_local 4
+call 2
+return
   end
 get_local 9
-i32.const 1
-i32.add
-tee_local 9
-get_local 1
-i32.ne
-br_if 0
+set_local 5
+br 0
 end
-get_local 3
-set_global 0
-get_local 7
+i32.const 0
 )
+(func $_Z9test_max4ii (export "__Z9test_max4ii")(param i32 i32)(result i32)
+(local)
+get_local 0
+get_local 1
+get_local 0
+get_local 1
+i32.gt_s
+select
+i32.const 100
+i32.mul
+)
+(func $_Z9test_max3ii (export "__Z9test_max3ii")(param i32 i32)(result i32)
+(local)
+get_local 0
+get_local 1
+get_local 0
+get_local 1
+i32.gt_s
+select
+)
+(func $_Z9test_max2ii (export "__Z9test_max2ii")(param i32 i32)(result i32)
+(local)
+get_local 0
+get_local 1
+get_local 0
+get_local 1
+i32.gt_s
+select
+)
+(func $_Z9test_max1ii (export "__Z9test_max1ii")(param i32 i32)(result i32)
+(local)
+get_local 0
+get_local 1
+get_local 0
+get_local 1
+i32.gt_s
+select
+)
+(data (i32.const 1048584) "\41\42\43\44\45\46\47\48\49\4a\4b\4c\4d\4e\4f\50\51\52\53\54\55\56\57\58\59\5a\61\62\63\64\65\66\67\68\69\6a\6b\6c\6d\6e\6f\70\71\72\73\74\75\76\77\78\79\7a\30\31\32\33\34\35\36\37\38\39\2b\2f")
 )

@@ -25,7 +25,7 @@
 #endif 
 
 #define VERSION 1001
-#define TIME_OUT_NUM 3000
+#define TIME_OUT_NUM 5000
 #define REDISMODULE_REPLY_INTEGER_T long long
 #define REIDSMODULE_REPLY_STAT_OK   1
 #define REIDSMODULE_REPLY_STAT_FAIL 0
@@ -76,7 +76,8 @@
 #define REDISMODULE_MESSAGE_KILL_VIP  "{\"vip\":\"%s\", \"type\":0, \"cmd\":\"kill_vip\"}"
 #define REDISMODULE_MESSAGE_DIAMOND_PUBLISH   "{\"path\":\"%s\", \"type\":1, \"cmd\":\"diamond_config\"}"
 void set_read_obnly_copy_lua_state (lua_State *lua) ;
-
+static lua_State * _ccm1_state;
+void scriptingInit(int setup);
 
 static void stackDump(lua_State* L, REDISMODULE_CONTEXT_T *ctx){
     int i = 0;
@@ -414,7 +415,7 @@ int suma_keep_alive_string (REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **a
         REDISMODULE_STRING_PTR_LEN(argv[2], NULL)
     );
     REDISMODULE_NOT_USED(s);
-    //REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
+    REIDSMODULE_DEBUG(ctx, "warning", "suma_keep_alive_string param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     RedisModuleCallReply *rep_leader_val = REDISMODULE_JIT_CALL(ctx, REDISMODULE_CMD_GET, REDISMODULE_CALL_NO_PARAM, argv[1]);
     int is_leader    = 0;
@@ -714,6 +715,12 @@ static REDISMODULE_REPLY_INTEGER_T STARTUP_ATOMIC_LOCK (RedisModuleTimerID incr_
 void timerDataProcessorHandler(REDISMODULE_CONTEXT_T *ctx, void *data) {
     REDISMODULE_AUTO_GCD (ctx);
     REDISMODULE_NOT_USED (data);
+
+    // if (NULL != _ccm1_state) {
+    //     lua_getglobal(_ccm1_state, "ccm1_say");
+    //     lua_pcall(_ccm1_state,0,1,0);
+    // }
+
     REDISMODULE_STRING_T * snapshot_cmd = REDISMODULE_CREATE_STRING_EX(ctx, "local result = redis.call ('lrange', 'biz_info' , 0, -1) \n"
                                                                             "redis.call('del', 'biz_info')                            \n"
                                                                             "local str = table.concat(result)                         \n"
@@ -740,6 +747,7 @@ int TimerCommand_RedisCommand(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T *
     REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, "biz engine start");
     #endif
     if (STARTUP_ATOMIC_ISLOCK()) { /*启动biz分析*/
+
         REDISMODULE_TIMER_T  tid            = REDISMODULE_CREATE_THREAD_EX  (ctx, REDISMODULE_TIME_INTERVAL, timerDataProcessorHandler, NULL);
         REDISMODULE_STRING_T *codes_install = REDISMODULE_CREATE_STRING_EX  (ctx, "local result = redis.call ('lrange', 'biz_info.list', 0, -1) \n"
                                                                                   "for i, v in ipairs (result) do                               \n"
@@ -818,7 +826,25 @@ int suma_biz_script_register(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **
 }
 
 
-void scriptingInit(int setup);
+
+void ccm1_show_version(REDISMODULE_CONTEXT_T *ctx, lua_State* L) {
+    int n;
+    lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+    lua_getfield(L, -1, "jit");  /* Get jit.* module table. */
+    lua_remove  (L, -2);
+    lua_getfield(L, -1, "status");
+    lua_remove  (L, -2);
+    n = lua_gettop(L);
+    lua_call(L, 0, LUA_MULTRET);
+    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, 
+    (lua_toboolean(L, n) ? "ccm1 JIT status : ON" : "ccm1 JIT status : OFF"));
+   
+}
+
+void ccm1_call_back_server_lua (lua_State* L) {
+     _ccm1_state = L;
+}
+
 ////程序入口 V1
 int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_NOT_USED(argv);
@@ -855,21 +881,10 @@ int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, 
     lua_gc(L, LUA_GCSTOP, 0);
     luaL_openlibs(L); 
     lua_gc(L, LUA_GCRESTART, -1);
-    int n;
-    lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
-    lua_getfield(L, -1, "jit");  /* Get jit.* module table. */
-    lua_remove  (L, -2);
-    lua_getfield(L, -1, "status");
-    lua_remove  (L, -2);
-    n = lua_gettop(L);
-    lua_call(L, 0, LUA_MULTRET);
-    REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, 
-    (lua_toboolean(L, n) ? "ccm1 JIT status : ON" : "ccm1 JIT status : OFF"));
    
 
-    ///注册redis的公开方法
-    set_read_obnly_copy_lua_state(L);
-    scriptingInit(0);
+    ccm1_show_version(ctx, L);
+    _ccm1_state = L;
     ///V1.2 ccm1 通用计算模块
    {
         /*** 
@@ -890,22 +905,33 @@ int RedisModule_OnLoad(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, 
 
    {
         /*** 
-        * jit版本 启动入口
+        * jit版本 ping
         */
-        char *require_s =  "function require_s ()\n"
-                           "package.path         = package.path .. ';/home/admin/ccm1/?.lua;'"
-                           "local ccm1_engine    = require('wasm')\n"
-                           "redis.log(redis.LOG_WARNING ,'hello redis')\n"
-                           "if redis ~= ccm1_engine then return 'OK' end \n"
-                           "return 'NO'\n"
+        char *ccm1_say =  "function ccm1_say ()\n"
+                           "print('ping')"
                            "end"; 
-        luaL_loadbuffer(L,require_s, strlen(require_s), "@require_s_def");
+        luaL_loadbuffer(L,ccm1_say, strlen(ccm1_say), "@ccm1_say_def");
         lua_pcall(L,0,0,0);
     }
 
-    lua_getglobal(L, "require_s");
+
+   {
+        /*** 
+        * jit版本 启动入口
+        */
+        char *ccm1_main =  "function ccm1_main ()\n"
+                           "package.path         = package.path .. ';/home/admin/ccm1/?.lua;'"
+                           "local ccm1_engine    = require('wasm')\n"
+                           "if redis ~= ccm1_engine then return 'OK' end \n"
+                           "return 'NO'\n"
+                           "end"; 
+        luaL_loadbuffer(L,ccm1_main, strlen(ccm1_main), "@ccm1_main_def");
+        lua_pcall(L,0,0,0);
+    }
+
+    lua_getglobal(L, "ccm1_main");
     lua_pcall(L,0,1,0);
-    stackDump(L, ctx);
+    //stackDump(L, ctx);
     // REIDSMODULE_DEBUG(ctx, REDISMODULE_WARN_S, lua_tostring(L, -1));
     return REDISMODULE_OK;
 }
