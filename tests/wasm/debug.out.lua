@@ -185,7 +185,6 @@ function F(G, H, I)
   local BA = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
   ffi.copy(BA, A, ASize*65536)
   A, ASize = BA, (ASize + 100)
-  exportTable.memory = A
 --debug
 
   error("Unreachable code reached..", 2)
@@ -199,7 +198,6 @@ function F(G, H, I)
   local BB = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
   ffi.copy(BB, A, ASize*65536)
   A, ASize = BB, (ASize + 100)
-  exportTable.memory = A
 --debug
 
   error("Unreachable code reached..", 2)
@@ -213,7 +211,6 @@ function F(G, H, I)
   local BC = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
   ffi.copy(BC, A, ASize*65536)
   A, ASize = BC, (ASize + 100)
-  exportTable.memory = A
 --debug
 
   error("Unreachable code reached..", 2)
@@ -221,7 +218,6 @@ function F(G, H, I)
   local BD = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
   ffi.copy(BD, A, ASize*65536)
   A, ASize = BD, (ASize + 100)
-  exportTable.memory = A
 --debug
 
   error("Unreachable code reached..", 2)
@@ -261,7 +257,6 @@ function F(G, H, I)
   local BI = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
   ffi.copy(BI, A, ASize*65536)
   A, ASize = BI, (ASize + 100)
-  exportTable.memory = A
 --debug
 
   error("Unreachable code reached..", 2)
@@ -276,7 +271,6 @@ function F(G, H, I)
   local BK = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
   ffi.copy(BK, A, ASize*65536)
   A, ASize = BK, (ASize + 100)
-  exportTable.memory = A
 --debug
 
   error("Unreachable code reached..", 2)
@@ -298,10 +292,10 @@ function F(G, H, I)
   end
   return (M + K), 2, (M + K), 2, (M + K), 2, (M + K), 2, (M + K), N, 2, N, 0
 end
+exportTable.main = E
 exportTable.base64_encode = F
 exportTable.memory = A
-exportTable.main = E
---exportTable.memory = A;
+exportTable.memory = A;
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 

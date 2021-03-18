@@ -151,7 +151,11 @@ function  parseFloat(stream, bytes)
     elseif type == typeMap.MEMI then
       -- We don't (currently) care about the alignment or the offset
       _, stream = parseLEBu(stream, 1)
+      --_, stream = parseLEBu(stream, 1)
+      local d,_ = parseLEBu(stream, 4)
       _, stream = parseLEBu(stream, 1)
+     --d is offset
+     return result, stream, nil, d
     elseif type == typeMap.BRTB then
       count, stream = parseLEBu(stream, 32);
       local i = 1;
@@ -160,19 +164,19 @@ function  parseFloat(stream, bytes)
       local br_tables_local = {}
       br_tables_local.br_tables = {}
       while  i <= count do
-        ctl, stream = parseLEBu(stream, 32);
+        ctl, stream = parseLEBu(stream, 4);
         br_tables_local.br_tables[i] = ctl;
         i = i+1;
       end
-      depth, stream = parseLEBu(stream, 32); -- depth
-      print("depth=", depth)
+      depth, stream = parseLEBu(stream, 4); -- depth
+      print("depth2=", depth)
       br_tables_local.brtable_stack_depth = depth + 1;
       br_tables_local.brtable_stack = {}
       return result, stream, br_tables_local
     elseif type == typeMap.CALI then
       print("CALI caught..")
-      result, stream = parseLEBu(stream, 1)
-      result, stream = parseLEBu(stream, 32)
+      -- result, stream = parseLEBu(stream, 1)
+      -- result, stream = parseLEBu(stream, 32)
     else
       error("Unsupported immediate type required: '" .. type .. "'", 0)
     end
@@ -197,8 +201,9 @@ function  parseFloat(stream, bytes)
       }
       local immediate = opcodeDef.immediate
       local brtableVal = nil;
+      local offsetVal  = 0;
       if immediate ~= typeMap.NONE then
-        instr.imVal, stream, brtableVal = decodeImmediate(immediate, stream, body)
+        instr.imVal, stream, brtableVal, offsetVal = decodeImmediate(immediate, stream, body)
         if brtableVal ~= nil then
           -- instr.br_table = brtableVal;
           if not hasTableV then

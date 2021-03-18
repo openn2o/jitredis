@@ -750,7 +750,10 @@ generators = {
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 32))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint32_t*", %s + %s)[0]
   end,
-  I32Load8U = function(stack, _, _, _, _, instance)
+  I32Load8U = function(stack, instr, argList, fnLocals, blockStack, instance)
+    --offset 
+    print(stack, instr, table.concat(argList, ","));
+    print("load8u", table.concat(instr, "|"));
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
   end,
@@ -804,7 +807,7 @@ generators = {
     push(stack, instance.memories[0] .. "Size")
   end,
   MemoryGrow = function(stack, _, _, _, _, instance)
-    print("stack = " , table.concat(stack));
+    print("stack = " , table.concat(stack, "|"));
     local temp  = makeName()
     local delta = pop(stack)
     push(stack, 2)
@@ -823,14 +826,14 @@ generators = {
     -- TODO: find a better way to do this
     local extraLogic = ""
     if instance.sectionData[7] then
-      for k, v in pairs(instance.sectionData[7]) do
-        if v.kind == kinds.Memory then
-          -- FIXME: This won't work after wasm MVP, because multiple memories
-          extraLogic = ([[
-  exportTable.%s = %s
-]]):format(k, instance.memories[0])
-        end
-      end
+--       for k, v in pairs(instance.sectionData[7]) do
+--         if v.kind == kinds.Memory then
+--           -- FIXME: This won't work after wasm MVP, because multiple memories
+--           extraLogic = ([[
+--   exportTable.%s = %s
+-- ]]):format(k, instance.memories[0])
+--         end
+--       end
     end
 
     if type(delta) == "string" then
@@ -1130,7 +1133,7 @@ function compiler.newInstance(sectionData)
   end
 
   t.source =  t.source .. [[
---exportTable.memory = A;
+exportTable.memory = A;
 exportTable.grow_ip = 0;
 
 exportTable.write_uint8_array = function (buff) 
