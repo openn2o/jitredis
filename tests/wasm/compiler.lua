@@ -837,8 +837,11 @@ generators = {
     end
 
     if type(delta) == "string" then
-      extraLogic = extraLogic .. "--debug\n\n"
-      delta = 100;
+      -- print("pop", pop(stack))
+      -- extraLogic = extraLogic .. "--debug\n\n"
+      -- delta = 100;
+
+      return "\tlocal ".. temp .." = ".. delta .. "\n";
     end
     return ([[  local %s = ffi.new("uint8_t[" .. (%sSize + %d)*%d .. "]")
   ffi.copy(%s, %s, %sSize*%d)

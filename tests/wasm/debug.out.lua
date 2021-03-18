@@ -182,11 +182,7 @@ function F(G, H, I)
 	::ZFinish::
   end
   P = P
-  local BA = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
-  ffi.copy(BA, A, ASize*65536)
-  A, ASize = BA, (ASize + 100)
---debug
-
+	local BA = (readMem(A, ASize, (bit.rshift(P, 2)), 8))
   error("Unreachable code reached..", 2)
   error("Unreachable code reached..", 2)
   M = (M + 1)
@@ -195,11 +191,7 @@ function F(G, H, I)
 	::YFinish::
   end
   P = P
-  local BB = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
-  ffi.copy(BB, A, ASize*65536)
-  A, ASize = BB, (ASize + 100)
---debug
-
+	local BB = (readMem(A, ASize, (bit.bor((bit.rshift(P, 4)), (bit.band((bit.lshift(L, 4)), 48)))), 8))
   error("Unreachable code reached..", 2)
   error("Unreachable code reached..", 2)
   M = (M + 1)
@@ -208,18 +200,10 @@ function F(G, H, I)
 	::XFinish::
   end
   P = P
-  local BC = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
-  ffi.copy(BC, A, ASize*65536)
-  A, ASize = BC, (ASize + 100)
---debug
-
+	local BC = (readMem(A, ASize, (bit.bor((bit.rshift(P, 6)), (bit.band((bit.lshift(L, 2)), 60)))), 8))
   error("Unreachable code reached..", 2)
   error("Unreachable code reached..", 2)
-  local BD = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
-  ffi.copy(BD, A, ASize*65536)
-  A, ASize = BD, (ASize + 100)
---debug
-
+	local BD = (readMem(A, ASize, (bit.band(P, 63)), 8))
   error("Unreachable code reached..", 2)
   M = (M + 2)
   O = 0
@@ -254,11 +238,7 @@ function F(G, H, I)
 	end
 	::BHFinish::
   end
-  local BI = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
-  ffi.copy(BI, A, ASize*65536)
-  A, ASize = BI, (ASize + 100)
---debug
-
+	local BI = (readMem(A, ASize, (bit.band((bit.lshift(P, 4)), 48)), 8))
   error("Unreachable code reached..", 2)
   error("Unreachable code reached..", 2)
   storeMem(A, ASize, (M + K), 61, 8)
@@ -268,11 +248,7 @@ function F(G, H, I)
   if true then return BJ end
 	::BGFinish::
   end
-  local BK = ffi.new("uint8_t[" .. (ASize + 100)*65536 .. "]")
-  ffi.copy(BK, A, ASize*65536)
-  A, ASize = BK, (ASize + 100)
---debug
-
+	local BK = (readMem(A, ASize, (bit.band((bit.lshift(P, 2)), 60)), 8))
   error("Unreachable code reached..", 2)
   error("Unreachable code reached..", 2)
   storeMem(A, ASize, (M + K), 61, 8)
