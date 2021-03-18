@@ -239,19 +239,35 @@ generators = {
     local p2 = pop(stack);
     local p3 = pop(stack);
 
-    print("p1=", type(p1), string.byte(p1,1));
+    print("p1=", type(p1), string.byte(p1,1), #stack);
     if is_eq_exp(p1) then
-      push (stack, table.concat(
-        {
-          "(checkCondition(",
-          p1,
-          ") and ",
-          p3,
-          ") or (",
-          p2,
-          ")"
-        }
-      ));
+        if (not is_eq_exp(p2)) and (not is_eq_exp(p3)) then
+          push (stack, table.concat(
+            {
+              "(checkCondition(",
+              p1,
+              ") and ",
+              p3,
+              ") or (",
+              p2,
+              ")"
+            }
+          ));
+        else
+         ------如果p2 和 p3 有一个是 并且p1是
+         effect = table.concat(
+          {
+            "\tif checkCondition(" ,
+            p1,
+            ") then \n",
+           "\treturn ",
+            p3,
+            "\n\tend\n" 
+          }
+         )
+         push(stack, p2);
+
+        end
     else
       if p2 ~= nil and p3 ~= nil then
         push (stack, table.concat(

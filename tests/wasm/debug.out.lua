@@ -80,7 +80,7 @@ function F(G, H)
 		 goto KFinish
 	 end
 	else
-		 goto KFinish
+		 goto IFinish
 	end
 	::KFinish::
   end
@@ -90,8 +90,19 @@ function F(G, H)
   if true then return 2 end
 	::IFinish::
   end
-  return (checkCondition(((G == 1) and 1 or 0)) and 2) or ((checkCondition(((G == 2) and 1 or 0)) and 3) or (5))
+  print("========", checkCondition((G == 1) and 1 or 0))
+	if checkCondition(((G == 1) and 1 or 0)) then 
+	return 2
+  end
+
+  return (checkCondition(((G == 2) and 1 or 0)) and 3) or (5)
 end
+
+print(F(1,12));
+print(F(1,5));
+print(F(1,25));
+print(F(2,25));
+print(F(9,25));
 exportTable.br_table_muli = F
 exportTable.memory = A
 exportTable.main = E
