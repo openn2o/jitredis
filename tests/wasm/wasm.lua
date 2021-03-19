@@ -155,6 +155,7 @@ function  parseFloat(stream, bytes)
         _, stream = parseLEBu(stream, 4);
       else
         _, stream = parseLEBu(stream, 1);
+        d  = nil;
       end
       local n,_ = parseLEBu(stream, 4);
       -- print("MEMI=", result, d, n);
@@ -207,8 +208,11 @@ function  parseFloat(stream, bytes)
       local offsetVal  = 0;
       if immediate ~= typeMap.NONE then
         instr.imVal, stream, brtableVal, offsetVal = decodeImmediate(immediate, stream, body)
+        if (offsetVal ~= nil) and (brtableVal == nil) then
+          instr.offset = offsetVal;
+          print("offset", offsetVal);
+        end
         if brtableVal ~= nil then
-          -- instr.br_table = brtableVal;
           if not hasTableV then
             hasTableV = {}
           end
@@ -510,7 +514,7 @@ local sections = {
               func.locals[#func.locals + 1] = type
             end
           end
-  
+          
           -- Decode instructions
           func.instructions, brtables = decodeFunctionBody(workingStream)
           if brtables then

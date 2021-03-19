@@ -36,11 +36,8 @@ function assignHeaps(tmp0){
 }
 var HEAP8=null,HEAP16=null,HEAP32=null,HEAPF32=null,HEAPF64=null,__asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
 var __Z13base64_encodeiii=null;
-var __Z13base64_decodeiii=null;
 var _Z13base64_encodeiii={};
-var _Z13base64_decodeiii={};
 _Z13base64_encodeiii.promise=
-_Z13base64_decodeiii.promise=
 fetchBuffer('bin.wasm').then(tmp0=>
 WebAssembly.instantiate(tmp0,
 {i:{
@@ -54,11 +51,8 @@ WebAssembly.instantiate(tmp0,
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
 	__Z13base64_encodeiii=__asm.__Z13base64_encodeiii;
-	__Z13base64_decodeiii=__asm.__Z13base64_decodeiii;
 	_Z13base64_encodeiii=__Z13base64_encodeiii;
-	_Z13base64_decodeiii=__Z13base64_decodeiii;
 	_Z13base64_encodeiii.promise=
-	_Z13base64_decodeiii.promise=
 	Promise.resolve();
 	__asm._main();
 },console.log,console.log);

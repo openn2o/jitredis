@@ -7,7 +7,7 @@ _M.string_buff = {}
 
 
 _M.const_char_ptr_value = function (ptr)
-
+    print(ptr)
     local eax = ptr..""
     if _M.caches [eax] ~= nil then
         return _M.caches [eax];
@@ -17,6 +17,9 @@ _M.const_char_ptr_value = function (ptr)
     local str = {}
 
     while bytes[ptr] ~= 0 do
+        if bytes[ptr] == nil then
+            bytes[ptr] = 0;
+        end
         str[#str + 1] = string.char(bytes[ptr]);
         ptr = ptr+1;
     end

@@ -752,7 +752,12 @@ generators = {
   end,
   I32Load8U = function(stack, instr, argList, fnLocals, blockStack, instance)
     local addr = pop(stack)
-    push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
+    if(instr.offset ~= nil) then
+      push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr .. "+" .. instr.offset)) ;
+    else
+      push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) ;
+    end
+   
   end,
   I32Load8S = function(stack, _, _, _, _, instance)
     local addr = pop(stack)
@@ -772,14 +777,33 @@ generators = {
     local addr = pop(stack)
     return ([[  storeMem(%s, %sSize, %s, %s, 8)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint8_t*", %s + %s)[0] = %s%s
   end,
-  I32Store8 = function(stack, _, _, _, _, instance)
+  I32Store8 = function(stack, instr, _, _, _, instance)
+
+    print("i32.store8=", table.concat(stack, " | ") , tostring(instr.offset))
     local value = pop(stack)
     local addr  = pop(stack)
-    return ([[  storeMem(%s, %sSize, %s, %s, 8)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint8_t*", %s + %s)[0] = %s%s
+
+    print(addr)
+    if(instr.offset ~= nil) then
+      return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr .. "+" .. instr.offset, value, "\n") ;
+    else
+      local effect = ""
+      if string.find(addr , "+") ~= nil then
+        local t1 = string.sub(addr, 2, string.len(addr)-1);
+        local t2 = string.find(t1, "+");
+        local re = string.sub(t1, 1, t2 -1);
+        local dist= string.sub(t1, t2+1);
+        -- print("===", string.find (tostring(dist), "%d"))
+        if dist ~= nil and string.find (dist, "%d") ~= nil then
+           effect = "\t" .. re .. "= (" .. dist .. "+" .. re .. ")\n"; 
+        end
+      end
+      return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr, value, "\n") .. effect ;
+    end
   end,
   I32Store16 = function(stack, _, _, _, _, instance)
     local value = pop(stack)
-    local addr = pop(stack)
+    local addr  = pop(stack)
     return ([[  storeMem(%s, %sSize, %s, %s, 16)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint16_t*", %s + %s)[0] = %s%s
   end,
   I64Load = function(stack, _, _, _, _, instance)
@@ -1165,7 +1189,6 @@ end
 
 ]]
   t.source = t.source .. "return { "
-
   if sectionData[7] then
     t.source = t.source .. "exports = exportTable, "
   end

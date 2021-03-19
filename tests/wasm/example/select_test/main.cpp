@@ -186,61 +186,61 @@ Value base64_encode(Value a , Value b , int size)
 	return warp_from_uint8ptr_to_value(out);
 }
 
-[[cheerp::jsexport]]
-Value base64_decode(Value a,  Value b , int inlen)
-{
-	unsigned int i;
-	unsigned int j;
-	unsigned char c;
+// [[cheerp::jsexport]]
+// Value base64_decode(Value a,  Value b , int inlen)
+// {
+// 	unsigned int i;
+// 	unsigned int j;
+// 	unsigned char c;
 
-	uint8 * in   = ccm1::warp_from_value_to_uint8ptr(a);
-	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);
+// 	uint8 * in   = ccm1::warp_from_value_to_uint8ptr(a);
+// 	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);
 
-	if (inlen & 0x3) {
-		return 0;
-	}
+// 	if (inlen & 0x3) {
+// 		return 0;
+// 	}
 
-	for (i = j = 0; i < inlen; i++) {
-		if (in[i] == BASE64_PAD) {
-			break;
-		}
-		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
-			return 0;
-		}
+// 	for (i = j = 0; i < inlen; i++) {
+// 		if (in[i] == BASE64_PAD) {
+// 			break;
+// 		}
+// 		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
+// 			return 0;
+// 		}
 
-		c = base64de[in[i]];
-		if (c == 255) {
-			return 0;
-		}
+// 		c = base64de[in[i]];
+// 		if (c == 255) {
+// 			return 0;
+// 		}
 
-		switch (i & 0x3) {
-		case 0:
-			out[j] = (c << 2) & 0xFF;
-			break;
-		case 1:
-			out[j++] |= (c >> 4) & 0x3;
-			out[j] = (c & 0xF) << 4; 
-			break;
-		case 2:
-			out[j++] |= (c >> 2) & 0xF;
-			out[j] = (c & 0x3) << 6;
-			break;
-		case 3:
-			out[j++] |= c;
-			break;
-		}
-	}
+// 		switch (i & 0x3) {
+// 		case 0:
+// 			out[j] = (c << 2) & 0xFF;
+// 			break;
+// 		case 1:
+// 			out[j++] |= (c >> 4) & 0x3;
+// 			out[j] = (c & 0xF) << 4; 
+// 			break;
+// 		case 2:
+// 			out[j++] |= (c >> 2) & 0xF;
+// 			out[j] = (c & 0x3) << 6;
+// 			break;
+// 		case 3:
+// 			out[j++] |= c;
+// 			break;
+// 		}
+// 	}
 
-	out[j] = 0;
+// 	out[j] = 0;
 
-	return ccm1::warp_from_uint8ptr_to_value(out);
-}
+// 	return ccm1::warp_from_uint8ptr_to_value(out);
+// }
 
 
 int main() {
 	// ccm1::log(fab(40));
 	const char * in = "hello";
-	uint8 * out= (uint8 *) "0000000000000000000000000000";
+	uint8 out[]= {1,2,3,4,5,6,7,8,9,10};
 	Value a    = ccm1::string_from_cstr_to_value(in);
 	Value b    = ccm1::warp_from_uint8ptr_to_value(out);
 	base64_encode(a, b, sizeof(in));
