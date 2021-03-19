@@ -182,29 +182,22 @@ function F(G, H, I)
 	::ZFinish::
   end
   P = P
-	local BA = (readMem(A, ASize, (bit.rshift(P, 2)), 8))
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
+  storeMem(A, ASize, (M + K), (readMem(A, ASize, (bit.rshift(P, 2)), 8)), 8)
   M = (M + 1)
   O = 1
  goto VFinish
 	::YFinish::
   end
   P = P
-	local BB = (readMem(A, ASize, (bit.bor((bit.rshift(P, 4)), (bit.band((bit.lshift(L, 4)), 48)))), 8))
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
+  storeMem(A, ASize, (M + K), (readMem(A, ASize, (bit.bor((bit.rshift(P, 4)), (bit.band((bit.lshift(L, 4)), 48)))), 8)), 8)
   M = (M + 1)
   O = 2
  goto VFinish
 	::XFinish::
   end
   P = P
-	local BC = (readMem(A, ASize, (bit.bor((bit.rshift(P, 6)), (bit.band((bit.lshift(L, 2)), 60)))), 8))
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
-	local BD = (readMem(A, ASize, (bit.band(P, 63)), 8))
-  error("Unreachable code reached..", 2)
+  storeMem(A, ASize, (M + K), (readMem(A, ASize, (bit.bor((bit.rshift(P, 6)), (bit.band((bit.lshift(L, 2)), 60)))), 8)), 8)
+  storeMem(A, ASize, (M + K), (readMem(A, ASize, (bit.band(P, 63)), 8)), 8)
   M = (M + 2)
   O = 0
  goto VFinish
@@ -215,62 +208,58 @@ function F(G, H, I)
   end
   N = (N + 1)
  if checkCondition((((N + 1) == I) and 1 or 0)) then 
-	::BEStart::
+	::BAStart::
   N = (M + K)
  do 
-	::BFStart::
+	::BBStart::
  do 
-	::BGStart::
+	::BCStart::
  do 
-	::BHStart::
+	::BDStart::
 	local eax=(O - 1)
 	local branch_tab = ffi.new('int[2]', {0,1})
 	if (eax < 2) then
 	eax=branch_tab[eax];
 	 if eax == 1 then
-		 goto BGFinish
+		 goto BCFinish
 	 end
 	 if eax == 0 then
-		 goto BHFinish
+		 goto BDFinish
 	 end
 	else
-		 goto BFFinish
+		 goto BBFinish
 	end
-	::BHFinish::
+	::BDFinish::
   end
-	local BI = (readMem(A, ASize, (bit.band((bit.lshift(P, 4)), 48)), 8))
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
+  storeMem(A, ASize, N, (readMem(A, ASize, (bit.band((bit.lshift(P, 4)), 48)), 8)), 8)
   storeMem(A, ASize, (M + K), 61, 8)
   storeMem(A, ASize, (M + K), 61, 8)
   storeMem(A, ASize, (M + K), 0, 8)
-  local BJ = imports.ccm1__warp_from_uint8ptr_to_value(K)
-  if true then return BJ end
-	::BGFinish::
+  local BE = imports.ccm1__warp_from_uint8ptr_to_value(K)
+  if true then return BE end
+	::BCFinish::
   end
-	local BK = (readMem(A, ASize, (bit.band((bit.lshift(P, 2)), 60)), 8))
-  error("Unreachable code reached..", 2)
-  error("Unreachable code reached..", 2)
+  storeMem(A, ASize, N, (readMem(A, ASize, (bit.band((bit.lshift(P, 2)), 60)), 8)), 8)
   storeMem(A, ASize, (M + K), 61, 8)
   storeMem(A, ASize, (M + K), 0, 8)
-  local BL = imports.ccm1__warp_from_uint8ptr_to_value(K)
-  if true then return BL end
-	::BFFinish::
+  local BF = imports.ccm1__warp_from_uint8ptr_to_value(K)
+  if true then return BF end
+	::BBFinish::
   end
-  storeMem(A, ASize, 2, 0, 8)
-  local BM = imports.ccm1__warp_from_uint8ptr_to_value(K)
-  if true then return BM end
-	::BEFinish::
+  storeMem(A, ASize, (M + K), 0, 8)
+  local BG = imports.ccm1__warp_from_uint8ptr_to_value(K)
+  if true then return BG end
+	::BAFinish::
   end
   L = P
  goto UStart
 	::UFinish::
   end
-  return (M + K), 2, (M + K), 2, (M + K), 2, (M + K), 2, (M + K), N, 2, N, 0
+  return 0
 end
-exportTable.main = E
 exportTable.base64_encode = F
 exportTable.memory = A
+exportTable.main = E
 exportTable.memory = A;
 exportTable.grow_ip = 0;
 

@@ -751,9 +751,6 @@ generators = {
     push(stack, ([[(readMem(%s, %sSize, %s, 32))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint32_t*", %s + %s)[0]
   end,
   I32Load8U = function(stack, instr, argList, fnLocals, blockStack, instance)
-    --offset 
-    print(stack, instr, table.concat(argList, ","));
-    print("load8u", table.concat(instr, "|"));
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
   end,

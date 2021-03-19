@@ -149,12 +149,15 @@ function  parseFloat(stream, bytes)
     elseif type == typeMap.BLOC then
       result, stream =  parseLEBs(stream, 1)
     elseif type == typeMap.MEMI then
-      -- We don't (currently) care about the alignment or the offset
-      _, stream = parseLEBu(stream, 1)
-      --_, stream = parseLEBu(stream, 1)
-      local d,_ = parseLEBu(stream, 4)
-      _, stream = parseLEBu(stream, 1)
-     --d is offset
+      result, stream = parseLEBu(stream, 1)
+      local d,_ = parseLEBu(stream, 4);
+      if d > 0 then
+        _, stream = parseLEBu(stream, 4);
+      else
+        _, stream = parseLEBu(stream, 1);
+      end
+      local n,_ = parseLEBu(stream, 4);
+      -- print("MEMI=", result, d, n);
      return result, stream, nil, d
     elseif type == typeMap.BRTB then
       count, stream = parseLEBu(stream, 32);
@@ -174,7 +177,7 @@ function  parseFloat(stream, bytes)
       br_tables_local.brtable_stack = {}
       return result, stream, br_tables_local
     elseif type == typeMap.CALI then
-      print("CALI caught..")
+      error("CALI caught..")
       -- result, stream = parseLEBu(stream, 1)
       -- result, stream = parseLEBu(stream, 32)
     else
@@ -566,7 +569,7 @@ local sections = {
 
 local wasm_loader_decode = function (bytes)
     if bytes:sub(1, WASM_VERSION_MAGIC_LEN) ~= WASM_VERSION_MAGIC then
-        print("Not a valid wasm 1.0 binary");
+      error("Not a valid wasm 1.0 binary");
     end
    
     bytes = bytes:sub(WASM_VERSION_MAGIC_LEN + 1);
@@ -585,16 +588,6 @@ local wasm_loader_decode = function (bytes)
             name = sectionName,
             data = sectionStream
           }
-          -- print("name=", sectionName)
-          -- local sectionName
-          -- sectionName = parsers.parseVLString(stream)
-    
-          -- local sectionStream
-          -- sectionStream, stream = stream:sub(1, sectionLength), stream:sub(sectionLength + 1)
-          -- sectionData[0][#sectionData[0] + 1] = {
-          --   name = sectionName,
-          --   data = sectionStream
-          -- }
         else
             if sections[sectionID] then
                 local sectionStream
