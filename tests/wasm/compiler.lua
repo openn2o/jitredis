@@ -788,16 +788,16 @@ generators = {
       return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr .. "+" .. instr.offset, value, "\n") ;
     else
       local effect = ""
-      if string.find(addr , "+") ~= nil then
-        local t1 = string.sub(addr, 2, string.len(addr)-1);
-        local t2 = string.find(t1, "+");
-        local re = string.sub(t1, 1, t2 -1);
-        local dist= string.sub(t1, t2+1);
-        -- print("===", string.find (tostring(dist), "%d"))
-        if dist ~= nil and string.find (dist, "%d") ~= nil then
-           effect = "\t" .. re .. "= (" .. dist .. "+" .. re .. ")\n"; 
-        end
-      end
+      -- if string.find(addr , "+") ~= nil then
+      --   local t1 = string.sub(addr, 2, string.len(addr)-1);
+      --   local t2 = string.find(t1, "+");
+      --   local re = string.sub(t1, 1, t2 -1);
+      --   local dist= string.sub(t1, t2+1);
+      --   -- print("===", string.find (tostring(dist), "%d"))
+      --   if dist ~= nil and string.find (dist, "%d") ~= nil then
+      --      effect = "\t" .. re .. "= (" .. dist .. "+" .. re .. ")\n"; 
+      --   end
+      -- end
       return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr, value, "\n") .. effect ;
     end
   end,

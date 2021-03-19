@@ -21,50 +21,50 @@ namespace ccm1 {
 
 using namespace ccm1;
 
-// [[cheerp::jsexport]]
-// int test_max1 (int a, int b) {
-// 	if (a > b) {
-// 		return a;
-// 	}	
-// 	return b;
-// }
+[[cheerp::jsexport]]
+int test_max1 (int a, int b) {
+	if (a > b) {
+		return a;
+	}	
+	return b;
+}
 
-// [[cheerp::jsexport]]
-// int test_max2 (int a, int b) {
-// 	return (a > b ? a: b);
-// }
+[[cheerp::jsexport]]
+int test_max2 (int a, int b) {
+	return (a > b ? a: b);
+}
 
-// [[cheerp::jsexport]]
-// int test_max3 (int a, int b) {
-// 	int max = 0;
-// 	if (a > b) {
-// 		max = a;
-// 	} else {
-// 		max = b;
-// 	} 
-//     return max;
-// }
+[[cheerp::jsexport]]
+int test_max3 (int a, int b) {
+	int max = 0;
+	if (a > b) {
+		max = a;
+	} else {
+		max = b;
+	} 
+    return max;
+}
 
-// [[cheerp::jsexport]]
-// int test_max4 (int a, int b) {
-// 	int max = 0;
-// 	if (a > b) {
-// 		max = a;
-// 	} else {
-// 		max = b;
-// 	} 
+[[cheerp::jsexport]]
+int test_max4 (int a, int b) {
+	int max = 0;
+	if (a > b) {
+		max = a;
+	} else {
+		max = b;
+	} 
 
-// 	max = max * 100;
-//     return max;
-// }
+	max = max * 100;
+    return max;
+}
 
-// [[cheerp::jsexport]]
-// int fab (int n) {
-// 	if(n == 1||n ==2) {
-// 		return 1;
-// 	} 
-// 	return fab(n-1) + fab(n-2);
-// }
+[[cheerp::jsexport]]
+int fab (int n) {
+	if(n == 1||n ==2) {
+		return 1;
+	} 
+	return fab(n-1) + fab(n-2);
+}
 
 #define BASE64_PAD '='
 #define BASE64DE_FIRST '+'
@@ -186,55 +186,55 @@ Value base64_encode(Value a , Value b , int size)
 	return warp_from_uint8ptr_to_value(out);
 }
 
-// [[cheerp::jsexport]]
-// Value base64_decode(Value a,  Value b , int inlen)
-// {
-// 	unsigned int i;
-// 	unsigned int j;
-// 	unsigned char c;
+[[cheerp::jsexport]]
+Value base64_decode(Value a,  Value b , int inlen)
+{
+	unsigned int i;
+	unsigned int j;
+	unsigned char c;
 
-// 	uint8 * in   = ccm1::warp_from_value_to_uint8ptr(a);
-// 	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);
+	uint8 * in   = ccm1::warp_from_value_to_uint8ptr(a);
+	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);
 
-// 	if (inlen & 0x3) {
-// 		return 0;
-// 	}
+	if (inlen & 0x3) {
+		return 0;
+	}
 
-// 	for (i = j = 0; i < inlen; i++) {
-// 		if (in[i] == BASE64_PAD) {
-// 			break;
-// 		}
-// 		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
-// 			return 0;
-// 		}
+	for (i = j = 0; i < inlen; i++) {
+		if (in[i] == BASE64_PAD) {
+			break;
+		}
+		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
+			return 0;
+		}
 
-// 		c = base64de[in[i]];
-// 		if (c == 255) {
-// 			return 0;
-// 		}
+		c = base64de[in[i]];
+		if (c == 255) {
+			return 0;
+		}
 
-// 		switch (i & 0x3) {
-// 		case 0:
-// 			out[j] = (c << 2) & 0xFF;
-// 			break;
-// 		case 1:
-// 			out[j++] |= (c >> 4) & 0x3;
-// 			out[j] = (c & 0xF) << 4; 
-// 			break;
-// 		case 2:
-// 			out[j++] |= (c >> 2) & 0xF;
-// 			out[j] = (c & 0x3) << 6;
-// 			break;
-// 		case 3:
-// 			out[j++] |= c;
-// 			break;
-// 		}
-// 	}
+		switch (i & 0x3) {
+		case 0:
+			out[j] = (c << 2) & 0xFF;
+			break;
+		case 1:
+			out[j++] |= (c >> 4) & 0x3;
+			out[j] = (c & 0xF) << 4; 
+			break;
+		case 2:
+			out[j++] |= (c >> 2) & 0xF;
+			out[j] = (c & 0x3) << 6;
+			break;
+		case 3:
+			out[j++] |= c;
+			break;
+		}
+	}
 
-// 	out[j] = 0;
+	out[j] = 0;
 
-// 	return ccm1::warp_from_uint8ptr_to_value(out);
-// }
+	return ccm1::warp_from_uint8ptr_to_value(out);
+}
 
 
 int main() {
