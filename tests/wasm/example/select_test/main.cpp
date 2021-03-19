@@ -1,4 +1,3 @@
-  
 
 
 #define Value int
@@ -85,7 +84,7 @@ static const uint8 base64en[] = {
 
 
 /* ASCII order for BASE 64 decode, 255 in unused character */
-static  uint8 base64de[] = {
+static const uint8 base64de[] = {
 	/* nul, soh, stx, etx, eot, enq, ack, bel, */
 	   255, 255, 255, 255, 255, 255, 255, 255,
 
@@ -139,7 +138,7 @@ static  uint8 base64de[] = {
 Value base64_encode(Value a , Value b , int size)
 {
 	uint8 * in   = ccm1::warp_from_value_to_uint8ptr(a);
-	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);;
+	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);
 	int inlen = size;
 	int s;
 	unsigned int i;
@@ -187,53 +186,64 @@ Value base64_encode(Value a , Value b , int size)
 	return warp_from_uint8ptr_to_value(out);
 }
 
-// unsigned int
-// base64_decode(const char *in, unsigned int inlen, unsigned char *out)
-// {
-// 	unsigned int i;
-// 	unsigned int j;
-// 	unsigned char c;
+[[cheerp::jsexport]]
+Value base64_decode(Value a,  Value b , int inlen)
+{
+	unsigned int i;
+	unsigned int j;
+	unsigned char c;
 
-// 	if (inlen & 0x3) {
-// 		return 0;
-// 	}
+	uint8 * in   = ccm1::warp_from_value_to_uint8ptr(a);
+	uint8 * out  = ccm1::warp_from_value_to_uint8ptr(b);
 
-// 	for (i = j = 0; i < inlen; i++) {
-// 		if (in[i] == BASE64_PAD) {
-// 			break;
-// 		}
-// 		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
-// 			return 0;
-// 		}
+	if (inlen & 0x3) {
+		return 0;
+	}
 
-// 		c = base64de[(unsigned char)in[i]];
-// 		if (c == 255) {
-// 			return 0;
-// 		}
+	for (i = j = 0; i < inlen; i++) {
+		if (in[i] == BASE64_PAD) {
+			break;
+		}
+		if (in[i] < BASE64DE_FIRST || in[i] > BASE64DE_LAST) {
+			return 0;
+		}
 
-// 		switch (i & 0x3) {
-// 		case 0:
-// 			out[j] = (c << 2) & 0xFF;
-// 			break;
-// 		case 1:
-// 			out[j++] |= (c >> 4) & 0x3;
-// 			out[j] = (c & 0xF) << 4; 
-// 			break;
-// 		case 2:
-// 			out[j++] |= (c >> 2) & 0xF;
-// 			out[j] = (c & 0x3) << 6;
-// 			break;
-// 		case 3:
-// 			out[j++] |= c;
-// 			break;
-// 		}
-// 	}
+		c = base64de[in[i]];
+		if (c == 255) {
+			return 0;
+		}
 
-// 	return j;
-// }
+		switch (i & 0x3) {
+		case 0:
+			out[j] = (c << 2) & 0xFF;
+			break;
+		case 1:
+			out[j++] |= (c >> 4) & 0x3;
+			out[j] = (c & 0xF) << 4; 
+			break;
+		case 2:
+			out[j++] |= (c >> 2) & 0xF;
+			out[j] = (c & 0x3) << 6;
+			break;
+		case 3:
+			out[j++] |= c;
+			break;
+		}
+	}
+
+	out[j] = 0;
+
+	return ccm1::warp_from_uint8ptr_to_value(out);
+}
 
 
 int main() {
 	// ccm1::log(fab(40));
+	const char * in = "hello";
+	uint8 * out= (uint8 *) "0000000000000000000000000000";
+	Value a    = ccm1::string_from_cstr_to_value(in);
+	Value b    = ccm1::warp_from_uint8ptr_to_value(out);
+	base64_encode(a, b, sizeof(in));
+	ccm1::string_log(b);
 	return 0;
 }

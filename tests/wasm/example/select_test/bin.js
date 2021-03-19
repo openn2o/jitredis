@@ -19,6 +19,10 @@ function fetchBuffer(p){
 	});
 	return b;
 }
+function ___wrapper___ZN4ccm125string_from_cstr_to_valueEPKc(Larg0){
+	Larg0=Larg0|0;
+	return __ZN4ccm125string_from_cstr_to_valueEPKc()|0|0;
+}
 function ___wrapper___ZN4ccm127warp_from_uint8ptr_to_valueEPh(Larg0){
 	Larg0=Larg0|0;
 	return __ZN4ccm127warp_from_uint8ptr_to_valueEPh()|0|0;
@@ -32,21 +36,29 @@ function assignHeaps(tmp0){
 }
 var HEAP8=null,HEAP16=null,HEAP32=null,HEAPF32=null,HEAPF64=null,__asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
 var __Z13base64_encodeiii=null;
+var __Z13base64_decodeiii=null;
 var _Z13base64_encodeiii={};
+var _Z13base64_decodeiii={};
 _Z13base64_encodeiii.promise=
+_Z13base64_decodeiii.promise=
 fetchBuffer('bin.wasm').then(tmp0=>
 WebAssembly.instantiate(tmp0,
 {i:{
-		__ZN4ccm127warp_from_value_to_uint8ptrEi:__dummy,
+		___wrapper___ZN4ccm125string_from_cstr_to_valueEPKc:___wrapper___ZN4ccm125string_from_cstr_to_valueEPKc,
 		___wrapper___ZN4ccm127warp_from_uint8ptr_to_valueEPh:___wrapper___ZN4ccm127warp_from_uint8ptr_to_valueEPh,
+		__ZN4ccm110string_logEi:__dummy,
+		__ZN4ccm127warp_from_value_to_uint8ptrEi:__dummy,
 	}})
 ,console.log).then(tmp0=>{
 	__asm=tmp0.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
 	__Z13base64_encodeiii=__asm.__Z13base64_encodeiii;
+	__Z13base64_decodeiii=__asm.__Z13base64_decodeiii;
 	_Z13base64_encodeiii=__Z13base64_encodeiii;
+	_Z13base64_decodeiii=__Z13base64_decodeiii;
 	_Z13base64_encodeiii.promise=
+	_Z13base64_decodeiii.promise=
 	Promise.resolve();
 	__asm._main();
 },console.log,console.log);

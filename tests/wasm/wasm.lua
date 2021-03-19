@@ -554,7 +554,8 @@ local sections = {
           local ram_s = {}
           for i = 1, data_size do
             flag,stream =  parseLEBu(stream, 1);
-            ram_s [i] = string.char(flag);
+            --ram_s [i] = string.char(flag);
+            ram_s [i] = flag;
           end 
           ram_s [#ram_s + 1] = '\0';
           segments[i] = {index = offsetVal, addr = offsetVal, data = table.concat(ram_s)}
@@ -611,7 +612,7 @@ local wasm_loader_decode = function (bytes)
     return instance.chunk.exports;
 end
 
-
+local ccm1 = require("ccm1_string");
 ---------------------------test
 local data   = nil;
 -- local handle = io.open("/tmp/bin.wasm", "rb")
@@ -629,13 +630,9 @@ end
 
 
 
--- local addr,size  = exports.write_uint8_array({
---   string.byte('h'),
---   string.byte('e'),
---   string.byte('l'),
---   string.byte('l'),
---   string.byte('o')
--- });
+
+
+-- aGVsbG8=
 
 -- local addr2,size2  = exports.write_uint8_array({
 --   string.byte('h'),

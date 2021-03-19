@@ -6,7 +6,8 @@ _M.caches = {}
 _M.string_buff = {}
 
 
-local const_char_ptr_value = function (ptr)
+_M.const_char_ptr_value = function (ptr)
+
     local eax = ptr..""
     if _M.caches [eax] ~= nil then
         return _M.caches [eax];
@@ -14,6 +15,7 @@ local const_char_ptr_value = function (ptr)
 
     local bytes = _M.bytes;
     local str = {}
+
     while bytes[ptr] ~= 0 do
         str[#str + 1] = string.char(bytes[ptr]);
         ptr = ptr+1;
@@ -23,6 +25,7 @@ local const_char_ptr_value = function (ptr)
     return val;
 end
 
+local const_char_ptr_value = _M.const_char_ptr_value;
 _M.ccm1__string_from_value_to_cstr = function (ptr, size)
     return ptr;
 end
