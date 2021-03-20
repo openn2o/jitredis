@@ -763,6 +763,10 @@ generators = {
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
   end,
+  I32Load16S = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(readMem(%s, %sSize, %s, 16))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint16_t*", %s + %s)[0]
+  end,
   I32Load16U = function(stack, _, _, _, _, instance)
     local addr = pop(stack)
     push(stack, ([[(readMem(%s, %sSize, %s, 16))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint16_t*", %s + %s)[0]
@@ -815,9 +819,37 @@ generators = {
     local addr = pop(stack)
     return ([[  storeMem(%s, %sSize, %s, %s, 64)]] .. "\n"):format(instance.memories[0], instance.memories[0], addr, value, "\n") -- ffi.cast("uint64_t*", %s + %s)[0] = %s%s
   end,
+  I64Load8S = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("uint64_t*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
+  I64Load16S = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("uint64_t*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
+  I64Load32S = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("uint64_t*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
+  I64Load8U = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("uint64_t*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
+  I64Load16U =  function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("uint64_t*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
+  I64Load32U = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("uint64_t*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
   F64Load = function(stack, _, _, _, _, instance)
     local addr = pop(stack)
     push(stack, ([[(ffi.cast("double*", %s + %s)[0])]]):format(instance.memories[0], addr))
+  end,
+  F32Load = function(stack, _, _, _, _, instance)
+    local addr = pop(stack)
+    push(stack, ([[(ffi.cast("float*", %s + %s)[0])]]):format(instance.memories[0], addr))
   end,
   F64Store = function(stack, _, _, _, _, instance)
     local value = pop(stack)
@@ -916,7 +948,6 @@ do -- Redundant Generators
   g.F64ConvertSI32 = g.Nop
   g.F32Copysign    = g.Nop
   g.F64Copysign    = g.Nop
-  
 end
 local static_link = {
   ["client__print"] = [[print]]
@@ -1208,9 +1239,9 @@ end
   t.source = t.source .. "}\n"
   -----------------b_debug
   do 
-     local handle = io.open("debug.out.lua", "w")
-     handle:write(t.source)
-     handle:close()
+    --  local handle = io.open("debug.out.lua", "w")
+    --  handle:write(t.source)
+    --  handle:close()
   
      local handle = io.open("debug.out.lua", "r")
      t.source = handle:read("*a")

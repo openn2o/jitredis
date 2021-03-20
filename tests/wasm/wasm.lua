@@ -30,6 +30,7 @@ local parseLEBu = function (stream, nBytes)
     local bitCnt = nBytes * 7
     for shift = 0, bitCnt,  7 do
       byte, stream = stream:sub(1, 1):byte(), stream:sub(2)
+
       if byte == nil then
         return 1 , stream;  
       end
@@ -538,33 +539,37 @@ local sections = {
         flag,stream= parseLEBu(stream, 4);
 
         if 0 == flag then
-          -- print("header begin");
+          print("header begin");
           flag,stream = parseLEBu(stream, 4);
           if 0x41 == flag then
-            -- print("i32 const" , flag)
+            print("i32 const" , flag)
           end
           
           offsetVal,stream = parseLEBu(stream, 4);
-          -- print("mem offset", offsetVal)
+          print("mem offset", offsetVal)
           flag,stream = parseLEBu(stream, 4);
          
-          -- if 0x0b == flag then
-          --   print("header end");
-          -- end
+          if 0x0b == flag then
+            print("header end");
+          end
           
           flag,stream = parseLEBu(stream, 4);
           data_size = flag;
-          -- print("data size=", data_size);
+          print("data size=", data_size);
           local ram_s = {}
-          for i = 1, data_size do
-            flag,stream =  parseLEBu(stream, 1);
-            --ram_s [i] = string.char(flag);
-            ram_s [i] = flag;
+          local read_size = data_size;
+          local unit8_s = 0;
+          for i = 1, read_size do
+            unit8_s,stream =  parseLEBu(stream, 4);
+            ram_s [i] = unit8_s;
           end 
           ram_s [#ram_s + 1] = '\0';
+          print(table.concat(ram_s,","))
           segments[i] = {index = offsetVal, addr = offsetVal, data = table.concat(ram_s)}
         else
+          print("err=", string.byte(0xFF));
           print("uncaght error");
+          print("flag=", flag);
         end
       end
       return segments
@@ -622,7 +627,7 @@ local data   = nil;
 -- local handle = io.open("/tmp/bin.wasm", "rb")
 ---V1.wasm
 -- notpass.wasm
-local handle = io.open("./tests/bin.wasm", "rb")
+local handle = io.open("./tests/load.wasm", "rb")
 data  = handle:read("*a");
 handle:close();
 local exports = wasm_loader_decode(data);
