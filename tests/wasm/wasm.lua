@@ -28,11 +28,17 @@ end
 local parseLEBu = function (stream, nBytes)
     local result, byte = 0
     local bitCnt = nBytes * 7
+    
     for shift = 0, bitCnt,  7 do
       byte, stream = stream:sub(1, 1):byte(), stream:sub(2)
 
       if byte == nil then
-        return 1 , stream;  
+        --print("11111");
+        --print("t=", tostring(t), string.byte(255));
+        return 0xff , stream;  
+        --result = string.byte(255);
+        
+        --break;
       end
       result = bit.bor(result, bit.lshift(bit.band(byte, 0x7F), shift))
       if bit.band(byte, 0x80) == 0 then
@@ -530,44 +536,45 @@ local sections = {
     end,
     [11] = function(stream) -- Data Section
       local count
-      count, stream = parseLEBu(stream, 4)
-      -- print("num=" , count);
+      count, stream = parseLEBu(stream, 1)
+      print("num=" , count);
       local segments = {}
       local flag
-
       for i = 1, count do
-        flag,stream= parseLEBu(stream, 4);
-
+        flag,stream= parseLEBu(stream, 1);
+        print("flag=" , flag)
         if 0 == flag then
           print("header begin");
-          flag,stream = parseLEBu(stream, 4);
+          flag,stream = parseLEBu(stream, 1); --2 i32.const
           if 0x41 == flag then
             print("i32 const" , flag)
           end
           
-          offsetVal,stream = parseLEBu(stream, 4);
+          offsetVal,stream = parseLEBu(stream, 1);
           print("mem offset", offsetVal)
-          flag,stream = parseLEBu(stream, 4);
+          flag,stream = parseLEBu(stream, 1);
          
           if 0x0b == flag then
             print("header end");
           end
           
-          flag,stream = parseLEBu(stream, 4);
+          flag,stream = parseLEBu(stream, 1);
           data_size = flag;
           print("data size=", data_size);
           local ram_s = {}
-          local read_size = data_size;
           local unit8_s = 0;
-          for i = 1, read_size do
-            unit8_s,stream =  parseLEBu(stream, 4);
-            ram_s [i] = unit8_s;
+        
+          for i = 1, data_size do
+            -- unit8_s, _ =  parseLEBu(stream, 1);
+            ram_s [i] = string.byte(stream:sub(1,1));
+            ram_s [i] = (unit8_s);
           end 
+          stream = stream:sub(5) 
           ram_s [#ram_s + 1] = '\0';
           print(table.concat(ram_s,","))
           segments[i] = {index = offsetVal, addr = offsetVal, data = table.concat(ram_s)}
         else
-          print("err=", string.byte(0xFF));
+          
           print("uncaght error");
           print("flag=", flag);
         end
