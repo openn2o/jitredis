@@ -151,7 +151,6 @@ print(exportTable.i64_load16_u() ,"=> i64:65535");
 print(exportTable.i64_load32_u() ,"=> i64:4294967295" );
 print(exportTable.f32_load() ,"=> f32:25.750000");
 print(exportTable.f64_load() , "=> f64:1023.875000" ); 
-
 exportTable.write_uint8_array = function (buff) 
   local len = table.getn(buff);
   if len < 1 then

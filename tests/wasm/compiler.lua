@@ -746,9 +746,15 @@ generators = {
     pop(stack)
   end,
 
-  I32Load = function(stack, _, _, _, _, instance)
+  I32Load = function(stack, instr, argList, fnLocals, blockStack, instance)
     local addr = pop(stack)
-    push(stack, ([[(readMem(%s, %sSize, %s, 32))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint32_t*", %s + %s)[0]
+    if(instr.offset ~= nil) then
+      push(stack, ([[(readMem(%s, %sSize, %s, 32))]]):format(instance.memories[0], instance.memories[0], addr .. "+" .. instr.offset)) ;
+    else
+      push(stack, ([[(readMem(%s, %sSize, %s, 32))]]):format(instance.memories[0], instance.memories[0], addr)) ;
+    end
+    -- local addr = pop(stack)
+    -- push(stack, ([[(readMem(%s, %sSize, %s, 32))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint32_t*", %s + %s)[0]
   end,
   I32Load8U = function(stack, instr, argList, fnLocals, blockStack, instance)
     local addr = pop(stack)
@@ -757,11 +763,18 @@ generators = {
     else
       push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) ;
     end
-   
   end,
-  I32Load8S = function(stack, _, _, _, _, instance)
+  I32Load8S = function(stack, instr, argList, fnLocals, blockStack, instance)
+    --debug load
+    -- local addr = pop(stack)
+    -- push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr));
     local addr = pop(stack)
-    push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) -- ffi.cast("uint8_t*", %s + %s)[0]
+    if(instr.offset ~= nil) then
+      push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr .. "+" .. instr.offset)) ;
+    else
+      push(stack, ([[(readMem(%s, %sSize, %s, 8))]]):format(instance.memories[0], instance.memories[0], addr)) ;
+    end
+   
   end,
   I32Load16S = function(stack, _, _, _, _, instance)
     local addr = pop(stack)
