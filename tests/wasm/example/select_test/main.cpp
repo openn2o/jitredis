@@ -232,7 +232,6 @@ Value base64_decode(Value a,  Value b , int inlen)
 	}
 
 	out[j] = 0;
-
 	return ccm1::warp_from_uint8ptr_to_value(out);
 }
 
@@ -240,10 +239,12 @@ Value base64_decode(Value a,  Value b , int inlen)
 int main() {
 	// ccm1::log(fab(40));
 	const char * in = "hello";
-	uint8 out[]= {1,2,3,4,5,6,7,8,9,10};
+	uint8 out[256];
 	Value a    = ccm1::string_from_cstr_to_value(in);
 	Value b    = ccm1::warp_from_uint8ptr_to_value(out);
 	base64_encode(a, b, sizeof(in));
 	ccm1::string_log(b);
 	return 0;
 }
+
+

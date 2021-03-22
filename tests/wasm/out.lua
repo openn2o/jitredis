@@ -629,4 +629,8 @@ exportTable.read_uint8_array = function (i, len)
   end
   return tmp;
 end
+
+if exportTable.main ~= nil then
+  exportTable.main();
+end
 return { exports = exportTable, importTable = imports, }

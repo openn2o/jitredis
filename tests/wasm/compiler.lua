@@ -1316,7 +1316,6 @@ exportTable.read_uint8_array = function (i, len)
   end
   return tmp;
 end
-
 ]]
   t.source = t.source .. "return { "
   if sectionData[7] then
@@ -1338,11 +1337,11 @@ end
   t.source = t.source .. "}\n"
   -----------------b_debug
   do 
-     local handle = io.open("debug.out.lua", "w")
+     local handle = io.open("lib.lua", "w")
      handle:write(t.source)
      handle:close()
   
-     local handle = io.open("debug.out.lua", "r")
+     local handle = io.open("lib.lua", "r")
      t.source = handle:read("*a")
      handle:close()
   end
