@@ -19,28 +19,29 @@ function fetchBuffer(p){
 	});
 	return b;
 }
-function assignHeaps(tmp2){
-	HEAP8=new Uint8Array(tmp2);
-	HEAP16=new Uint16Array(tmp2);
-	HEAP32=new Int32Array(tmp2);
-	HEAPF32=new Float32Array(tmp2);
-	HEAPF64=new Float64Array(tmp2);
+function assignHeaps(tmp0){
+	HEAP8=new Uint8Array(tmp0);
+	HEAP16=new Uint16Array(tmp0);
+	HEAP32=new Int32Array(tmp0);
+	HEAPF32=new Float32Array(tmp0);
+	HEAPF64=new Float64Array(tmp0);
 }
 var HEAP8=null,HEAP16=null,HEAP32=null,HEAPF32=null,HEAPF64=null,__asm=null,__heap=null;function __dummy(){throw new Error('this should be unreachable');};
-var __Z10b64_decodePcjS_=null;
-var _Z10b64_decodePcjS_={};
-_Z10b64_decodePcjS_.promise=
-fetchBuffer('bin.wasm').then(tmp2=>
-WebAssembly.instantiate(tmp2,
+var __Z3fabi=null;
+var _Z3fabi={};
+_Z3fabi.promise=
+fetchBuffer('bin.wasm').then(tmp0=>
+WebAssembly.instantiate(tmp0,
 {i:{
+		__ZN4ccm13logEi:__dummy,
 	}})
-,console.log).then(tmp2=>{
-	__asm=tmp2.instance.exports;
+,console.log).then(tmp0=>{
+	__asm=tmp0.instance.exports;
 	__heap=__asm.memory.buffer;
 	assignHeaps(__heap);
-	__Z10b64_decodePcjS_=__asm.__Z10b64_decodePcjS_;
-	_Z10b64_decodePcjS_=__Z10b64_decodePcjS_;
-	_Z10b64_decodePcjS_.promise=
+	__Z3fabi=__asm.__Z3fabi;
+	_Z3fabi=__Z3fabi;
+	_Z3fabi.promise=
 	Promise.resolve();
 	__asm._main();
 },console.log,console.log);
