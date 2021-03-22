@@ -586,13 +586,13 @@ local sections = {
           for i = 1, data_size do
             --print("sub" , #stream);
             -- unit8_s, stream =  parseLEBu(stream, 1);
-            ram_s [i] = string.byte(stream:sub(i,i));
+            ram_s [i] =  stream:sub(i,i);
             -- ram_s [i] = (unit8_s);
           end 
           stream = stream:sub(data_size+1) 
           ram_s [#ram_s + 1] = '\0';
           print(table.concat(ram_s,","))
-          segments[i] = {index = offsetVal, addr = offsetVal, data = table.concat(ram_s)}
+          segments[i] = {index = offsetVal, addr = size_offset, data = table.concat(ram_s)}
         else
           
           print("uncaght error");

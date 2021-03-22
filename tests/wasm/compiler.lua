@@ -1239,9 +1239,9 @@ end
   t.source = t.source .. "}\n"
   -----------------b_debug
   do 
-    --  local handle = io.open("debug.out.lua", "w")
-    --  handle:write(t.source)
-    --  handle:close()
+     local handle = io.open("debug.out.lua", "w")
+     handle:write(t.source)
+     handle:close()
   
      local handle = io.open("debug.out.lua", "r")
      t.source = handle:read("*a")

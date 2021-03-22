@@ -49,20 +49,34 @@ end
 local exportTable = {}
 local A = ffi.new("uint8_t[65536]")
 local ASize = 1
-A[0] = 49
-A[1] = 54
-A[2] = 51
-A[3] = 56
-A[4] = 51
-A[5] = 49
-A[6] = 54
-A[7] = 51
-A[8] = 56
-A[9] = 51
-A[10] = 48
-A[11] = 54
-A[12] = 53
-A[13] = 0
+A[0] = 255
+A[1] = 255
+A[2] = 255
+A[3] = 255
+A[4] = 0
+A[4] = 0
+A[5] = 0
+A[6] = 206
+A[7] = 65
+A[8] = 0
+A[8] = 0
+A[9] = 0
+A[10] = 0
+A[11] = 0
+A[12] = 0
+A[13] = 255
+A[14] = 143
+A[15] = 64
+A[16] = 0
+A[16] = 255
+A[17] = 255
+A[18] = 255
+A[19] = 255
+A[20] = 255
+A[21] = 255
+A[22] = 255
+A[23] = 255
+A[24] = 0
 local B, C, D, E, F, G, H, I, J, K, L, M, N, O
 function B()
   return (readMem(A, ASize, 0, 8))
@@ -106,40 +120,37 @@ end
 function O()
   return (ffi.cast("double*", A + 8)[0])
 end
-exportTable.i64_load8_s = G
 exportTable.i32_load8_s = B
-exportTable.i32_load16_u = F
-exportTable.i64_load16_u = L
-exportTable.i32_load = D
-exportTable.f32_load = N
-exportTable.i64_load8_u = K
-exportTable.i32_load8_u = E
-exportTable.i32_load16_s = C
-exportTable.i64_load16_s = H
+exportTable.i64_load8_s = G
 exportTable.f64_load = O
-exportTable.i64_load32_u = M
-exportTable.i64_load = J
 exportTable.i64_load32_s = I
+exportTable.i64_load16_u = L
+exportTable.f32_load = N
+exportTable.i32_load16_u = F
+exportTable.i64_load16_s = H
+exportTable.i64_load8_u = K
+exportTable.i32_load16_s = C
+exportTable.i32_load8_u = E
+exportTable.i64_load = J
+exportTable.i64_load32_u = M
+exportTable.i32_load = D
 exportTable.memory = A;
 exportTable.grow_ip = 0;
 
-
-print(".........")
-print(exportTable.i32_load8_s());-- => i32:4294967295
-print(exportTable.i32_load16_s() );-- => i32:4294967295
-print(exportTable.i32_load() );-- => i32:4294967295
-print(exportTable.i32_load8_u() );-- => i32:255
-print(exportTable.i32_load16_u() );-- => i32:65535
-print(exportTable.i64_load8_s() );-- => i64:18446744073709551615
-print(exportTable.i64_load16_s() );-- => i64:18446744073709551615
-print(exportTable.i64_load32_s() );-- => i64:18446744073709551615
-print(exportTable.i64_load() );-- => i64:18446744073709551615
-print(exportTable.i64_load8_u() );-- => i64:255
-print(exportTable.i64_load16_u() );-- => i64:65535
-print(exportTable.i64_load32_u() );-- => i64:4294967295
-print(exportTable.f32_load() );-- => f32:25.750000
-print(exportTable.f64_load() );-- => f64:1023.875000
-
+print(exportTable.i32_load8_s(), " => i32:4294967295 ");
+print(exportTable.i32_load16_s() ,"=> i32:4294967295");
+print(exportTable.i32_load(), "=> i32:4294967295" ); 
+print(exportTable.i32_load8_u() ,"=> i32:255");
+print(exportTable.i32_load16_u() ,"=> i32:65535");
+print(exportTable.i64_load8_s(), "=> i64:18446744073709551615" );
+print(exportTable.i64_load16_s() ,"=> i64:18446744073709551615");
+print(exportTable.i64_load32_s() ,"=> i64:18446744073709551615");
+print(exportTable.i64_load() ," => i64:18446744073709551615" );
+print(exportTable.i64_load8_u()," => i64:255" );
+print(exportTable.i64_load16_u() ,"=> i64:65535");
+print(exportTable.i64_load32_u() ,"=> i64:4294967295" );
+print(exportTable.f32_load() ,"=> f32:25.750000");
+print(exportTable.f64_load() , "=> f64:1023.875000" ); 
 
 exportTable.write_uint8_array = function (buff) 
   local len = table.getn(buff);
