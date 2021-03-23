@@ -122,11 +122,14 @@
 					subtask.cache["ws_suma_subtask_all_cluster_data"] = [];
 					var retVal  = [];
 					var json_r  = e;
+					var fliters = {}
 					for(var i = 0; i< json_r.length; i++) {
+						if (!json_r[i]) continue;
 						var o = JSON.parse(json_r[i]);
-						if (o.biz_id) {
+						if (o.biz_id && !fliters[o.local_vip]) {
 							retVal.push(o);
 							subtask.cache["ws_suma_subtask_all_cluster_data"] = retVal;
+							fliters [o.local_vip] = 1;
 						}
 					}
 					
