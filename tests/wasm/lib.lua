@@ -205,8 +205,8 @@ function F()
   return 0
 end
 exportTable.main = F
-exportTable.memory = A
 exportTable.fab = E
+exportTable.memory = A
 exportTable.memory = A;
 exportTable.grow_ip = 0;
 
