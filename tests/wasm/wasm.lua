@@ -657,44 +657,4 @@ local exports = wasm_loader_decode(data);
 if exports.main ~= nil then
   print(exports.main());
 end
-
-
-
-
-
-
--- aGVsbG8=
-
--- local addr2,size2  = exports.write_uint8_array({
---   string.byte('h'),
---   string.byte('e'),
---   string.byte('l'),
---   string.byte('l'),
---   string.byte('o'),
---   string.byte('2')
--- });
--- --https://blog.csdn.net/yangguanghaozi/article/details/52100501
-
--- print(addr, size)
--- local step = 1;
--- local size_w = 100;
-
--- while step <  size_w do
---   if step % 2 == 0 then
---     exports.murmur_hash2(addr , size);
---   else
---     exports.djb_hash(addr2 , size2);
---   end
---   step = step + 1;
--- end
-
-
--- print('murmur_hash2=>', exports.murmur_hash2(addr , size));
--- print('murmur_hash2=>', exports.murmur_hash2(addr , size));
--- print('murmur_hash2=>', exports.murmur_hash2(addr2 , size2));
--- print('djbhash_=>', exports.djb_hash(addr , size));
--- print('djbhash_=>', exports.djb_hash(addr , size));
--- print('djbhash_=>', exports.djb_hash(addr2 , size2));
-
-
 return _M;

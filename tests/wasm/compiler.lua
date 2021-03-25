@@ -864,6 +864,11 @@ generators = {
         local re = string.sub(t1, 1, t2 -1);
         local dist= string.sub(t1, t2+1);
         if dist ~= nil and string.find (dist, "%d") ~= nil then
+            local loc_re_idx = 0;
+            if (re:byte() == 40) then
+              effect = "";
+              return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr, value, "\n") .. effect ;
+            end
             effect = "\t" .. re .. "= " .. re .. "+" .. dist .. "\n"; 
         end
       end
