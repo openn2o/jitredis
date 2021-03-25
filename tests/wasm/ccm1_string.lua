@@ -68,7 +68,6 @@ _M.ccm1__dynamic_string_append = function (self,  ptr)
 end
 
 _M.ccm1__dynamic_string_log = function (ptr)
-   
     local ptr_t = type(ptr);
     if ptr_t == "string" then
         return print(ptr);
