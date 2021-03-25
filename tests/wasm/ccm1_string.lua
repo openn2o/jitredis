@@ -9,9 +9,9 @@ _M.string_buff = {}
 _M.const_char_ptr_value = function (ptr)
     print(ptr)
     local eax = ptr..""
-    if _M.caches [eax] ~= nil then
-        return _M.caches [eax];
-    end
+    -- if _M.caches [eax] ~= nil then
+    --     return _M.caches [eax];
+    -- end
 
     local bytes = _M.bytes;
     local str = {}
@@ -24,7 +24,7 @@ _M.const_char_ptr_value = function (ptr)
         ptr = ptr+1;
     end
     local val = table.concat(str);
-    _M.caches [eax] = val;
+    -- _M.caches [eax] = val;
     return val;
 end
 

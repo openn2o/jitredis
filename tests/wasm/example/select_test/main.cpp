@@ -20,6 +20,29 @@ namespace ccm1 {
 	void  log(int i);	
 };
 
+
+[[cheerp::jsexport]]
+Value ccm1_cheerp_version () {
+	uint8 ccm1_magic[7]  = {
+	'c','h','e','e','r','p', 0
+	};
+
+	ccm1::string_log(ccm1::warp_from_uint8ptr_to_value(ccm1_magic));
+	return ccm1::warp_from_uint8ptr_to_value(ccm1_magic);
+}
+
+
+[[cheerp::jsexport]]
+Value ccm1_cheerp_version2 () {
+	uint8 ccm1_magic[7]  = {
+	'p','h','e','e','r','p', 0
+	};
+	ccm1::string_log(ccm1::warp_from_uint8ptr_to_value(ccm1_magic));
+	return ccm1::warp_from_uint8ptr_to_value(ccm1_magic);
+}
+
+
+
 using namespace ccm1;
 
 

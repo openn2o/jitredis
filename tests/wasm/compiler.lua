@@ -858,6 +858,15 @@ generators = {
       return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr .. "+" .. instr.offset, value, "\n") ;
     else
       local effect = ""
+      if string.find(addr , "+") ~= nil then
+        local t1 = string.sub(addr, 2, string.len(addr)-1);
+        local t2 = string.find(t1, "+");
+        local re = string.sub(t1, 1, t2 -1);
+        local dist= string.sub(t1, t2+1);
+        if dist ~= nil and string.find (dist, "%d") ~= nil then
+            effect = "\t" .. re .. "= " .. re .. "+" .. dist .. "\n"; 
+        end
+      end
       return ([[ storeMem(%s, %sSize, %s, %s, 8)]] .. "\n "):format(instance.memories[0], instance.memories[0], addr, value, "\n") .. effect ;
     end
   end,
@@ -1289,6 +1298,13 @@ function compiler.newInstance(sectionData)
   t.source =  t.source .. [[
 exportTable.memory = A;
 exportTable.grow_ip = 0;
+
+---memory init deps
+if imports.requires ~= nil then
+  for k, v in pairs(imports.requires) do
+      v.bytes = A;
+  end
+end
 
 exportTable.write_uint8_array = function (buff) 
   local len = table.getn(buff);

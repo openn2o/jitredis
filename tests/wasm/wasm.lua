@@ -536,7 +536,10 @@ local sections = {
     end,
     [11] = function(stream) -- Data Section
       local count
-      count, stream = parseLEBu(stream, 1)
+      local size_offset
+
+      count, stream = parseLEBu(stream, 1);
+      
       print("num=" , count);
       local segments = {}
       local flag;
@@ -545,13 +548,6 @@ local sections = {
         flag,stream= parseLEBu(stream, 1);
         print("flag=" , flag)
         if 0 == flag then
-
-          ----parse header
--- 00000c3: 00                                        ; segment flags
--- 00000c4: 41                                        ; i32.const
--- 00000c5: 8880 c000                                 ; i32 literal
--- 00000c9: 0b                                        ; end
--- 00000ca: 05                                        ; data segment size
           print("header begin");
           flag,stream = parseLEBu(stream, 1); --2 i32.const
           if 0x41 == flag then
@@ -573,7 +569,6 @@ local sections = {
 
           ----read offset
           size_offset,stream = parseLEBu(stream, read_size);
-         
           -- read end
           flag,stream = parseLEBu(stream, 1);
           print("offet =", size_offset);
