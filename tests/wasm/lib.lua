@@ -592,14 +592,14 @@ function L(DF, DG)
   return (checkCondition(((DF > DG) and 1 or 0)) and DF) or (DG)
 end
 exportTable.main = G
-exportTable.test_max1 = L
 exportTable.base64_encode = E
-exportTable.test_max3 = J
 exportTable.test_max2 = K
-exportTable.fab = F
-exportTable.base64_decode = H
-exportTable.test_max4 = I
+exportTable.test_max1 = L
 exportTable.memory = A
+exportTable.base64_decode = H
+exportTable.test_max3 = J
+exportTable.test_max4 = I
+exportTable.fab = F
 exportTable.memory = A;
 exportTable.grow_ip = 0;
 
