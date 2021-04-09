@@ -208,20 +208,48 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     );
     REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
-    RedisModuleString *SumaClusterInfo = REDISMODULE_CREATE_STRING_EX(ctx, "SumaClusterInfo");
-       
-    if (SumaClusterInfo) {
+    
+ 
+
+    if (argc > 3) {
+        ////集群信息
+        RedisModuleString *SumaClusterInfo = REDISMODULE_CREATE_STRING_EX(ctx, "SumaClusterInfo");
         REDISMODULE_JIT_CALL(ctx, "SADD", "ss", SumaClusterInfo, argv[1]);
-    }
 
-    RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "!ss", argv[1], argv[2]);
+        RedisModuleString *lock = REDISMODULE_CREATE_STRING_EX(ctx, 
+        "subtask_%s.lock", 
+        REDISMODULE_STRING_PTR_LEN(argv[3], NULL));
 
-    if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
-        REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
-        if(status != REIDSMODULE_REPLY_STAT_FAIL) {
-            REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
-            return  REDISMODULE_OK;
+        RedisModuleCallReply *status = REDISMODULE_JIT_CALL(ctx, "SETNX", "sc", lock, "1");
+        if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(status)) {
+            RedisModuleString * setnx_str = REDISMODULE_ELE_TO_STRING(status);
+            if (REDISMODULE_STRCMP(REDISMODULE_STRING_ALLOC(ctx, "OK", 2), setnx_str) != 0) {
+                 REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+                 return  REDISMODULE_OK;
+            }
         }
+
+        RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "ss", argv[1], argv[2]);
+        if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
+            REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
+            if(status != REIDSMODULE_REPLY_STAT_FAIL) {
+                REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+                return  REDISMODULE_OK;
+            }
+        }
+
+    } else {
+
+        RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "ss", argv[1], argv[2]);
+
+        if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(pub_status_int)) {
+            REDISMODULE_REPLY_INTEGER_T status = REDISMODULE_INTEGER_GET(pub_status_int);
+            if(status != REIDSMODULE_REPLY_STAT_FAIL) {
+                REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+                return  REDISMODULE_OK;
+            }
+        }
+        REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
     }
     REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_FAIL);
     return  REDISMODULE_OK;
@@ -755,8 +783,9 @@ void timerDataProcessorHandler(REDISMODULE_CONTEXT_T *ctx, void *data) {
 }
 
 /***
-*  定时任务启动  V1
+*  定时任务启动  V1.1
 *  注册回调函数，不需要外部调用。 
+*  注册内置集群是否可用巡检
 */
 int TimerCommand_RedisCommand(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T **argv, int argc) {
     REDISMODULE_AUTO_GCD (ctx);
@@ -774,6 +803,21 @@ int TimerCommand_RedisCommand(REDISMODULE_CONTEXT_T *ctx, REDISMODULE_STRING_T *
                                                                                   "  register_c(v, code)                                        \n"
                                                                                   "end                                                          \n"
                                                                                   "return 1");
+        /////V1.1 reporter for RDA(实时数据分析)
+
+        REDISMODULE_STRING_T *warn_port_str = REDISMODULE_CREATE_STRING_EX (ctx , "local _M = {}\n"
+                                                                                  "_M.process = function () \n"
+                                                                                  "  redis.call('sumavlib.suma_biz_id_cluster_online',0);        \n"
+                                                                                  "  redis.log(redis.LOG_WARNING, 'chk cluster reporter is run.')\n"
+                                                                                  "end                                                           \n"
+                                                                                  "return _M;");
+        
+
+        REDISMODULE_STRING_T *warn_port_ioc = REDISMODULE_CREATE_STRING_EX (ctx , "return redis.call ('biz_script_register', KEYS[1], KEYS[2]);");  
+        RedisModuleCallReply *reporter_ioc = REDISMODULE_JIT_CALL (ctx, REDISMODULE_EVAL_T, "scsc", warn_port_ioc, "Cluster_Reporter", warn_port_str, "0");
+        REDISMODULE_NOT_USED(reporter_ioc);
+
+        /////
         REDISMODULE_NOT_USED(tid);
         STARTUP_ATOMIC_LOCK (tid);
         REDISMODULE_JIT_CALL(ctx, REDISMODULE_EVAL_T, "sc", codes_install, "0");
