@@ -3,20 +3,71 @@
 	<head>
 		<meta charset="utf-8" />
 		<title></title>
-		<script src="subtask_stat.js"></script>
+		<script type="text/javascript" src="subtask_stat.js"></script>
+		<script type="text/javascript" src="ecahrts.js" ></script>
 	</head>
 	<body>
+	    <div id="main" style="width:1024px; height: 400px;"></div>
 		<script>
 			console.log(subtask);
+			var chartDom = document.getElementById('main');
+			var myChart = echarts.init(chartDom);
+			var hash    = {}
 			
+			var data_opt = {
+			    tooltip: {
+			        trigger: 'item'
+			    },
+			    legend: {
+			        top: '5%',
+			        left: 'center'
+			    },
+			    series: [
+					        {
+					            name: '子节点数量',
+					            type: 'pie',
+					            radius: ['40%', '70%'],
+					            avoidLabelOverlap: false,
+					            itemStyle: {
+					                borderRadius: 10,
+					                borderColor: '#fff',
+					                borderWidth: 2
+					            },
+					            label: {
+					                show: true,
+					                position: 'right'
+					            },
+					            emphasis: {
+					                label: {
+					                    show: true,
+					                    fontWeight: 'bold'
+					                }
+					            },
+					      		labelLine: {
+					                show: false
+					            },
+				            	data: []
+					         }
+			         ]
+			};
+
+
+		
 			subtask.start({
-				master_ip:"10.254.12.12"
+				master_ip:"10.254.12.33"
 			}, function () {
 				/////
 				///  推送
 				////
 				subtask.get_all_cluster_names(subtask, function (e) {
 					console.log("获取所有集群名称 =>" , e);
+					data_opt.series[0].data = [];
+					for(var k in e) {
+						var item = {}
+						item.name  = e[k] + "集群"
+						data_opt.series[0].data.push(item);
+						hash[e[k]] = item;
+					}
 				});
 				
 				//// 参数biz_id 
@@ -38,6 +89,15 @@
 				
 				subtask.get_all_live_instance(subtask, function (e) {
 					console.log("在线活跃状态信息 =>" , e);
+//					data_opt.series[0].data
+					var nums = {}
+					for(var i = 0; i< e.length ; i++) {
+						if(!hash[e[i].biz_id].value) {
+							hash[e[i].biz_id].value = 0;
+						}
+						hash[e[i].biz_id].value ++;
+					}
+					myChart.setOption(data_opt);
 				});
 			}).subscribe(function (e) {
 				/***
@@ -49,6 +109,12 @@
 				console.log("订阅内容推送 <= " , e);
 			})
 			
+			
+
+				
+
+
+
 			
 		</script>
 	</body>

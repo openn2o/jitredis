@@ -209,8 +209,6 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
     REIDSMODULE_DEBUG(ctx, "warning", "suma_vip_register_list param = %s", REDISMODULE_STRING_PTR_LEN(s, NULL));
     #endif
     
- 
-
     if (argc > 3) {
         ////集群信息
         RedisModuleString *SumaClusterInfo = REDISMODULE_CREATE_STRING_EX(ctx, "SumaClusterInfo");
@@ -220,10 +218,16 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
         "subtask_%s.lock", 
         REDISMODULE_STRING_PTR_LEN(argv[3], NULL));
 
-        RedisModuleCallReply *status = REDISMODULE_JIT_CALL(ctx, "SETNX", "sc", lock, "1");
-        if (REDISMODULE_REPLY_STRING == REDISMODULE_TYPE_OF_ELEMENT(status)) {
-            RedisModuleString * setnx_str = REDISMODULE_ELE_TO_STRING(status);
-            if (REDISMODULE_STRCMP(REDISMODULE_STRING_ALLOC(ctx, "OK", 2), setnx_str) != 0) {
+ 
+        RedisModuleCallReply *status = REDISMODULE_JIT_CALL(ctx, "HSETNX", "csc", "subtask_register_lock_hash", lock, "1");
+        if (REDISMODULE_REPLY_INTEGER == REDISMODULE_TYPE_OF_ELEMENT(status)) {
+            int setnx = REDISMODULE_INTEGER_GET (status);
+            // if (REDISMODULE_STRCMP(REDISMODULE_STRING_ALLOC(ctx, "OK", 2), setnx_str) != 0) {
+            //      REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
+            //      return  REDISMODULE_OK;
+            // }
+
+            if (REIDSMODULE_REPLY_STAT_FAIL == setnx) {
                  REIDSMODULE_REPLY_STATUS_OUT(ctx, REIDSMODULE_REPLY_STAT_OK);
                  return  REDISMODULE_OK;
             }
@@ -237,7 +241,6 @@ int suma_vip_register_list (RedisModuleCtx *ctx, RedisModuleString **argv, int a
                 return  REDISMODULE_OK;
             }
         }
-
     } else {
 
         RedisModuleCallReply *pub_status_int = REDISMODULE_JIT_CALL(ctx, "SADD", "ss", argv[1], argv[2]);

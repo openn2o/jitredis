@@ -1,0 +1,187 @@
+--[[
+    数码upstram模块
+--]]
+
+local _M = {}
+local cjson     = require("cjson");
+local http_jit  = require("suma_vip_http_jit");
+local http      = require("resty.http");
+local _push     = table.insert;
+local gsub      = string.gsub;
+local find_s    = string.find;
+local EXTENSION = ".mxml";
+local server    = require("suma_apollo_server")
+
+if not ngx then
+	ngx = {}
+end
+
+local cache_ngx = ngx.shared.ngx_share_dict;
+_M.set_to_cache   = function (key, value)
+    local succ = cache_ngx:set(key, value)
+    return succ
+end
+_M.get_to_cache   = function (key)
+    return cache_ngx:get(key)
+end
+--是否vip
+_M.is_vip = function (host)
+    if host == nil then
+        host = ""
+    end
+    return find_s (host, '.vip') ~= nil;
+end
+
+--match 数据
+_M.match_mxml = function (str)
+    if str == nil then
+        str = ""
+    end
+    local s, e = find_s(str, EXTENSION);
+    if s ~= nil then
+        return string.sub (str, 1, s - 1);
+    end
+    return str;
+end
+
+--拆分字符串
+_M.split = function (str,reps)
+    local loc = {}
+    gsub(str,'[^'..reps..']+',function (w)
+        _push(loc,w)
+    end)
+    return loc
+end
+
+--是否内部模块
+_M.is_internal_module = function (uri)
+    local s,e =  find_s (uri, '.mxml');
+    if not s then
+        return false;
+    end
+    return true;
+end
+
+--是否为本地ip
+_M.is_local_ip = function (host)
+    if host == "127.0.0.1" then
+        return true;
+    end
+    local raw_ip = http_jit.local_ip_jit_get();
+    if raw_ip ~= nil then
+        return raw_ip == host;
+    end
+    return false;
+end
+
+_M.raw_ip_proxy = function ()--本地ip代理 80
+    ngx.ctx.http_user_agent = "internal::module";
+end
+
+_M.local_ip_proxy = function ()--本地ip代理 非80
+    ngx.ctx.http_user_agent = "local::proxy"
+end
+
+_M.vip_ip_proxy = function ()--本地vip代理
+    ngx.ctx.http_user_agent = "vip::proxy"
+end
+
+------- 单机限流
+_M.upstream_limit_rate = function ()
+    cache_ngx:incr("local_vip_limit_incr", 1);
+    local local_total_m = tonumber(cache_ngx:get("local_vip_limit"));
+    local local_limit_c = tonumber(cache_ngx:get("local_vip_limit_incr"));
+    if not local_total_m then
+        return false;
+    end
+    if not local_limit_c then
+        return false;
+    end
+    if local_limit_c > local_total_m then
+        cache_ngx:incr("local_vip_limit_forbid", 1);
+        ngx.exit(403);
+        return false;
+    end
+    cache_ngx:incr("local_vip_limit_pass", 1);
+    return true;
+end
+
+local is_leader = server.get_worker_is_leader;
+local jit_get   = http_jit.vip_info_jit_get;
+local jit_avg   = http_jit.avg;
+local jit_load = http_jit.load_calc;
+---upstream 负载均衡
+_M.upstream_proxy  = function ()
+    local uri = ngx.var.request_uri;
+    -- ngx.log(ngx.ERR, "catch the request... 接口别名" ..uri);
+    -- if ngx.var.host == "127.0.0.1" then
+    --     ngx.ctx.is_proxy_pass = 1;
+    --     return ;
+    -- end
+    local params =  ngx.req.get_uri_args();
+
+    if params['token'] ~= nil then
+        ngx.ctx.token = params['token'];
+    end
+
+    if  ngx.ctx.is_proxy_pass then
+        return;
+    end
+    local mleader = is_leader();
+    if mleader == 1 then -- is leader
+        ---------------------------
+        local vipservers = jit_avg ();
+        local idx        = jit_load();
+        ----------------------------
+        local local_vip = jit_get (vipservers[idx]);
+        if local_vip == nil then
+            ngx.ctx.is_proxy_pass = 1;
+            return;
+        end
+
+        if local_vip.raw == server.get_to_cache("apollo_local_ip") then
+            local_vip.raw = "127.0.0.1";
+            ngx.ctx.is_proxy_pass = 1;
+            return;
+        end
+        -----
+        --  local proxy pass
+        -----
+        if local_vip.raw == server.get_to_cache("apollo_local_ip2") then
+            local container_type = server.content_type();
+            if container_type == "docker" then
+                local loc_port = server.get_to_cache("apollo_port");
+                if loc_port == local_vip.port then --- 本机访问
+                    ngx.ctx.is_proxy_pass = 1;
+                    return;
+                end
+            else
+                if local_vip.port == 80 then
+                    ngx.ctx.is_proxy_pass = 1;
+                    return ;
+                end
+            end
+        end
+
+        if local_vip.raw == nil then
+            local_vip.raw = "127.0.0.1";
+        end
+
+        if local_vip.port == nil then
+            local_vip.port = 80;
+        end
+        local httpc   = http.new();
+        local ok, err = httpc:connect(local_vip.raw ,  local_vip.port)
+        if not ok then
+            ngx.log(ngx.ERR, err)
+            return
+        end
+        ngx.ctx.is_proxy_pass = 1;
+        httpc:set_timeout(2000)
+        httpc:proxy_response(httpc:proxy_request(1024*100))
+        httpc:set_keepalive(1000, 10000);
+        return;
+    end
+    ngx.ctx.is_proxy_pass = 1;
+end
+return _M;

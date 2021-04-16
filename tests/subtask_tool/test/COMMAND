@@ -1,0 +1,3 @@
+ps -ef | grep "nginx: master" | grep -v grep | awk '{print($2)}'| xargs -r kill -15
+sleep 3
+/usr/local/openresty/nginx/sbin/nginx

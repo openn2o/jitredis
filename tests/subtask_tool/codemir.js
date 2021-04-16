@@ -10,7 +10,7 @@ const fs          = require("fs");
 var versionVO     = null;
 var u_version     = null;
 var bizId         = "subtask"
-var master_ip     = "10.254.12.23"; ///获取集群数据中心地址失败使用
+var master_ip     = null;
 var pubsub_channel= null;
 var sys_call_fifo = [];
 var service_standard = false;
@@ -22,17 +22,20 @@ if (!process.argv[2]) {
     useage();
     service_standard = true;
     console.log("[info] run it as service ");
-    // return;
+}
+
+
+if (process.argv[2]) {
+    u_version = process.argv[2];
 }
 
 if (process.argv[3]) {
     bizId = process.argv[3];
 }
 
-if (process.argv[2]) {
-    u_version = process.argv[2];
-}
-
+if (process.argv[4]) {
+    master_ip = process.argv[4];
+} 
 ///读取文件目录
 async function read_source_dir_file (path) {
     var files = [];
@@ -83,6 +86,10 @@ async function version_tag_read(files, path) {
         meta_version.TIME = Date.now();
     }
     versionVO = meta_version;
+
+    if(process.argv.length > 3) {
+        pubsub_channel = null;
+    }
     if (!pubsub_channel) {
         version_override(versionVO, path);
     } else  if(pubsub_channel && already_sub == false) {
@@ -110,10 +117,8 @@ function version_override (vo, path) {
                 var prcs  = spawn("mv", ["-f", vo.HOME , "/home/admin/backup/" + u_version]);
                 prcs.stdout.on('data', function (data) {});
                 prcs.stderr.on('data', function (data) {
-                    console.log('[skip] ' + data);
                 });
                 prcs.on('error' , function (e) {
-                    console.log('[skip] ' + e);
                     var f = sys_call_fifo.shift();
                     if (f != null) {
                         f();
@@ -471,7 +476,11 @@ function select_master_ip () {
 
 ////入口
 function main() {
-    select_master_ip();
+    if (!master_ip) {
+        select_master_ip();
+    } else {
+        connect_redis_client();
+    }
     return 0;
 }
 main();

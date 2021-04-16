@@ -16,6 +16,20 @@ if (!process.argv[2]) {
     return;
 }
 
+async function remove() {
+    var distK= versionVO.BIZID + "_VERSION.hash";
+    var client = (require("redis")).createClient({
+        "host": versionVO.REMOTE,
+        "port": 6379
+    });
+
+    client.on("error", function (err) {
+        console.log("response err:" + err)
+    });
+
+    client.hdel(distK , versionVO.VERSION, function(err) {
+    });
+}
 ////发布升级包 
 async function publish () {
     var distFile = "./bin.tar.gz"

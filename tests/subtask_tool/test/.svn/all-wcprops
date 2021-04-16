@@ -1,0 +1,293 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri
+END
+suma_pssh_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_pssh_action.lua
+END
+suma_sub_task.lua
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_sub_task.lua
+END
+suma_apollo_redis.lua
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_redis.lua
+END
+suma_websocket_server.lua
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_websocket_server.lua
+END
+suma_dyn_lib.lua
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_dyn_lib.lua
+END
+suma_cert_cache.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_cert_cache.lua
+END
+suma_default_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_default_action.lua
+END
+suma_apollo_template.lua
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_template.lua
+END
+suma_native_client.lua
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_native_client.lua
+END
+suma_main.lua
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_main.lua
+END
+suma_apollo_client.lua
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_client.lua
+END
+suma_main_proxy.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_main_proxy.lua
+END
+http.lua
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/http.lua
+END
+suma_vip_client.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_vip_client.lua
+END
+suma_ping.lua
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_ping.lua
+END
+suma_upstream_client.lua
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_upstream_client.lua
+END
+suma_apollo_core.c
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_core.c
+END
+suma_cluster_upstream.lua
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_cluster_upstream.lua
+END
+suma_verify_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_verify_action.lua
+END
+suma_default_response.lua
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_default_response.lua
+END
+suma_cert_module.lua
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_cert_module.lua
+END
+suma_livepreload_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_livepreload_action.lua
+END
+suma_code_manager.lua
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_code_manager.lua
+END
+suma_apollo_sandbox.lua
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_sandbox.lua
+END
+suma_ocsp.lua
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_ocsp.lua
+END
+suma_keygateway_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_keygateway_action.lua
+END
+suma_black_list.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_black_list.lua
+END
+suma_ci_task_manager.lua
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_ci_task_manager.lua
+END
+suma_websocket_mgrid.lua
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_websocket_mgrid.lua
+END
+suma_diamond_client.lua
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_diamond_client.lua
+END
+suma_apollo_server.lua
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_server.lua
+END
+suma_crl_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_crl_action.lua
+END
+suma_aaa_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_aaa_action.lua
+END
+suma_nri_test_case.lua
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_nri_test_case.lua
+END
+suma_main_state.lua
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/RD22/!svn/ver/904/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_main_state.lua
+END
+suma_websocket_command.lua
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_websocket_command.lua
+END
+suma_native.lua
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_native.lua
+END
+suma_spec_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/RD22/!svn/ver/907/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_spec_action.lua
+END
+suma_res.lua
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_res.lua
+END
+suma_apollo_native_client.lua
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_apollo_native_client.lua
+END
+suma_ocsp_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_ocsp_action.lua
+END
+suma_main_vip.lua
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_main_vip.lua
+END
+nginx.conf
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/RD22/!svn/ver/904/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/nginx.conf
+END
+suma_hello.lua
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_hello.lua
+END
+suma_vip_http_jit.lua
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_vip_http_jit.lua
+END
+jit-uuid.lua
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/jit-uuid.lua
+END
+privileged.lua
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/RD22/!svn/ver/904/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/privileged.lua
+END
+suma_basecom_action.lua
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/RD22/!svn/ver/895/RD22_Dev_Master/%E5%B9%BF%E8%A5%BF%E9%A1%B9%E7%9B%AE/src/newri/suma_basecom_action.lua
+END

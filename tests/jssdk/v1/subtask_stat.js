@@ -2,6 +2,10 @@
 /***
 * subtask for js sdk1.0
 */
+if (!window) {
+	window = {}
+}
+
 ;(function (){
     var storage = window.localStorage;
     var time_at = setTimeout;
@@ -126,13 +130,14 @@
 					for(var i = 0; i< json_r.length; i++) {
 						if (!json_r[i]) continue;
 						var o = JSON.parse(json_r[i]);
-						if (o.biz_id && !fliters[o.local_vip]) {
+//						if (o.biz_id && !fliters[o.local_vip]) {
 							retVal.push(o);
-							subtask.cache["ws_suma_subtask_all_cluster_data"] = retVal;
 							fliters [o.local_vip] = 1;
-						}
+							console.log(o.biz_id, o.raw)
+//						}
 					}
 					
+					subtask.cache["ws_suma_subtask_all_cluster_data"] = retVal;
 					if(subtask.user_handle ["ws_suma_subtask_all_cluster_data"] != null) {
 						subtask.user_handle ["ws_suma_subtask_all_cluster_data"](retVal);
 					}
@@ -149,12 +154,9 @@
 		 	
 		 	var len = e.length;
 		 	var tmp = [];
-		 	for(var i = 0; i < len ; i ++) {
-		 		
-		 		for(var k in caches) {
-		 			if(caches[k].local_vip == e[i]) {
-		 				tmp.push(caches[k]);
-		 			}
+		 	for(var k in caches) {
+		 		if(e.indexOf(caches[k].local_vip) != -1) {
+		 			tmp.push(caches[k]);
 		 		}
 		 	}
 		 	if(subtask.user_handle ["ws_suma_subtask_all_cluster_live_data"] != null) {
